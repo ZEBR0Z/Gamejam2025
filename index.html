@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Mini-Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Main Menu -->
+    <div id="main-menu" class="screen active">
+        <div class="menu-container">
+            <h1>Music Mini-Game</h1>
+            <div class="menu-buttons">
+                <button id="tutorial-btn" class="menu-button">Tutorial</button>
+                <button id="play-btn" class="menu-button">Play</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorial Overlay -->
+    <div id="tutorial" class="screen overlay">
+        <div class="tutorial-content">
+            <h2>How to Play</h2>
+            <div class="tutorial-steps">
+                <div class="step">
+                    <h3>1. Sound Selection (10 seconds)</h3>
+                    <p>Pick exactly 3 sounds from 5 random options. Hover to preview, click to select.</p>
+                </div>
+                <div class="step">
+                    <h3>2. Performance Phase (1.5 minutes)</h3>
+                    <p>Press keys 1, 2, 3 to play your chosen sounds and record them on an 8-second loop.</p>
+                </div>
+                <div class="step">
+                    <h3>3. Editing Phase (1 minute)</h3>
+                    <p>Drag notes up/down to change their pitch. Create your perfect melody!</p>
+                </div>
+                <div class="step">
+                    <h3>4. Final Playback</h3>
+                    <p>Listen to your creation! Your song will loop continuously.</p>
+                </div>
+            </div>
+            <div class="tutorial-buttons">
+                <button id="skip-tutorial-btn" class="secondary-button">Skip</button>
+                <button id="start-tutorial-btn" class="primary-button">Start</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sound Selection -->
+    <div id="selection" class="screen">
+        <div class="selection-header">
+            <h2>Choose 3 Sounds</h2>
+            <div class="countdown" id="selection-countdown">10</div>
+        </div>
+        <div class="sound-grid" id="sound-grid">
+            <!-- Sound icons will be populated here -->
+        </div>
+        <div class="selection-footer">
+            <div class="selected-count">Selected: <span id="selected-count">0</span>/3</div>
+            <button id="continue-btn" class="primary-button" disabled>Continue</button>
+        </div>
+    </div>
+
+    <!-- Performance Phase -->
+    <div id="performance" class="screen">
+        <div class="phase-header">
+            <h2>Performance Phase</h2>
+            <div class="countdown" id="performance-countdown">1:30</div>
+            <div class="phase-countdown" id="phase-countdown"></div>
+        </div>
+
+        <div class="chosen-sounds">
+            <div class="sound-key">
+                <span class="key">1</span>
+                <img id="sound-1-icon" class="sound-icon" alt="Sound 1">
+            </div>
+            <div class="sound-key">
+                <span class="key">2</span>
+                <img id="sound-2-icon" class="sound-icon" alt="Sound 2">
+            </div>
+            <div class="sound-key">
+                <span class="key">3</span>
+                <img id="sound-3-icon" class="sound-icon" alt="Sound 3">
+            </div>
+        </div>
+
+        <div class="timeline-container">
+            <canvas id="timeline-canvas" width="800" height="200"></canvas>
+        </div>
+
+        <div class="transport-controls">
+            <button id="play-pause-btn" class="control-button">⏸️</button>
+            <button id="restart-btn" class="control-button">⏮️</button>
+            <div class="progress-container">
+                <input type="range" id="progress-bar" min="0" max="8" step="0.1" value="0">
+                <span id="time-display">0.0 / 8.0</span>
+            </div>
+            <button id="performance-continue-btn" class="primary-button">Finish Early</button>
+        </div>
+    </div>
+
+    <!-- Editing Phase -->
+    <div id="editing" class="screen">
+        <div class="phase-header">
+            <h2>Editing Phase</h2>
+            <div class="countdown" id="editing-countdown">60</div>
+            <div class="phase-countdown" id="editing-phase-countdown"></div>
+        </div>
+
+        <div class="editing-container">
+            <div class="editing-track">
+                <h3>Sound 1</h3>
+                <canvas id="editing-canvas-1" width="800" height="650"></canvas>
+            </div>
+            <div class="editing-track">
+                <h3>Sound 2</h3>
+                <canvas id="editing-canvas-2" width="800" height="650"></canvas>
+            </div>
+            <div class="editing-track">
+                <h3>Sound 3</h3>
+                <canvas id="editing-canvas-3" width="800" height="650"></canvas>
+            </div>
+        </div>
+
+        <div class="transport-controls">
+            <button id="edit-play-pause-btn" class="control-button">▶️</button>
+            <button id="edit-restart-btn" class="control-button">⏮️</button>
+            <div class="progress-container">
+                <input type="range" id="edit-progress-bar" min="0" max="8" step="0.1" value="0">
+                <span id="edit-time-display">0.0 / 8.0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Playback -->
+    <div id="final" class="screen">
+        <div class="phase-header">
+            <h2>Your Creation</h2>
+        </div>
+
+        <div class="final-timeline-container">
+            <canvas id="final-canvas" width="800" height="200"></canvas>
+        </div>
+
+        <div class="transport-controls">
+            <button id="final-play-pause-btn" class="control-button">⏸️</button>
+            <button id="final-restart-btn" class="control-button">⏮️</button>
+            <div class="progress-container">
+                <input type="range" id="final-progress-bar" min="0" max="8" step="0.1" value="0">
+                <span id="final-time-display">0.0 / 8.0</span>
+            </div>
+        </div>
+
+        <div class="final-buttons">
+            <button id="restart-game-btn" class="secondary-button">Play Again</button>
+            <button id="exit-btn" class="primary-button">Exit</button>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
