@@ -7,6 +7,25 @@ export class UIManager {
         this.screens = {};
         this.elements = {};
         this.initialized = false;
+
+        // Transport control mapping for different phases
+        this.transportControls = {
+            performance: {
+                playPauseBtn: 'playPauseBtn',
+                progressBar: 'progressBar',
+                timeDisplay: 'timeDisplay'
+            },
+            editing: {
+                playPauseBtn: 'editPlayPauseBtn',
+                progressBar: 'editProgressBar',
+                timeDisplay: 'editTimeDisplay'
+            },
+            final: {
+                playPauseBtn: 'finalPlayPauseBtn',
+                progressBar: 'finalProgressBar',
+                timeDisplay: 'finalTimeDisplay'
+            }
+        };
     }
 
     initialize() {
@@ -143,13 +162,12 @@ export class UIManager {
 
     // Transport control updates
     updateTransportControls(phase, isPlaying, currentTime, segmentLength) {
-        const phasePrefix = phase === 'performance' ? '' :
-                           phase === 'editing' ? 'edit' :
-                           phase === 'final' ? 'final' : '';
+        const controls = this.transportControls[phase];
+        if (!controls) return; // Unknown phase
 
-        const playPauseBtn = this.getElement(`${phasePrefix}PlayPauseBtn`);
-        const progressBar = this.getElement(`${phasePrefix}ProgressBar`);
-        const timeDisplay = this.getElement(`${phasePrefix}TimeDisplay`);
+        const playPauseBtn = this.getElement(controls.playPauseBtn);
+        const progressBar = this.getElement(controls.progressBar);
+        const timeDisplay = this.getElement(controls.timeDisplay);
 
         if (playPauseBtn) {
             playPauseBtn.textContent = isPlaying ? '⏸️' : '▶️';
