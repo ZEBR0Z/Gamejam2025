@@ -35,19 +35,6 @@
    http://localhost:3000
    ```
 
-### Quick Start Scripts
-
-For Windows:
-```bash
-./start.bat
-```
-
-For Linux/Mac:
-```bash
-chmod +x start.sh
-./start.sh
-```
-
 ## How Multiplayer Works
 
 ### Game Flow
