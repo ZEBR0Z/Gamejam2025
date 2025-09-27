@@ -18,6 +18,7 @@ export class MultiplayerManager {
         this.onPlayerLeft = null;
         this.onSongSubmitted = null;
         this.onGameStarted = null;
+        this.onAllPlayersReady = null;
     }
 
     async connect(serverUrl = 'http://localhost:3000') {
@@ -82,6 +83,14 @@ export class MultiplayerManager {
             this.gameState = data.gameState;
             if (this.onGameStateUpdate) {
                 this.onGameStateUpdate(data.gameState);
+            }
+        });
+
+        this.socket.on('allPlayersReady', (data) => {
+            console.log('All players ready!');
+            this.gameState = data.gameState;
+            if (this.onAllPlayersReady) {
+                this.onAllPlayersReady(data.gameState);
             }
         });
 

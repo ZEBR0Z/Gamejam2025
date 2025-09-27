@@ -158,6 +158,11 @@ export class MultiplayerGame {
             this.startMultiplayerGame(gameState);
         };
 
+        this.multiplayerManager.onAllPlayersReady = (gameState) => {
+            // Show countdown only when ALL players are ready
+            this.showGameStarting();
+        };
+
         this.multiplayerManager.onPhaseChange = (gameState) => {
             this.handlePhaseChange(gameState);
         };
@@ -304,8 +309,13 @@ export class MultiplayerGame {
         const readyBtn = document.getElementById('ready-btn');
         const currentPlayer = gameState.players.find(p => p.id === this.multiplayerManager.getPlayerId());
         if (readyBtn && currentPlayer) {
+            const hasEnoughPlayers = gameState.players.length >= 2;
+
             if (currentPlayer.isReady) {
                 readyBtn.textContent = 'Ready ✓';
+                readyBtn.disabled = true;
+            } else if (!hasEnoughPlayers) {
+                readyBtn.textContent = 'Ready';
                 readyBtn.disabled = true;
             } else {
                 readyBtn.textContent = 'Ready';
@@ -315,8 +325,14 @@ export class MultiplayerGame {
     }
 
     setReady() {
+        const gameState = this.multiplayerManager.getGameState();
+        if (!gameState || gameState.players.length < 2) {
+            console.log('Cannot ready up: not enough players');
+            return;
+        }
+
         this.multiplayerManager.setReady();
-        this.showGameStarting();
+        // Don't show countdown here - wait for server to confirm all players are ready
     }
 
     showGameStarting() {

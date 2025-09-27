@@ -409,13 +409,21 @@ io.on('connection', (socket) => {
       gameState: lobby.getGameState()
     });
 
-    // Start game if all players are ready
+    // Check if all players are ready
     if (lobby.areAllPlayersReady() && lobby.state === 'waiting') {
-      if (lobby.startGame()) {
-        io.to(lobby.code).emit('gameStarted', {
-          gameState: lobby.getGameState()
-        });
-      }
+      // First notify all players that everyone is ready (triggers countdown)
+      io.to(lobby.code).emit('allPlayersReady', {
+        gameState: lobby.getGameState()
+      });
+
+      // Then start the game after a delay (3 seconds)
+      setTimeout(() => {
+        if (lobby.startGame()) {
+          io.to(lobby.code).emit('gameStarted', {
+            gameState: lobby.getGameState()
+          });
+        }
+      }, 3000);
     }
 
     console.log(`${player.name} is ready in lobby ${lobby.code}`);
