@@ -37,7 +37,10 @@ export class UIManager {
 
     initializeScreens() {
         this.screens = {
-            menu: document.getElementById('main-menu'),
+            'main-menu': document.getElementById('main-menu'),
+            'create-lobby': document.getElementById('create-lobby'),
+            'join-lobby': document.getElementById('join-lobby'),
+            'lobby-waiting': document.getElementById('lobby-waiting'),
             tutorial: document.getElementById('tutorial'),
             selection: document.getElementById('selection'),
             performance: document.getElementById('performance'),

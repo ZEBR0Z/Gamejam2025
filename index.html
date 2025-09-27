@@ -10,10 +10,81 @@
     <!-- Main Menu -->
     <div id="main-menu" class="screen active">
         <div class="menu-container">
-            <h1>Music Mini-Game</h1>
+            <h1>Bring the Heat</h1>
+            <p class="subtitle">A Gartic Phone-style collaborative music creation game</p>
             <div class="menu-buttons">
                 <button id="tutorial-btn" class="menu-button">Tutorial</button>
-                <button id="play-btn" class="menu-button">Play</button>
+                <button id="create-lobby-btn" class="menu-button primary">Create Lobby</button>
+                <button id="join-lobby-btn" class="menu-button">Join Lobby</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Lobby -->
+    <div id="create-lobby" class="screen">
+        <div class="lobby-container">
+            <h2>Create Lobby</h2>
+            <div class="form-group">
+                <label for="host-name">Your Name:</label>
+                <input type="text" id="host-name" placeholder="Enter your name" maxlength="20">
+            </div>
+            <div class="lobby-buttons">
+                <button id="back-to-menu-btn" class="secondary-button">Back</button>
+                <button id="create-lobby-confirm-btn" class="primary-button">Create Lobby</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join Lobby -->
+    <div id="join-lobby" class="screen">
+        <div class="lobby-container">
+            <h2>Join Lobby</h2>
+            <div class="form-group">
+                <label for="player-name">Your Name:</label>
+                <input type="text" id="player-name" placeholder="Enter your name" maxlength="20">
+            </div>
+            <div class="form-group">
+                <label for="lobby-code">Lobby Code:</label>
+                <input type="text" id="lobby-code" placeholder="Enter lobby code" maxlength="6" style="text-transform: uppercase;">
+            </div>
+            <div class="lobby-buttons">
+                <button id="back-to-menu-from-join-btn" class="secondary-button">Back</button>
+                <button id="join-lobby-confirm-btn" class="primary-button">Join Lobby</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lobby Waiting Room -->
+    <div id="lobby-waiting" class="screen">
+        <div class="lobby-container">
+            <h2>Lobby: <span id="lobby-code-display"></span></h2>
+            <div class="connection-status">
+                <span id="connection-indicator" class="connected">●</span>
+                <span>Connected to server</span>
+            </div>
+
+            <div class="players-list">
+                <h3>Players (<span id="player-count">0</span>):</h3>
+                <div id="players-container">
+                    <!-- Players will be populated here -->
+                </div>
+            </div>
+
+            <div class="lobby-info">
+                <p>Share this code with friends: <strong id="shareable-code"></strong></p>
+                <p>Minimum 2 players required to start</p>
+            </div>
+
+            <div class="lobby-buttons">
+                <button id="leave-lobby-btn" class="secondary-button">Leave Lobby</button>
+                <button id="ready-btn" class="primary-button">Ready</button>
+            </div>
+
+            <div id="game-starting" class="game-starting" style="display: none;">
+                <h3>All players ready! Starting game...</h3>
+                <div class="countdown-circle">
+                    <span id="start-countdown">3</span>
+                </div>
             </div>
         </div>
     </div>
@@ -158,6 +229,6 @@
         </div>
     </div>
 
-    <script type="module" src="js/MusicGame.js"></script>
+    <script type="module" src="js/MultiplayerGame.js"></script>
 </body>
 </html>

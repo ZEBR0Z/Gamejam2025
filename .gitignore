@@ -1,0 +1,7 @@
+# Editors
+.vs/
+.vscode/
+.idea/
+
+# JavaScript
+node_modules/
