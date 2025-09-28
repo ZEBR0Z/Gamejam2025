@@ -352,6 +352,13 @@ export class UIManager {
 
   // Editing sound icon updates with selection highlighting
   updateEditingSoundIcons(selectedSounds, selectedSoundIndex) {
+    // Refresh cached references to ensure we're updating current DOM elements
+    this.elements.editingSoundIcons = [
+      document.getElementById("editing-sound-1-icon"),
+      document.getElementById("editing-sound-2-icon"),
+      document.getElementById("editing-sound-3-icon"),
+    ];
+
     this.elements.editingSoundIcons.forEach((icon, index) => {
       if (icon && selectedSounds[index]) {
         const newIconUrl = selectedSounds[index].icon;
