@@ -213,10 +213,10 @@ export class FinalShowcasePhase {
         const song = this.finalSongs[this.currentSongIndex];
         const totalTime = song ? song.segments.length * this.gameState.config.segmentLength : this.gameState.config.segmentLength;
 
-        this.gameState.updateCurrentTime(this.audioEngine.getCurrentTime());
+        this.gameState.updateCurrentTime(this.audioEngine.getCurrentTime(), totalTime);
         this.uiManager.updateShowcaseTransportControls(
             this.gameState.playback.isPlaying,
-            this.gameState.playback.currentTime % totalTime,
+            this.gameState.playback.currentTime,
             totalTime
         );
     }
@@ -231,7 +231,7 @@ export class FinalShowcasePhase {
             this.canvasRenderer.drawFinalView(
                 canvas,
                 this.currentSongEvents,
-                this.gameState.playback.currentTime % totalTime,
+                this.gameState.playback.currentTime,
                 totalTime
             );
         }
@@ -263,7 +263,7 @@ export class FinalShowcasePhase {
         this.startScheduling();
         this.startAnimation();
 
-        this.uiManager.updateShowcaseTransportControls(true, this.gameState.playback.currentTime % totalTime, totalTime);
+        this.uiManager.updateShowcaseTransportControls(true, this.gameState.playback.currentTime, totalTime);
     }
 
     pause() {
@@ -274,7 +274,7 @@ export class FinalShowcasePhase {
 
         const song = this.finalSongs[this.currentSongIndex];
         const totalTime = song ? song.segments.length * this.gameState.config.segmentLength : this.gameState.config.segmentLength;
-        this.uiManager.updateShowcaseTransportControls(false, this.gameState.playback.currentTime % totalTime, totalTime);
+        this.uiManager.updateShowcaseTransportControls(false, this.gameState.playback.currentTime, totalTime);
     }
 
     restart() {

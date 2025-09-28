@@ -126,10 +126,11 @@ export class GameState {
         if (startTime !== null) this.playback.startTime = startTime;
     }
 
-    updateCurrentTime(audioCurrentTime) {
+    updateCurrentTime(audioCurrentTime, totalTime = null) {
         if (this.playback.isPlaying) {
             const elapsed = audioCurrentTime - this.playback.startTime;
-            this.playback.currentTime = elapsed % this.config.segmentLength;
+            const timeLimit = totalTime || this.config.segmentLength;
+            this.playback.currentTime = elapsed % timeLimit;
         }
     }
 
