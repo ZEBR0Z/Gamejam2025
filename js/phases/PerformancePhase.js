@@ -20,7 +20,6 @@ export class PerformancePhase {
         this.onPhaseComplete = onComplete;
 
         console.log('Starting performance phase');
-        this.gameState.setState('performance');
         this.uiManager.showScreen('performance');
 
         // Reset performance state

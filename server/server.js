@@ -286,11 +286,6 @@ class Lobby {
     this.currentSongAssignments = newAssignments;
   }
 
-  startFinalPhase() {
-    this.state = 'final';
-    this.phaseStartTime = Date.now();
-  }
-
   /**
    * Submit a song segment from a player
    * Adds the segment to the assigned song and checks if round is complete

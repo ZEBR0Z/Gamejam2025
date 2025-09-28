@@ -20,7 +20,6 @@ export class EditingPhase {
         this.onPhaseComplete = onComplete;
 
         console.log('Starting editing phase');
-        this.gameState.setState('editing');
         this.uiManager.showScreen('editing');
 
         // Reset editing state

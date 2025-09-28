@@ -15,7 +15,6 @@ export class SelectionPhase {
         this.onPhaseComplete = onComplete;
 
         console.log('Starting selection phase');
-        this.gameState.setState('selection');
         this.uiManager.showScreen('selection');
 
         // Reset selection state

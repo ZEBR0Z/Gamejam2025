@@ -14,7 +14,6 @@ export class WaitingPhase {
         this.onPhaseComplete = onComplete;
 
         console.log('Starting waiting phase');
-        this.gameState.setState('waiting-for-players');
         this.uiManager.showScreen('waiting-for-players');
 
         // Update the waiting screen with current game state

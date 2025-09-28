@@ -166,8 +166,7 @@ game_jam/
 │   │   ├── WaitingPhase.js
 │   │   ├── SongPreviewPhase.js
 │   │   └── FinalShowcasePhase.js
-│   ├── MultiplayerGame.js # Main game class
-│   └── MusicGame.js      # Single-player version
+│   └── MultiplayerGame.js # Main game class
 ├── sounds/               # Audio files and icons
 ├── index.html           # Main HTML file
 ├── style.css           # Game styling

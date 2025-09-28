@@ -22,12 +22,12 @@ import { CanvasRenderer } from './core/CanvasRenderer.js';
 import { InputController } from './core/InputController.js';
 import { Timer } from './core/Timer.js';
 import { MultiplayerManager } from './core/MultiplayerManager.js';
+import { PhaseManager } from './core/PhaseManager.js';
 
 // Game phases
 import { SelectionPhase } from './phases/SelectionPhase.js';
 import { PerformancePhase } from './phases/PerformancePhase.js';
 import { EditingPhase } from './phases/EditingPhase.js';
-import { FinalPhase } from './phases/FinalPhase.js';
 import { WaitingPhase } from './phases/WaitingPhase.js';
 import { SongPreviewPhase } from './phases/SongPreviewPhase.js';
 import { FinalShowcasePhase } from './phases/FinalShowcasePhase.js';
@@ -42,6 +42,7 @@ export class MultiplayerGame {
         this.inputController = new InputController(this.gameState, this.uiManager, this.audioEngine);
         this.timer = new Timer(this.gameState, this.uiManager);
         this.multiplayerManager = new MultiplayerManager();
+        this.phaseManager = new PhaseManager();
 
         // Game phases
         this.selectionPhase = new SelectionPhase(this.gameState, this.uiManager, this.audioEngine, this.timer);
@@ -58,13 +59,6 @@ export class MultiplayerGame {
             this.uiManager,
             this.audioEngine,
             this.timer,
-            this.canvasRenderer,
-            this.inputController
-        );
-        this.finalPhase = new FinalPhase(
-            this.gameState,
-            this.uiManager,
-            this.audioEngine,
             this.canvasRenderer,
             this.inputController
         );
@@ -90,9 +84,27 @@ export class MultiplayerGame {
             this.multiplayerManager
         );
 
-        this.currentPhase = null;
         this.isMultiplayer = true;
         this.serverUrl = 'http://localhost:3000';
+
+        // Register phases with the phase manager
+        this.setupPhaseManager();
+    }
+
+    setupPhaseManager() {
+        // Register all phases
+        this.phaseManager.registerPhase('selection', this.selectionPhase);
+        this.phaseManager.registerPhase('performance', this.performancePhase);
+        this.phaseManager.registerPhase('editing', this.editingPhase);
+        this.phaseManager.registerPhase('waiting-for-players', this.waitingPhase);
+        this.phaseManager.registerPhase('song-preview', this.songPreviewPhase);
+        this.phaseManager.registerPhase('final-showcase', this.finalShowcasePhase);
+
+        // Set up phase transition callback
+        this.phaseManager.onTransition = (phaseName, phaseInstance) => {
+            console.log(`Transitioned to phase: ${phaseName}`);
+            this.gameState.setState(phaseName);
+        };
     }
 
     async initialize() {
@@ -438,141 +450,60 @@ export class MultiplayerGame {
     handlePhaseChange(gameState) {
         switch (gameState.state) {
             case 'performance':
-                this.startPerformancePhase();
+                this.phaseManager.transitionTo('performance', () => {
+                    console.log('Performance phase complete, moving to editing phase');
+                    this.phaseManager.transitionTo('editing', () => {
+                        console.log('Editing phase complete, submitting song and moving to waiting phase');
+                        this.submitSongToServer();
+                    });
+                });
                 break;
             case 'editing':
-                this.startEditingPhase();
+                this.phaseManager.transitionTo('editing', () => {
+                    console.log('Editing phase complete, submitting song and moving to waiting phase');
+                    this.submitSongToServer();
+                });
                 break;
             case 'waiting-for-players':
-                this.startWaitingPhase();
+                this.phaseManager.transitionTo('waiting-for-players', (gameState) => {
+                    this.handlePhaseChange(gameState);
+                });
                 break;
             case 'song-preview':
-                this.startSongPreviewPhase();
+                this.phaseManager.transitionTo('song-preview', () => {
+                    console.log('Song preview complete, moving to performance phase');
+                    this.phaseManager.transitionTo('performance', () => {
+                        console.log('Performance phase complete, moving to editing phase');
+                        this.phaseManager.transitionTo('editing', () => {
+                            console.log('Editing phase complete, submitting song and moving to waiting phase');
+                            this.submitSongToServer();
+                        });
+                    });
+                });
                 break;
             case 'final-showcase':
-                this.startFinalShowcasePhase();
-                break;
-            case 'final':
-                this.startFinalPhase();
+                this.phaseManager.transitionTo('final-showcase',
+                    () => this.restartGame(),  // onRestart
+                    () => this.exitToMenu()    // onExit
+                );
                 break;
         }
     }
 
     startSelectionPhase() {
-        // Clean up current phase
-        this.cleanupCurrentPhase();
-
-        // Start selection phase normally - client handles everything
-        this.currentPhase = this.selectionPhase;
-
-        this.selectionPhase.start(() => {
+        this.phaseManager.transitionTo('selection', () => {
             // Selection complete - immediately go to performance phase
             console.log('Selection phase complete, moving to performance phase');
-            this.startPerformancePhase();
+            this.phaseManager.transitionTo('performance', () => {
+                console.log('Performance phase complete, moving to editing phase');
+                this.phaseManager.transitionTo('editing', () => {
+                    console.log('Editing phase complete, submitting song and moving to waiting phase');
+                    this.submitSongToServer();
+                });
+            });
         });
     }
 
-    startPerformancePhase() {
-        // Clean up current phase
-        this.cleanupCurrentPhase();
-
-        // Start performance phase immediately - no server communication needed
-        this.currentPhase = this.performancePhase;
-
-        this.performancePhase.start(() => {
-            // Performance complete - immediately go to editing phase
-            console.log('Performance phase complete, moving to editing phase');
-            this.startEditingPhase();
-        });
-    }
-
-    startEditingPhase() {
-        // Clean up current phase
-        this.cleanupCurrentPhase();
-
-        // Start editing phase immediately - no server communication needed
-        this.currentPhase = this.editingPhase;
-
-        this.editingPhase.start(() => {
-            // Editing complete - submit song to server and go to waiting phase
-            console.log('Editing phase complete, submitting song and moving to waiting phase');
-            this.submitSongToServer();
-            this.startWaitingPhase();
-        });
-    }
-
-    startWaitingPhase() {
-        // Clean up current phase
-        this.cleanupCurrentPhase();
-
-        // Start waiting phase
-        this.currentPhase = this.waitingPhase;
-
-        this.waitingPhase.start((gameState) => {
-            // Waiting complete - transition based on server response
-            this.handlePhaseChange(gameState);
-        });
-    }
-
-    startSongPreviewPhase() {
-        // Clean up current phase
-        this.cleanupCurrentPhase();
-
-        // Start song preview phase
-        this.currentPhase = this.songPreviewPhase;
-
-        this.songPreviewPhase.start(() => {
-            // Preview complete - go to performance phase
-            console.log('Song preview complete, moving to performance phase');
-            this.startPerformancePhase();
-        });
-    }
-
-    startFinalShowcasePhase() {
-        // Clean up current phase
-        this.cleanupCurrentPhase();
-
-        // Start final showcase phase
-        this.currentPhase = this.finalShowcasePhase;
-
-        this.finalShowcasePhase.start(
-            () => this.restartGame(),  // onRestart
-            () => this.exitToMenu()    // onExit
-        );
-    }
-
-    startFinalPhase() {
-        // Clean up current phase
-        this.cleanupCurrentPhase();
-
-        // Get all final songs from server
-        this.multiplayerManager.getFinalSongs().then(response => {
-            if (response.success && response.songs.length > 0) {
-                // For now, just show the first song
-                // In a full implementation, you'd allow cycling through all songs
-                const firstSong = response.songs[0];
-				if (firstSong && firstSong.songData) {
-                    // Convert song data back to events format for playback
-                    this.gameState.events = firstSong.songData.map((soundEvent, index) => ({
-                        id: index,
-                        soundIndex: 0, // We'll need to map this properly
-                        startTimeSec: soundEvent.time,
-                        pitchSemitones: soundEvent.pitch || 0,
-                        scheduled: false
-                    }));
-
-                    console.log('Loaded song for final phase:', firstSong.songData);
-                }
-            }
-
-            // Start final phase
-            this.currentPhase = this.finalPhase;
-            this.finalPhase.start(
-                () => this.restartGame(),  // onRestart
-                () => this.exitToMenu()    // onExit
-            );
-        });
-    }
 
     /**
      * Submit completed song segment to server
@@ -598,6 +529,11 @@ export class MultiplayerGame {
         }));
 
         this.multiplayerManager.submitSong(songData, selectedSounds);
+
+        // Transition to waiting phase after submitting song
+        this.phaseManager.transitionTo('waiting-for-players', (gameState) => {
+            this.handlePhaseChange(gameState);
+        });
     }
 
     restartGame() {
@@ -615,10 +551,7 @@ export class MultiplayerGame {
     }
 
     cleanupCurrentPhase() {
-        if (this.currentPhase && typeof this.currentPhase.cleanup === 'function') {
-            this.currentPhase.cleanup();
-        }
-        this.currentPhase = null;
+        this.phaseManager.cleanup();
     }
 
     showNotification(message) {

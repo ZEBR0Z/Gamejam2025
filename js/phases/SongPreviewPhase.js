@@ -28,7 +28,6 @@ export class SongPreviewPhase {
         this.onPhaseComplete = onComplete;
 
         console.log('Starting song preview phase');
-        this.gameState.setState('song-preview');
         this.uiManager.showScreen('song-preview');
 
         // Get the previous song data from server
@@ -293,6 +292,11 @@ export class SongPreviewPhase {
 
             // Auto-continue when time runs out
             if (timeLeft <= 0) {
+                // Clear timer and call completion
+                if (this.phaseTimerInterval) {
+                    clearInterval(this.phaseTimerInterval);
+                    this.phaseTimerInterval = null;
+                }
                 this.continueToPerformance();
             }
         }, 1000);
@@ -317,6 +321,12 @@ export class SongPreviewPhase {
     }
 
     async continueToPerformance() {
+        // Clear the timer if still running
+        if (this.phaseTimerInterval) {
+            clearInterval(this.phaseTimerInterval);
+            this.phaseTimerInterval = null;
+        }
+
         this.pause();
 
         // Load the selected sounds from the previous song for the next performance
