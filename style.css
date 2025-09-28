@@ -130,7 +130,7 @@ input, button, textarea {
   background: rgba(255, 255, 255, 0.1);
   padding: 2rem;
   backdrop-filter: blur(15px);
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 1rem;
 }
 
@@ -159,6 +159,7 @@ input, button, textarea {
   display: flex;
   gap: 1rem;
   justify-content: center;
+  min-width: 200px;
 }
 
 /* Buttons */
