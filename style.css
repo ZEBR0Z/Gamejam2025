@@ -3,15 +3,29 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  cursor: url('/assets/art/cursor.png'), auto;
 }
 
 body {
-  font-family: sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #fff;
-  overflow: hidden;
-  height: 100vh;
+    font-family: heatFont;
+    text-transform: uppercase;
+    background: #fff;
+    color: #000;
+    overflow: hidden;
+    height: 100vh;
+    image-rendering: pixelated;
 }
+
+#final {
+    background-image: url('./assets/art/performanceScreen.gif');
+    background-size: cover;
+    image-rendering: pixelated;
+}
+
+input, button, textarea {
+    font-family: readableFont;
+}
+
 
 /* Screen management */
 .screen {
