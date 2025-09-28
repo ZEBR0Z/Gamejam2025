@@ -75,6 +75,18 @@ input, button, textarea {
   visibility: visible;
 }
 
+.oven {
+  background-image: url('assets/art/oven.png') !important;
+  background-size: cover;
+  image-rendering: pixelated;
+}
+
+.party {
+  background-image: url('assets/art/performanceScreen.gif') !important;
+  background-size: cover;
+  image-rendering: pixelated;
+}
+
 .overlay {
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(10px);
@@ -758,8 +770,6 @@ canvas {
 .spinner {
   width: 40px;
   height: 40px;
-  background-image: url('./assets/art/blackRecord.png');
-  background-size: cover;
   border: 4px solid rgba(255, 255, 255, 0.3);
   border-top: 4px solid #fff;
   animation: spin 1s linear infinite;
