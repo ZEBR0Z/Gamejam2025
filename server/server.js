@@ -37,12 +37,8 @@ app.use(express.static(path.join(__dirname, '..')));
 const lobbies = new Map(); // lobbyCode -> Lobby instance
 const playerSockets = new Map(); // socketId -> playerId mapping
 
-// Game timing configuration (in seconds)
+// Game configuration
 const GAME_CONFIG = {
-  selectionTime: 10,      // Time to select 3 sounds
-  performanceTime: 90,    // Time to record music (1.5 minutes)
-  editingTime: 60,        // Time to edit pitch/timing (1 minute)
-  phaseCountdownTime: 3,  // Countdown before each phase
   segmentLength: 8        // Length of each song segment
 };
 
@@ -75,7 +71,6 @@ class Lobby {
     this.songs = new Map(); // songId -> song object with segments array
     this.currentSongAssignments = new Map(); // playerId -> songId they're working on
     this.roundSubmissions = new Map(); // playerId -> boolean (submitted this round)
-    this.timer = null;
     this.phaseStartTime = null;
     this.availableSounds = []; // 5 random sounds for this lobby
   }
@@ -208,45 +203,6 @@ class Lobby {
     this.players.forEach(player => {
       player.isReady = false;
     });
-
-    // Start performance timer
-    this.timer = setTimeout(() => {
-      this.endPerformancePhase();
-    }, GAME_CONFIG.performanceTime * 1000);
-  }
-
-  endPerformancePhase() {
-    if (this.timer) {
-      clearTimeout(this.timer);
-      this.timer = null;
-    }
-
-    this.startEditingPhase();
-  }
-
-  startEditingPhase() {
-    this.state = 'editing';
-    this.phaseStartTime = Date.now();
-
-    // Reset player ready states
-    this.players.forEach(player => {
-      player.isReady = false;
-    });
-
-    // Start editing timer
-    this.timer = setTimeout(() => {
-      this.endEditingPhase();
-    }, GAME_CONFIG.editingTime * 1000);
-  }
-
-  endEditingPhase() {
-    if (this.timer) {
-      clearTimeout(this.timer);
-      this.timer = null;
-    }
-
-    // Start waiting for all players to submit their songs
-    this.startWaitingForPlayers();
   }
 
   /**
@@ -287,6 +243,13 @@ class Lobby {
   startSongPreview() {
     this.state = 'song-preview';
     this.phaseStartTime = Date.now();
+
+    // No server-side timer - clients handle their own timing
+  }
+
+  endSongPreviewPhase() {
+    // All players continue to performance phase
+    this.startPerformancePhase();
   }
 
   /**
@@ -396,33 +359,13 @@ class Lobby {
   }
 
   getPhaseTimeLeft() {
-    if (!this.phaseStartTime) return 0;
-
-    const elapsed = (Date.now() - this.phaseStartTime) / 1000;
-    let totalTime;
-
-    switch (this.state) {
-      case 'selection':
-        totalTime = GAME_CONFIG.selectionTime;
-        break;
-      case 'performance':
-        totalTime = GAME_CONFIG.performanceTime;
-        break;
-      case 'editing':
-        totalTime = GAME_CONFIG.editingTime;
-        break;
-      default:
-        return 0;
-    }
-
-    return Math.max(0, totalTime - elapsed);
+    // Server doesn't track phase timing - clients handle their own timers
+    // Only return time for server-managed phases (none currently)
+    return 0;
   }
 
   cleanup() {
-    if (this.timer) {
-      clearTimeout(this.timer);
-      this.timer = null;
-    }
+    // Server cleanup - clients handle their own timers
   }
 }
 

@@ -18,8 +18,10 @@ export class SongPreviewPhase {
         this.onPhaseComplete = null;
         this.scheduleInterval = null;
         this.animationFrameId = null;
+        this.phaseTimerInterval = null;
         this.previousSong = null;
         this.previewEvents = [];
+        this.phaseStartTime = null;
     }
 
     async start(onComplete) {
@@ -36,6 +38,9 @@ export class SongPreviewPhase {
         this.setupUI();
         this.setupEventHandlers();
         this.startPreviewPlayback();
+
+        // Start the phase timer
+        this.startPhaseTimer();
     }
 
     async loadPreviousSong() {
@@ -272,6 +277,45 @@ export class SongPreviewPhase {
         this.uiManager.updatePreviewTransportControls(this.gameState.playback.isPlaying, time, totalTime);
     }
 
+    startPhaseTimer() {
+        this.phaseStartTime = Date.now();
+        const previewTime = 20; // 20 seconds
+
+        // Update timer display immediately
+        this.updatePhaseTimer(previewTime);
+
+        // Update timer every second
+        this.phaseTimerInterval = setInterval(() => {
+            const elapsed = (Date.now() - this.phaseStartTime) / 1000;
+            const timeLeft = Math.max(0, previewTime - elapsed);
+
+            this.updatePhaseTimer(Math.ceil(timeLeft));
+
+            // Auto-continue when time runs out
+            if (timeLeft <= 0) {
+                this.continueToPerformance();
+            }
+        }, 1000);
+    }
+
+    updatePhaseTimer(timeLeft) {
+        if (this.uiManager.elements.previewPhaseTimer) {
+            this.uiManager.elements.previewPhaseTimer.textContent = timeLeft;
+
+            // Change color as time gets low
+            const timerElement = this.uiManager.elements.previewPhaseTimer.parentElement;
+            if (timeLeft <= 5) {
+                timerElement.style.background = 'rgba(255, 0, 0, 0.3)';
+                timerElement.style.color = '#ff6b6b';
+                timerElement.style.borderColor = 'rgba(255, 0, 0, 0.5)';
+            } else if (timeLeft <= 10) {
+                timerElement.style.background = 'rgba(255, 165, 0, 0.3)';
+                timerElement.style.color = '#ffa500';
+                timerElement.style.borderColor = 'rgba(255, 165, 0, 0.5)';
+            }
+        }
+    }
+
     async continueToPerformance() {
         this.pause();
 
@@ -315,6 +359,9 @@ export class SongPreviewPhase {
         }
         if (this.animationFrameId) {
             cancelAnimationFrame(this.animationFrameId);
+        }
+        if (this.phaseTimerInterval) {
+            clearInterval(this.phaseTimerInterval);
         }
 
         // Reset playback state

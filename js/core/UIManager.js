@@ -109,6 +109,7 @@ export class UIManager {
         this.elements.previousPlayerName = document.getElementById('previous-player-name');
         this.elements.previewCurrentRound = document.getElementById('preview-current-round');
         this.elements.previewTotalRounds = document.getElementById('preview-total-rounds');
+        this.elements.previewPhaseTimer = document.getElementById('preview-phase-timer');
         this.elements.previewCanvas = document.getElementById('preview-canvas');
         this.elements.previewPlayPauseBtn = document.getElementById('preview-play-pause-btn');
         this.elements.previewRestartBtn = document.getElementById('preview-restart-btn');
@@ -335,6 +336,9 @@ export class UIManager {
         }
         if (this.elements.previewTotalRounds) {
             this.elements.previewTotalRounds.textContent = gameState.maxRounds;
+        }
+        if (this.elements.previewPhaseTimer) {
+            this.elements.previewPhaseTimer.textContent = Math.ceil(gameState.phaseTimeLeft || 20);
         }
     }
 
