@@ -33,24 +33,23 @@ export class EditingPhase {
     // Reset editing state
     this.gameState.setPlaybackState(false, 0, 0);
     this.gameState.timers.editingTimeLeft = this.gameState.config.editingTime;
-    this.gameState.timers.phaseCountdown =
-      this.gameState.config.phaseCountdownTime;
 
     // Setup UI
     this.setupUI();
 
-    // Show phase countdown
-    this.timer.startPhaseCountdown("editingPhaseCountdown", () => {
-      this.startEditingTimer();
-    });
-
     // Setup event handlers
     this.setupEventHandlers();
+
+    // Start timer for length of editing phase
+    this.startEditingTimer();
   }
 
   setupUI() {
     // Update sound icons to show selected sounds
-    this.uiManager.updateEditingSoundIcons(this.gameState.selectedSounds, this.selectedSoundIndex);
+    this.uiManager.updateEditingSoundIcons(
+      this.gameState.selectedSounds,
+      this.selectedSoundIndex,
+    );
 
     // Reset transport controls
     this.uiManager.updateTransportControls(
@@ -389,7 +388,10 @@ export class EditingPhase {
   selectSound(soundIndex) {
     if (soundIndex >= 0 && soundIndex < 3) {
       this.selectedSoundIndex = soundIndex;
-      this.uiManager.updateEditingSoundIcons(this.gameState.selectedSounds, this.selectedSoundIndex);
+      this.uiManager.updateEditingSoundIcons(
+        this.gameState.selectedSounds,
+        this.selectedSoundIndex,
+      );
       this.draw(); // Redraw to update transparency
     }
   }

@@ -34,19 +34,15 @@ export class PerformancePhase {
     this.gameState.setPlaybackState(false, 0, 0);
     this.gameState.timers.performanceTimeLeft =
       this.gameState.config.performanceTime;
-    this.gameState.timers.phaseCountdown =
-      this.gameState.config.phaseCountdownTime;
 
     // Setup UI
     this.setupUI();
 
-    // Show phase countdown
-    this.timer.startPhaseCountdown("phaseCountdown", () => {
-      this.startLoop();
-    });
-
     // Setup event handlers
     this.setupEventHandlers();
+
+    // Start loop
+    this.startLoop();
   }
 
   setupUI() {

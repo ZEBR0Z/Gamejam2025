@@ -63,10 +63,6 @@ export class UIManager {
     );
     this.elements.editingCountdown =
       document.getElementById("editing-countdown");
-    this.elements.phaseCountdown = document.getElementById("phase-countdown");
-    this.elements.editingPhaseCountdown = document.getElementById(
-      "editing-phase-countdown",
-    );
 
     // Selection elements
     this.elements.selectedCount = document.getElementById("selected-count");
@@ -129,7 +125,9 @@ export class UIManager {
 
     // Canvas elements
     this.elements.timelineCanvas = document.getElementById("timeline-canvas");
-    this.elements.editingTimelineCanvas = document.getElementById("editing-timeline-canvas");
+    this.elements.editingTimelineCanvas = document.getElementById(
+      "editing-timeline-canvas",
+    );
     this.elements.editingCanvases = [
       document.getElementById("editing-canvas-1"),
       document.getElementById("editing-canvas-2"),
@@ -366,7 +364,7 @@ export class UIManager {
         // Only update if the icon URL has actually changed
         if (icon.src !== newIconUrl) {
           // Force refresh by clearing src first, then setting new URL
-          icon.src = '';
+          icon.src = "";
           // Use setTimeout to ensure the src clear takes effect
           setTimeout(() => {
             icon.src = newIconUrl;
@@ -376,12 +374,12 @@ export class UIManager {
     });
 
     // Update selection highlighting on sound key elements
-    const editingSounds = document.querySelectorAll('.editing-sound');
+    const editingSounds = document.querySelectorAll(".editing-sound");
     editingSounds.forEach((soundEl, index) => {
       if (index === selectedSoundIndex) {
-        soundEl.classList.add('selected');
+        soundEl.classList.add("selected");
       } else {
-        soundEl.classList.remove('selected');
+        soundEl.classList.remove("selected");
       }
     });
   }

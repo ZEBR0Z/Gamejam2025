@@ -24,7 +24,6 @@ export class GameState {
       performanceTime: 90, // 1.5 minutes
       editingTime: 60,
       replacementTime: 15, // 15 seconds for sound replacement
-      phaseCountdownTime: 3,
     };
 
     // Playback state
@@ -160,7 +159,6 @@ export class GameState {
     this.timers.performanceTimeLeft = this.config.performanceTime;
     this.timers.editingTimeLeft = this.config.editingTime;
     this.timers.replacementTimeLeft = this.config.replacementTime;
-    this.timers.phaseCountdown = this.config.phaseCountdownTime;
   }
 
   decrementTimer(timerName) {

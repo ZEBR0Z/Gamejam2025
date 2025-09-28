@@ -64,7 +64,8 @@ export class InputController {
     if (currentState !== "performance" && currentState !== "editing") return;
 
     // For performance phase, only allow when playing
-    if (currentState === "performance" && !this.gameState.playback.isPlaying) return;
+    if (currentState === "performance" && !this.gameState.playback.isPlaying)
+      return;
 
     const key = e.key;
     let soundIndex = -1;
@@ -151,9 +152,10 @@ export class InputController {
     if (currentState !== "editing") return;
 
     // Use unified editing timeline canvas instead of individual canvases
-    const canvas = canvasIndex !== null && canvasIndex !== undefined
-      ? this.uiManager.getEditingCanvas(canvasIndex)  // Legacy individual canvas
-      : this.uiManager.getCanvas("editingTimelineCanvas");  // New unified canvas
+    const canvas =
+      canvasIndex !== null && canvasIndex !== undefined
+        ? this.uiManager.getEditingCanvas(canvasIndex) // Legacy individual canvas
+        : this.uiManager.getCanvas("editingTimelineCanvas"); // New unified canvas
     if (!canvas) return;
 
     e.preventDefault();
@@ -164,16 +166,20 @@ export class InputController {
     const handler = this.getHandler("editingMouseDown");
     if (handler) {
       // For unified timeline, don't pass canvasIndex
-      const result = canvasIndex !== null && canvasIndex !== undefined
-        ? handler(mouseX, mouseY, canvasIndex)  // Legacy individual canvas
-        : handler(mouseX, mouseY);  // New unified canvas
+      const result =
+        canvasIndex !== null && canvasIndex !== undefined
+          ? handler(mouseX, mouseY, canvasIndex) // Legacy individual canvas
+          : handler(mouseX, mouseY); // New unified canvas
 
       // Update drag state
       if (result && result.draggedNote) {
         this.dragState.isDragging = true;
         this.dragState.draggedNote = result.draggedNote;
         // Use null for unified timeline, preserve actual index for legacy individual canvases
-        this.dragState.draggedCanvasIndex = (canvasIndex !== null && canvasIndex !== undefined) ? canvasIndex : null;
+        this.dragState.draggedCanvasIndex =
+          canvasIndex !== null && canvasIndex !== undefined
+            ? canvasIndex
+            : null;
         this.dragState.dragStartY = mouseY;
         this.dragState.dragStartPitch = result.draggedNote.pitchSemitones;
 
@@ -187,9 +193,10 @@ export class InputController {
     if (!this.dragState.isDragging || !this.dragState.draggedNote) return;
 
     // Use unified editing timeline canvas instead of individual canvases
-    const canvas = this.dragState.draggedCanvasIndex !== null
-      ? this.uiManager.getEditingCanvas(this.dragState.draggedCanvasIndex)  // Legacy individual canvas
-      : this.uiManager.getCanvas("editingTimelineCanvas");  // New unified canvas
+    const canvas =
+      this.dragState.draggedCanvasIndex !== null
+        ? this.uiManager.getEditingCanvas(this.dragState.draggedCanvasIndex) // Legacy individual canvas
+        : this.uiManager.getCanvas("editingTimelineCanvas"); // New unified canvas
     if (!canvas) return;
 
     e.preventDefault();
@@ -211,9 +218,10 @@ export class InputController {
     if (!this.dragState.isDragging) return;
 
     // Reset cursor
-    const canvas = this.dragState.draggedCanvasIndex !== null
-      ? this.uiManager.getEditingCanvas(this.dragState.draggedCanvasIndex)  // Legacy individual canvas
-      : this.uiManager.getCanvas("editingTimelineCanvas");  // New unified canvas
+    const canvas =
+      this.dragState.draggedCanvasIndex !== null
+        ? this.uiManager.getEditingCanvas(this.dragState.draggedCanvasIndex) // Legacy individual canvas
+        : this.uiManager.getCanvas("editingTimelineCanvas"); // New unified canvas
     if (canvas) {
       canvas.style.cursor = "grab";
     }
