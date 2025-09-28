@@ -182,6 +182,7 @@ export class EditingPhase {
           this.gameState.config.segmentLength,
           soundIndex,
           this.gameState.playback.isPlaying,
+          this.gameState.selectedSounds,
         );
       }
     }

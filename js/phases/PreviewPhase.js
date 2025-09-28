@@ -377,6 +377,15 @@ export class PreviewPhase {
         icon: sound.icon,
         originalIndex: index,
       }));
+
+      // Preload icons for next phase
+      if (this.gameState.onIconPreload) {
+        this.previousSong.selectedSounds.forEach(sound => {
+          if (sound.icon) {
+            this.gameState.onIconPreload(sound.icon);
+          }
+        });
+      }
     }
 
     // Notify server that this player is ready to continue

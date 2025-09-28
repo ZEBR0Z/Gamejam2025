@@ -40,6 +40,9 @@ export class GameState {
       editingTimeLeft: this.config.editingTime,
       phaseCountdown: 0,
     };
+
+    // Icon preloading callback (set by Game)
+    this.onIconPreload = null;
   }
 
   // State management
@@ -78,6 +81,11 @@ export class GameState {
       icon: soundData.icon,
       audio: soundData.audio,
     });
+
+    // Preload icon if callback is set
+    if (this.onIconPreload && soundData.icon) {
+      this.onIconPreload(soundData.icon);
+    }
 
     return true;
   }

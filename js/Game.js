@@ -96,6 +96,11 @@ export class Game {
     this.isMultiplayer = true;
     this.serverUrl = "http://localhost:3000";
 
+    // Set up icon preloading callback
+    this.gameState.onIconPreload = (iconUrl) => {
+      this.canvasRenderer.loadIcon(iconUrl);
+    };
+
     // Register phases with the phase manager
     this.setupPhaseManager();
   }

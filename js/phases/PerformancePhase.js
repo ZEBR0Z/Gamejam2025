@@ -236,6 +236,7 @@ export class PerformancePhase {
         this.gameState.events,
         this.gameState.playback.currentTime,
         this.gameState.config.segmentLength,
+        this.gameState.selectedSounds,
       );
     }
   }
