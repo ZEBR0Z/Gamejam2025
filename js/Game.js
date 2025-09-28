@@ -106,8 +106,8 @@ export class Game {
     this.phaseManager.registerPhase("performance", this.performancePhase);
     this.phaseManager.registerPhase("editing", this.editingPhase);
     this.phaseManager.registerPhase("waiting-for-players", this.waitingPhase);
-    this.phaseManager.registerPhase("song-preview", this.songPreviewPhase);
-    this.phaseManager.registerPhase("final-showcase", this.finalShowcasePhase);
+    this.phaseManager.registerPhase("preview", this.songPreviewPhase);
+    this.phaseManager.registerPhase("showcase", this.finalShowcasePhase);
 
     // Set up phase transition callback
     this.phaseManager.onTransition = (phaseName, phaseInstance) => {
@@ -501,8 +501,8 @@ export class Game {
           this.handlePhaseChange(gameState);
         });
         break;
-      case "song-preview":
-        this.phaseManager.transitionTo("song-preview", () => {
+      case "preview":
+        this.phaseManager.transitionTo("preview", () => {
           console.log("Song preview complete, moving to performance phase");
           this.phaseManager.transitionTo("performance", () => {
             console.log("Performance phase complete, moving to editing phase");
@@ -515,9 +515,9 @@ export class Game {
           });
         });
         break;
-      case "final-showcase":
+      case "showcase":
         this.phaseManager.transitionTo(
-          "final-showcase",
+          "showcase",
           () => this.restartGame(), // onRestart
           () => this.exitToMenu(), // onExit
         );

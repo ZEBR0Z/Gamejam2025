@@ -54,7 +54,7 @@ function generatePlayerId() {
 /**
  * Lobby Class - Manages a single game session
  *
- * States: waiting -> selection -> performance -> editing -> waiting-for-players -> song-preview -> final-showcase
+ * States: waiting -> selection -> performance -> editing -> waiting-for-players -> preview -> showcase
  *
  * Song Structure:
  * - Each song has multiple segments (one per round)
@@ -65,7 +65,7 @@ class Lobby {
   constructor(code) {
     this.code = code;
     this.players = new Map(); // playerId -> player object
-    this.state = "waiting"; // waiting, selection, performance, editing, waiting-for-players, song-preview, final-showcase
+    this.state = "waiting"; // waiting, selection, performance, editing, waiting-for-players, preview, showcase
     this.currentRound = 0;
     this.maxRounds = 0; // Will be set to number of players
     this.songs = new Map(); // songId -> song object with segments array
@@ -246,7 +246,7 @@ class Lobby {
    * Start song preview phase - players listen to previous work before adding to it
    */
   startSongPreview() {
-    this.state = "song-preview";
+    this.state = "preview";
     this.phaseStartTime = Date.now();
 
     // No server-side timer - clients handle their own timing
@@ -261,7 +261,7 @@ class Lobby {
    * Start final showcase - display all completed collaborative songs
    */
   startFinalShowcase() {
-    this.state = "final-showcase";
+    this.state = "showcase";
     this.phaseStartTime = Date.now();
   }
 
@@ -515,12 +515,12 @@ io.on("connection", (socket) => {
         io.to(lobby.code).emit("waitingUpdate", {
           gameState: lobby.getGameState(),
         });
-      } else if (lobby.state === "song-preview") {
+      } else if (lobby.state === "preview") {
         // All players submitted, moving to song preview
         io.to(lobby.code).emit("phaseChanged", {
           gameState: lobby.getGameState(),
         });
-      } else if (lobby.state === "final-showcase") {
+      } else if (lobby.state === "showcase") {
         // All rounds complete, moving to final showcase
         io.to(lobby.code).emit("phaseChanged", {
           gameState: lobby.getGameState(),

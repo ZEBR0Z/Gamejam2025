@@ -13,9 +13,9 @@ export class PhaseManager {
       ["selection", ["performance"]],
       ["performance", ["editing"]],
       ["editing", ["waiting-for-players"]],
-      ["waiting-for-players", ["song-preview", "final-showcase"]],
-      ["song-preview", ["performance"]],
-      ["final-showcase", ["menu"]], // Only exit to menu allowed
+      ["waiting-for-players", ["preview", "showcase"]],
+      ["preview", ["performance"]],
+      ["showcase", ["menu"]], // Only exit to menu allowed
     ]);
 
     this.onTransition = null; // Callback for when transitions happen
@@ -64,12 +64,6 @@ export class PhaseManager {
     const targetPhase = this.phases.get(phaseName);
     if (!targetPhase) {
       console.error(`Phase '${phaseName}' not registered`);
-      return false;
-    }
-
-    // Prevent transition if already in this phase
-    if (this.currentPhaseName === phaseName) {
-      console.warn(`Already in phase '${phaseName}', ignoring transition`);
       return false;
     }
 

@@ -37,7 +37,7 @@ export class ShowcasePhase {
     this.onExit = onExit;
 
     console.log("Starting final showcase phase");
-    this.uiManager.showScreen("final-showcase");
+    this.uiManager.showScreen("showcase");
 
     // Load all final songs from server
     await this.loadFinalSongs();
@@ -232,7 +232,7 @@ export class ShowcasePhase {
   startAnimation() {
     const animate = () => {
       if (
-        this.gameState.getState() === "final-showcase" &&
+        this.gameState.getState() === "showcase" &&
         this.gameState.playback.isPlaying
       ) {
         this.updateCurrentTime();

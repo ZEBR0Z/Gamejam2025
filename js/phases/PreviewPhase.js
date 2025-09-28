@@ -35,7 +35,7 @@ export class PreviewPhase {
     this.onPhaseComplete = onComplete;
 
     console.log("Starting song preview phase");
-    this.uiManager.showScreen("song-preview");
+    this.uiManager.showScreen("preview");
 
     // Get the previous song data from server
     await this.loadPreviousSong();
@@ -206,7 +206,7 @@ export class PreviewPhase {
   startAnimation() {
     const animate = () => {
       if (
-        this.gameState.getState() === "song-preview" &&
+        this.gameState.getState() === "preview" &&
         this.gameState.playback.isPlaying
       ) {
         this.updateCurrentTime();
