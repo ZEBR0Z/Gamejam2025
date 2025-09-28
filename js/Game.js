@@ -15,6 +15,7 @@
  */
 
 // Core systems
+import './server/node_modules/nes.css/css/nes.min.css';
 import { AudioEngine } from "./core/AudioEngine.js";
 import { GameState } from "./core/GameState.js";
 import { UIManager } from "./core/UIManager.js";
