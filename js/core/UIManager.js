@@ -354,7 +354,17 @@ export class UIManager {
   updateEditingSoundIcons(selectedSounds, selectedSoundIndex) {
     this.elements.editingSoundIcons.forEach((icon, index) => {
       if (icon && selectedSounds[index]) {
-        icon.src = selectedSounds[index].icon;
+        const newIconUrl = selectedSounds[index].icon;
+
+        // Only update if the icon URL has actually changed
+        if (icon.src !== newIconUrl) {
+          // Force refresh by clearing src first, then setting new URL
+          icon.src = '';
+          // Use setTimeout to ensure the src clear takes effect
+          setTimeout(() => {
+            icon.src = newIconUrl;
+          }, 0);
+        }
       }
     });
 
