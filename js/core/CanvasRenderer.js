@@ -92,12 +92,17 @@ export class CanvasRenderer {
     event,
     selectedSounds = null,
     fallbackNumber = null,
+    opacity = 1.0,
   ) {
     // Get icon URL and determine color
     const iconUrl = this.getEventIcon(event, selectedSounds);
     const backgroundColor = iconUrl
       ? this.getColorForIcon(iconUrl)
       : this.soundColors[event.soundIndex] || "#999";
+
+    // Save context and set opacity
+    ctx.save();
+    ctx.globalAlpha = opacity;
 
     // Draw background circle
     ctx.fillStyle = backgroundColor;
@@ -132,7 +137,8 @@ export class CanvasRenderer {
           iconSize,
         );
 
-        ctx.restore();
+        ctx.restore(); // Restore clipping path
+        ctx.restore(); // Restore opacity
         return true; // Successfully drew icon
       }
     }
@@ -149,6 +155,9 @@ export class CanvasRenderer {
       ctx.textAlign = "center";
       ctx.fillText(fallbackNumber.toString(), x, y + 4);
     }
+
+    // Restore context
+    ctx.restore();
 
     return false; // Did not draw icon
   }
@@ -325,6 +334,77 @@ export class CanvasRenderer {
       event.displayX = x;
       event.displayY = y;
       event.canvasIndex = soundIndex;
+    });
+
+    // Draw playhead if playing
+    if (isPlaying) {
+      this.drawScrollablePlayhead(ctx, currentTime, viewport, width, height);
+    }
+  }
+
+  // Editing timeline view (unified timeline with sound selection and transparency)
+  drawEditingTimeline(
+    canvas,
+    events,
+    currentTime,
+    segmentLength,
+    selectedSoundIndex,
+    isPlaying,
+    selectedSounds = null,
+  ) {
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Calculate viewport for scrolling
+    const viewport = this.calculateViewport(currentTime, segmentLength, width);
+
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+
+    // Draw background
+    ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+    ctx.fillRect(0, 0, width, height);
+
+    // Draw time grid for viewport
+    this.drawScrollableTimeGrid(ctx, width, height, viewport);
+
+    // Draw pitch grid
+    this.drawPitchGrid(ctx, width, height);
+
+    // Draw events - all events are visible but non-selected sounds are transparent
+    const visibleEvents = events.filter(
+      (event) =>
+        event.startTimeSec >= viewport.startTime &&
+        event.startTimeSec <= viewport.endTime,
+    );
+
+    visibleEvents.forEach((event) => {
+      const x = this.timeToX(event.startTimeSec, viewport);
+      const centerY = height / 2;
+      const y = centerY - event.pitchSemitones * this.semitoneHeight;
+
+      // Determine opacity based on whether this event's sound is selected
+      const isSelected = event.soundIndex === selectedSoundIndex;
+      const opacity = isSelected ? 1.0 : 0.2; // Highly transparent for non-selected sounds
+
+      // Draw event with icon and appropriate opacity
+      this.drawNoteWithIcon(
+        ctx,
+        x,
+        y,
+        12,
+        event,
+        selectedSounds,
+        event.soundIndex + 1,
+        opacity,
+      );
+
+      // Store position for interaction (all events need coordinates for hit detection)
+      event.displayX = x;
+      event.displayY = y;
     });
 
     // Draw playhead if playing

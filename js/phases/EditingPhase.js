@@ -21,6 +21,7 @@ export class EditingPhase {
     this.onPhaseComplete = null;
     this.scheduleInterval = null;
     this.animationFrameId = null;
+    this.selectedSoundIndex = 0; // Currently selected sound for editing (0, 1, or 2)
   }
 
   start(onComplete) {
@@ -48,6 +49,9 @@ export class EditingPhase {
   }
 
   setupUI() {
+    // Update sound icons to show selected sounds
+    this.uiManager.updateEditingSoundIcons(this.gameState.selectedSounds, this.selectedSoundIndex);
+
     // Reset transport controls
     this.uiManager.updateTransportControls(
       "editing",
@@ -65,8 +69,17 @@ export class EditingPhase {
     this.inputController.registerHandler(
       "editingMouseDown",
       "editing",
-      (mouseX, mouseY, canvasIndex) => {
-        return this.handleMouseDown(mouseX, mouseY, canvasIndex);
+      (mouseX, mouseY) => {
+        return this.handleMouseDown(mouseX, mouseY);
+      },
+    );
+
+    // Register sound selection key handlers
+    this.inputController.registerHandler(
+      "keyPress",
+      "editing",
+      (soundIndex) => {
+        this.selectSound(soundIndex);
       },
     );
 
@@ -86,12 +99,21 @@ export class EditingPhase {
       },
     );
 
-    // Setup canvas events for all editing canvases
-    this.uiManager.elements.editingCanvases.forEach((canvas, index) => {
-      if (canvas) {
-        this.inputController.setupCanvasEvents(canvas, "editing", index);
+    // Setup canvas events for unified editing timeline
+    const editingCanvas = this.uiManager.getCanvas("editingTimelineCanvas");
+    if (editingCanvas) {
+      this.inputController.setupCanvasEvents(editingCanvas, "editing");
+    }
+
+    // Setup click handlers for sound selection buttons
+    for (let i = 0; i < 3; i++) {
+      const soundButton = document.getElementById(`editing-sound-${i}`);
+      if (soundButton) {
+        soundButton.addEventListener("click", () => {
+          this.selectSound(i);
+        });
       }
-    });
+    }
 
     // Transport controls
     const transportHandlers = {
@@ -125,8 +147,8 @@ export class EditingPhase {
     this.timer.startEditingTimer(() => this.complete());
   }
 
-  handleMouseDown(mouseX, mouseY, canvasIndex) {
-    const canvas = this.uiManager.getEditingCanvas(canvasIndex);
+  handleMouseDown(mouseX, mouseY) {
+    const canvas = this.uiManager.getCanvas("editingTimelineCanvas");
     if (!canvas) return null;
 
     const clickedEvent = this.canvasRenderer.getEventAtPosition(
@@ -135,7 +157,7 @@ export class EditingPhase {
       mouseY,
       canvas,
       this.gameState.config.segmentLength,
-      canvasIndex, // Only events for this sound
+      this.selectedSoundIndex, // Only events for currently selected sound
       this.gameState.playback.currentTime, // currentTime for viewport calculation
     );
 
@@ -185,20 +207,18 @@ export class EditingPhase {
   }
 
   draw() {
-    // Draw each sound type on its own canvas
-    for (let soundIndex = 0; soundIndex < 3; soundIndex++) {
-      const canvas = this.uiManager.getEditingCanvas(soundIndex);
-      if (canvas) {
-        this.canvasRenderer.drawEditingTrack(
-          canvas,
-          this.gameState.events,
-          this.gameState.playback.currentTime,
-          this.gameState.config.segmentLength,
-          soundIndex,
-          this.gameState.playback.isPlaying,
-          this.gameState.selectedSounds,
-        );
-      }
+    // Draw unified timeline with all events, but highlight selected sound
+    const canvas = this.uiManager.getCanvas("editingTimelineCanvas");
+    if (canvas) {
+      this.canvasRenderer.drawEditingTimeline(
+        canvas,
+        this.gameState.events,
+        this.gameState.playback.currentTime,
+        this.gameState.config.segmentLength,
+        this.selectedSoundIndex,
+        this.gameState.playback.isPlaying,
+        this.gameState.selectedSounds,
+      );
     }
   }
 
@@ -366,6 +386,14 @@ export class EditingPhase {
     );
   }
 
+  selectSound(soundIndex) {
+    if (soundIndex >= 0 && soundIndex < 3) {
+      this.selectedSoundIndex = soundIndex;
+      this.uiManager.updateEditingSoundIcons(this.gameState.selectedSounds, this.selectedSoundIndex);
+      this.draw(); // Redraw to update transparency
+    }
+  }
+
   complete() {
     this.pause();
     this.audioEngine.stopEditPreview();
@@ -382,6 +410,15 @@ export class EditingPhase {
     this.inputController.unregisterHandler("editingMouseDown", "editing");
     this.inputController.unregisterHandler("editingMouseMove", "editing");
     this.inputController.unregisterHandler("editingMouseUp", "editing");
+    this.inputController.unregisterHandler("keyPress", "editing");
+
+    // Clean up sound selection button listeners
+    for (let i = 0; i < 3; i++) {
+      const soundButton = document.getElementById(`editing-sound-${i}`);
+      if (soundButton) {
+        soundButton.replaceWith(soundButton.cloneNode(true)); // Remove all event listeners
+      }
+    }
 
     // Clean up transport event listeners
     this.inputController.cleanupTransportEvents();
