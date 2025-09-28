@@ -5,27 +5,32 @@
 ## Setup Instructions
 
 ### Prerequisites
+
 - Node.js (version 14 or higher)
 - npm (comes with Node.js)
 
 ### Installation
 
 1. Navigate to the server directory:
+
    ```bash
    cd server
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Start the server:
+
    ```bash
    npm start
    ```
 
    Or for development with auto-restart:
+
    ```bash
    npm run dev
    ```

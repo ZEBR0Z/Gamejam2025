@@ -1,886 +1,886 @@
 [
-    {
-        "audio": "sounds/21.wav",
-        "icon": "sounds/21__icon.png"
-    },
-    {
-        "audio": "sounds/808cowbell.wav",
-        "icon": "sounds/808cowbell__icon.svg"
-    },
-    {
-        "audio": "sounds/BABA.wav",
-        "icon": "sounds/BABA__icon.png"
-    },
-    {
-        "audio": "sounds/DEFEAT.wav",
-        "icon": "sounds/DEFEAT__icon.png"
-    },
-    {
-        "audio": "sounds/SLAM.wav",
-        "icon": "sounds/SLAM__icon.png"
-    },
-    {
-        "audio": "sounds/YOU.wav",
-        "icon": "sounds/YOU__icon.png"
-    },
-    {
-        "audio": "sounds/aah.wav",
-        "icon": "sounds/aah__icon.svg"
-    },
-    {
-        "audio": "sounds/adofai_fire.wav",
-        "icon": "sounds/adofai_fire__icon.png"
-    },
-    {
-        "audio": "sounds/adofai_ice.wav",
-        "icon": "sounds/adofai_ice__icon.png"
-    },
-    {
-        "audio": "sounds/adofaicymbal.wav",
-        "icon": "sounds/adofaicymbal__icon.png"
-    },
-    {
-        "audio": "sounds/adofaikick.wav",
-        "icon": "sounds/adofaikick__icon.png"
-    },
-    {
-        "audio": "sounds/airhorn.wav",
-        "icon": "sounds/airhorn__icon.png"
-    },
-    {
-        "audio": "sounds/alarm.wav",
-        "icon": "sounds/alarm__icon.svg"
-    },
-    {
-        "audio": "sounds/alert.wav",
-        "icon": "sounds/alert__icon.svg"
-    },
-    {
-        "audio": "sounds/americano.wav",
-        "icon": "sounds/americano__icon.png"
-    },
-    {
-        "audio": "sounds/amogus.wav",
-        "icon": "sounds/amogus__icon.png"
-    },
-    {
-        "audio": "sounds/amogus_emergency.wav",
-        "icon": "sounds/amogus_emergency__icon.png"
-    },
-    {
-        "audio": "sounds/amogus_kill.wav",
-        "icon": "sounds/amogus_kill__icon.png"
-    },
-    {
-        "audio": "sounds/amongdrip.wav",
-        "icon": "sounds/amongdrip__icon.png"
-    },
-    {
-        "audio": "sounds/amongus.wav",
-        "icon": "sounds/amongus__icon.png"
-    },
-    {
-        "audio": "sounds/augh.wav",
-        "icon": "sounds/augh__icon.svg"
-    },
-    {
-        "audio": "sounds/babylaugh.wav",
-        "icon": "sounds/babylaugh__icon.svg"
-    },
-    {
-        "audio": "sounds/bell.wav",
-        "icon": "sounds/bell__icon.svg"
-    },
-    {
-        "audio": "sounds/bleep.wav",
-        "icon": "sounds/bleep__icon.svg"
-    },
-    {
-        "audio": "sounds/boing.wav",
-        "icon": "sounds/boing__icon.png"
-    },
-    {
-        "audio": "sounds/boink.wav",
-        "icon": "sounds/boink__icon.svg"
-    },
-    {
-        "audio": "sounds/bong.wav",
-        "icon": "sounds/bong__icon.png"
-    },
-    {
-        "audio": "sounds/bonk.wav",
-        "icon": "sounds/bonk__icon.svg"
-    },
-    {
-        "audio": "sounds/boom.wav",
-        "icon": "sounds/boom__icon.png"
-    },
-    {
-        "audio": "sounds/bruh.wav",
-        "icon": "sounds/bruh__icon.png"
-    },
-    {
-        "audio": "sounds/builttoscale.wav",
-        "icon": "sounds/builttoscale__icon.png"
-    },
-    {
-        "audio": "sounds/bup.wav",
-        "icon": "sounds/bup__icon.png"
-    },
-    {
-        "audio": "sounds/buttonpop.wav",
-        "icon": "sounds/buttonpop__icon.png"
-    },
-    {
-        "audio": "sounds/buzzer.wav",
-        "icon": "sounds/buzzer__icon.png"
-    },
-    {
-        "audio": "sounds/bwomp.wav",
-        "icon": "sounds/bwomp__icon.png"
-    },
-    {
-        "audio": "sounds/cave.wav",
-        "icon": "sounds/cave__icon.svg"
-    },
-    {
-        "audio": "sounds/celeste_dash.wav",
-        "icon": "sounds/celeste_dash__icon.png"
-    },
-    {
-        "audio": "sounds/celeste_death.wav",
-        "icon": "sounds/celeste_death__icon.png"
-    },
-    {
-        "audio": "sounds/celeste_diamond.wav",
-        "icon": "sounds/celeste_diamond__icon.png"
-    },
-    {
-        "audio": "sounds/celeste_spring.wav",
-        "icon": "sounds/celeste_spring__icon.png"
-    },
-    {
-        "audio": "sounds/chess.wav",
-        "icon": "sounds/chess__icon.png"
-    },
-    {
-        "audio": "sounds/choruskid.wav",
-        "icon": "sounds/choruskid__icon.png"
-    },
-    {
-        "audio": "sounds/clap.wav",
-        "icon": "sounds/clap__icon.svg"
-    },
-    {
-        "audio": "sounds/cop.wav",
-        "icon": "sounds/cop__icon.png"
-    },
-    {
-        "audio": "sounds/cowbell.wav",
-        "icon": "sounds/cowbell__icon.png"
-    },
-    {
-        "audio": "sounds/dimrainsynth.wav",
-        "icon": "sounds/dimrainsynth__icon.png"
-    },
-    {
-        "audio": "sounds/dkremote.wav",
-        "icon": "sounds/dkremote__icon.png"
-    },
-    {
-        "audio": "sounds/dodgeball.wav",
-        "icon": "sounds/dodgeball__icon.png"
-    },
-    {
-        "audio": "sounds/dog.wav",
-        "icon": "sounds/dog__icon.svg"
-    },
-    {
-        "audio": "sounds/doorbellcat.wav",
-        "icon": "sounds/doorbellcat__icon.png"
-    },
-    {
-        "audio": "sounds/e.wav",
-        "icon": "sounds/e__icon.png"
-    },
-    {
-        "audio": "sounds/eight.wav",
-        "icon": "sounds/eight__icon.png"
-    },
-    {
-        "audio": "sounds/error.wav",
-        "icon": "sounds/error__icon.svg"
-    },
-    {
-        "audio": "sounds/explosion.wav",
-        "icon": "sounds/explosion__icon.png"
-    },
-    {
-        "audio": "sounds/familyguy.wav",
-        "icon": "sounds/familyguy__icon.png"
-    },
-    {
-        "audio": "sounds/fart.wav",
-        "icon": "sounds/fart__icon.svg"
-    },
-    {
-        "audio": "sounds/fireinthehole.wav",
-        "icon": "sounds/fireinthehole__icon.png"
-    },
-    {
-        "audio": "sounds/flipnote.wav",
-        "icon": "sounds/flipnote__icon.png"
-    },
-    {
-        "audio": "sounds/fnf_death.wav",
-        "icon": "sounds/fnf_death__icon.png"
-    },
-    {
-        "audio": "sounds/fnf_down.wav",
-        "icon": "sounds/fnf_down__icon.png"
-    },
-    {
-        "audio": "sounds/fnf_left.wav",
-        "icon": "sounds/fnf_left__icon.png"
-    },
-    {
-        "audio": "sounds/fnf_right.wav",
-        "icon": "sounds/fnf_right__icon.png"
-    },
-    {
-        "audio": "sounds/fnf_up.wav",
-        "icon": "sounds/fnf_up__icon.png"
-    },
-    {
-        "audio": "sounds/gaster.wav",
-        "icon": "sounds/gaster__icon.png"
-    },
-    {
-        "audio": "sounds/gd_coin.wav",
-        "icon": "sounds/gd_coin__icon.png"
-    },
-    {
-        "audio": "sounds/gd_diamonds.wav",
-        "icon": "sounds/gd_diamonds__icon.png"
-    },
-    {
-        "audio": "sounds/gd_orbs.wav",
-        "icon": "sounds/gd_orbs__icon.png"
-    },
-    {
-        "audio": "sounds/gd_quit.wav",
-        "icon": "sounds/gd_quit__icon.png"
-    },
-    {
-        "audio": "sounds/gdcrash.wav",
-        "icon": "sounds/gdcrash__icon.png"
-    },
-    {
-        "audio": "sounds/gdcrash_orbs.wav",
-        "icon": "sounds/gdcrash_orbs__icon.png"
-    },
-    {
-        "audio": "sounds/gdexplosion.wav",
-        "icon": "sounds/gdexplosion__icon.png"
-    },
-    {
-        "audio": "sounds/geometrydash.wav",
-        "icon": "sounds/geometrydash__icon.png"
-    },
-    {
-        "audio": "sounds/getout.wav",
-        "icon": "sounds/getout__icon.svg"
-    },
-    {
-        "audio": "sounds/gnome.wav",
-        "icon": "sounds/gnome__icon.png"
-    },
-    {
-        "audio": "sounds/granddad.wav",
-        "icon": "sounds/granddad__icon.png"
-    },
-    {
-        "audio": "sounds/gun.wav",
-        "icon": "sounds/gun__icon.png"
-    },
-    {
-        "audio": "sounds/gura.wav",
-        "icon": "sounds/gura__icon.png"
-    },
-    {
-        "audio": "sounds/hammer.wav",
-        "icon": "sounds/hammer__icon.png"
-    },
-    {
-        "audio": "sounds/hehehehaw.wav",
-        "icon": "sounds/hehehehaw__icon.png"
-    },
-    {
-        "audio": "sounds/hitmarker.wav",
-        "icon": "sounds/hitmarker__icon.png"
-    },
-    {
-        "audio": "sounds/hoenn.wav",
-        "icon": "sounds/hoenn__icon.png"
-    },
-    {
-        "audio": "sounds/honk.wav",
-        "icon": "sounds/honk__icon.svg"
-    },
-    {
-        "audio": "sounds/huhcat.wav",
-        "icon": "sounds/huhcat__icon.png"
-    },
-    {
-        "audio": "sounds/huhdouyin.wav",
-        "icon": "sounds/huhdouyin__icon.png"
-    },
-    {
-        "audio": "sounds/isaac_dead.wav",
-        "icon": "sounds/isaac_dead__icon.png"
-    },
-    {
-        "audio": "sounds/isaac_hurt.wav",
-        "icon": "sounds/isaac_hurt__icon.png"
-    },
-    {
-        "audio": "sounds/isaac_mantle.wav",
-        "icon": "sounds/isaac_mantle__icon.png"
-    },
-    {
-        "audio": "sounds/jermawoo.wav",
-        "icon": "sounds/jermawoo__icon.png"
-    },
-    {
-        "audio": "sounds/kaching.wav",
-        "icon": "sounds/kaching__icon.svg"
-    },
-    {
-        "audio": "sounds/karateman_bulb.wav",
-        "icon": "sounds/karateman_bulb__icon.png"
-    },
-    {
-        "audio": "sounds/karateman_hit.wav",
-        "icon": "sounds/karateman_hit__icon.png"
-    },
-    {
-        "audio": "sounds/karateman_offbeat.wav",
-        "icon": "sounds/karateman_offbeat__icon.png"
-    },
-    {
-        "audio": "sounds/karateman_throw.wav",
-        "icon": "sounds/karateman_throw__icon.png"
-    },
-    {
-        "audio": "sounds/kick.wav",
-        "icon": "sounds/kick__icon.svg"
-    },
-    {
-        "audio": "sounds/krabs.wav",
-        "icon": "sounds/krabs__icon.svg"
-    },
-    {
-        "audio": "sounds/lancersplat.wav",
-        "icon": "sounds/lancersplat__icon.png"
-    },
-    {
-        "audio": "sounds/mariopaint_baby.wav",
-        "icon": "sounds/mariopaint_baby__icon.png"
-    },
-    {
-        "audio": "sounds/mariopaint_car.wav",
-        "icon": "sounds/mariopaint_car__icon.png"
-    },
-    {
-        "audio": "sounds/mariopaint_cat.wav",
-        "icon": "sounds/mariopaint_cat__icon.png"
-    },
-    {
-        "audio": "sounds/mariopaint_dog.wav",
-        "icon": "sounds/mariopaint_dog__icon.png"
-    },
-    {
-        "audio": "sounds/mariopaint_flower.wav",
-        "icon": "sounds/mariopaint_flower__icon.png"
-    },
-    {
-        "audio": "sounds/mariopaint_gameboy.wav",
-        "icon": "sounds/mariopaint_gameboy__icon.png"
-    },
-    {
-        "audio": "sounds/mariopaint_luigi.wav",
-        "icon": "sounds/mariopaint_luigi__icon.png"
-    },
-    {
-        "audio": "sounds/mariopaint_mario.wav",
-        "icon": "sounds/mariopaint_mario__icon.png"
-    },
-    {
-        "audio": "sounds/mariopaint_plane.wav",
-        "icon": "sounds/mariopaint_plane__icon.png"
-    },
-    {
-        "audio": "sounds/mariopaint_star.wav",
-        "icon": "sounds/mariopaint_star__icon.png"
-    },
-    {
-        "audio": "sounds/mariopaint_swan.wav",
-        "icon": "sounds/mariopaint_swan__icon.png"
-    },
-    {
-        "audio": "sounds/megalovania.wav",
-        "icon": "sounds/megalovania__icon.png"
-    },
-    {
-        "audio": "sounds/megalovania_note.wav",
-        "icon": "sounds/megalovania_note__icon.svg"
-    },
-    {
-        "audio": "sounds/meowsynth.wav",
-        "icon": "sounds/meowsynth__icon.png"
-    },
-    {
-        "audio": "sounds/metalpipe.wav",
-        "icon": "sounds/metalpipe__icon.png"
-    },
-    {
-        "audio": "sounds/midspin.wav",
-        "icon": "sounds/midspin__icon.png"
-    },
-    {
-        "audio": "sounds/minecraft_anvil.wav",
-        "icon": "sounds/minecraft_anvil__icon.png"
-    },
-    {
-        "audio": "sounds/minecraft_bell.wav",
-        "icon": "sounds/minecraft_bell__icon.png"
-    },
-    {
-        "audio": "sounds/minecraft_explosion.wav",
-        "icon": "sounds/minecraft_explosion__icon.png"
-    },
-    {
-        "audio": "sounds/morningflower.wav",
-        "icon": "sounds/morningflower__icon.svg"
-    },
-    {
-        "audio": "sounds/morshu.wav",
-        "icon": "sounds/morshu__icon.png"
-    },
-    {
-        "audio": "sounds/mrbeast.wav",
-        "icon": "sounds/mrbeast__icon.png"
-    },
-    {
-        "audio": "sounds/necoarc.wav",
-        "icon": "sounds/necoarc__icon.png"
-    },
-    {
-        "audio": "sounds/nerdhorn.wav",
-        "icon": "sounds/nerdhorn__icon.svg"
-    },
-    {
-        "audio": "sounds/noice.wav",
-        "icon": "sounds/noice__icon.svg"
-    },
-    {
-        "audio": "sounds/nope.wav",
-        "icon": "sounds/nope__icon.png"
-    },
-    {
-        "audio": "sounds/noteblock_banjo.wav",
-        "icon": "sounds/noteblock_banjo__icon.png"
-    },
-    {
-        "audio": "sounds/noteblock_bass.wav",
-        "icon": "sounds/noteblock_bass__icon.png"
-    },
-    {
-        "audio": "sounds/noteblock_bell.wav",
-        "icon": "sounds/noteblock_bell__icon.png"
-    },
-    {
-        "audio": "sounds/noteblock_bit.wav",
-        "icon": "sounds/noteblock_bit__icon.png"
-    },
-    {
-        "audio": "sounds/noteblock_chime.wav",
-        "icon": "sounds/noteblock_chime__icon.png"
-    },
-    {
-        "audio": "sounds/noteblock_click.wav",
-        "icon": "sounds/noteblock_click__icon.png"
-    },
-    {
-        "audio": "sounds/noteblock_flute.wav",
-        "icon": "sounds/noteblock_flute__icon.png"
-    },
-    {
-        "audio": "sounds/noteblock_guitar.wav",
-        "icon": "sounds/noteblock_guitar__icon.png"
-    },
-    {
-        "audio": "sounds/noteblock_harp.wav",
-        "icon": "sounds/noteblock_harp__icon.png"
-    },
-    {
-        "audio": "sounds/noteblock_pling.wav",
-        "icon": "sounds/noteblock_pling__icon.png"
-    },
-    {
-        "audio": "sounds/noteblock_snare.wav",
-        "icon": "sounds/noteblock_snare__icon.png"
-    },
-    {
-        "audio": "sounds/noteblock_xylophone.wav",
-        "icon": "sounds/noteblock_xylophone__icon.png"
-    },
-    {
-        "audio": "sounds/obama.wav",
-        "icon": "sounds/obama__icon.png"
-    },
-    {
-        "audio": "sounds/ohoho.wav",
-        "icon": "sounds/ohoho__icon.svg"
-    },
-    {
-        "audio": "sounds/oof.wav",
-        "icon": "sounds/oof__icon.png"
-    },
-    {
-        "audio": "sounds/ook.wav",
-        "icon": "sounds/ook__icon.png"
-    },
-    {
-        "audio": "sounds/op.wav",
-        "icon": "sounds/op__icon.png"
-    },
-    {
-        "audio": "sounds/otto_happy.wav",
-        "icon": "sounds/otto_happy__icon.png"
-    },
-    {
-        "audio": "sounds/otto_off.wav",
-        "icon": "sounds/otto_off__icon.png"
-    },
-    {
-        "audio": "sounds/otto_on.wav",
-        "icon": "sounds/otto_on__icon.png"
-    },
-    {
-        "audio": "sounds/otto_stress.wav",
-        "icon": "sounds/otto_stress__icon.png"
-    },
-    {
-        "audio": "sounds/pan.wav",
-        "icon": "sounds/pan__icon.png"
-    },
-    {
-        "audio": "sounds/perfectfail.wav",
-        "icon": "sounds/perfectfail__icon.png"
-    },
-    {
-        "audio": "sounds/pianoriff.wav",
-        "icon": "sounds/pianoriff__icon.svg"
-    },
-    {
-        "audio": "sounds/pingas.wav",
-        "icon": "sounds/pingas__icon.png"
-    },
-    {
-        "audio": "sounds/pizza.wav",
-        "icon": "sounds/pizza__icon.svg"
-    },
-    {
-        "audio": "sounds/preecho.wav",
-        "icon": "sounds/preecho__icon.png"
-    },
-    {
-        "audio": "sounds/puyo.wav",
-        "icon": "sounds/puyo__icon.png"
-    },
-    {
-        "audio": "sounds/quack.wav",
-        "icon": "sounds/quack__icon.svg"
-    },
-    {
-        "audio": "sounds/rattledash.wav",
-        "icon": "sounds/rattledash__icon.png"
-    },
-    {
-        "audio": "sounds/rdclap.wav",
-        "icon": "sounds/rdclap__icon.png"
-    },
-    {
-        "audio": "sounds/rdmistake.wav",
-        "icon": "sounds/rdmistake__icon.png"
-    },
-    {
-        "audio": "sounds/recordscratch.wav",
-        "icon": "sounds/recordscratch__icon.svg"
-    },
-    {
-        "audio": "sounds/ride2.wav",
-        "icon": "sounds/ride2__icon.png"
-    },
-    {
-        "audio": "sounds/robtopphone.wav",
-        "icon": "sounds/robtopphone__icon.png"
-    },
-    {
-        "audio": "sounds/samsung.wav",
-        "icon": "sounds/samsung__icon.svg"
-    },
-    {
-        "audio": "sounds/samurai.wav",
-        "icon": "sounds/samurai__icon.png"
-    },
-    {
-        "audio": "sounds/sans_voice.wav",
-        "icon": "sounds/sans_voice__icon.png"
-    },
-    {
-        "audio": "sounds/shaker.wav",
-        "icon": "sounds/shaker__icon.png"
-    },
-    {
-        "audio": "sounds/shatter.wav",
-        "icon": "sounds/shatter__icon.png"
-    },
-    {
-        "audio": "sounds/sidestick.wav",
-        "icon": "sounds/sidestick__icon.png"
-    },
-    {
-        "audio": "sounds/skeleton.wav",
-        "icon": "sounds/skeleton__icon.svg"
-    },
-    {
-        "audio": "sounds/skillstar.wav",
-        "icon": "sounds/skillstar__icon.svg"
-    },
-    {
-        "audio": "sounds/skipshot.wav",
-        "icon": "sounds/skipshot__icon.png"
-    },
-    {
-        "audio": "sounds/slap.wav",
-        "icon": "sounds/slap__icon.svg"
-    },
-    {
-        "audio": "sounds/slapbass.wav",
-        "icon": "sounds/slapbass__icon.svg"
-    },
-    {
-        "audio": "sounds/slip.wav",
-        "icon": "sounds/slip__icon.png"
-    },
-    {
-        "audio": "sounds/sm64_hurt.wav",
-        "icon": "sounds/sm64_hurt__icon.png"
-    },
-    {
-        "audio": "sounds/sm64_painting.wav",
-        "icon": "sounds/sm64_painting__icon.png"
-    },
-    {
-        "audio": "sounds/smm_scream.wav",
-        "icon": "sounds/smm_scream__icon.png"
-    },
-    {
-        "audio": "sounds/smokealarm.wav",
-        "icon": "sounds/smokealarm__icon.png"
-    },
-    {
-        "audio": "sounds/smw_1up.wav",
-        "icon": "sounds/smw_1up__icon.png"
-    },
-    {
-        "audio": "sounds/smw_coin.wav",
-        "icon": "sounds/smw_coin__icon.png"
-    },
-    {
-        "audio": "sounds/smw_kick.wav",
-        "icon": "sounds/smw_kick__icon.png"
-    },
-    {
-        "audio": "sounds/smw_spinjump.wav",
-        "icon": "sounds/smw_spinjump__icon.png"
-    },
-    {
-        "audio": "sounds/smw_stomp.wav",
-        "icon": "sounds/smw_stomp__icon.png"
-    },
-    {
-        "audio": "sounds/smw_stomp2.wav",
-        "icon": "sounds/smw_stomp2__icon.png"
-    },
-    {
-        "audio": "sounds/smw_yoshi.wav",
-        "icon": "sounds/smw_yoshi__icon.png"
-    },
-    {
-        "audio": "sounds/steve_oof.wav",
-        "icon": "sounds/steve_oof__icon.png"
-    },
-    {
-        "audio": "sounds/stopposting.wav",
-        "icon": "sounds/stopposting__icon.png"
-    },
-    {
-        "audio": "sounds/stylophone.wav",
-        "icon": "sounds/stylophone__icon.png"
-    },
-    {
-        "audio": "sounds/subaluwa.wav",
-        "icon": "sounds/subaluwa__icon.png"
-    },
-    {
-        "audio": "sounds/suspense.wav",
-        "icon": "sounds/suspense__icon.svg"
-    },
-    {
-        "audio": "sounds/tab_actions.wav",
-        "icon": "sounds/tab_actions__icon.png"
-    },
-    {
-        "audio": "sounds/tab_decorations.wav",
-        "icon": "sounds/tab_decorations__icon.png"
-    },
-    {
-        "audio": "sounds/tab_rooms.wav",
-        "icon": "sounds/tab_rooms__icon.png"
-    },
-    {
-        "audio": "sounds/tab_rows.wav",
-        "icon": "sounds/tab_rows__icon.png"
-    },
-    {
-        "audio": "sounds/tab_sounds.wav",
-        "icon": "sounds/tab_sounds__icon.png"
-    },
-    {
-        "audio": "sounds/tada.wav",
-        "icon": "sounds/tada__icon.svg"
-    },
-    {
-        "audio": "sounds/taiko_don.wav",
-        "icon": "sounds/taiko_don__icon.png"
-    },
-    {
-        "audio": "sounds/taiko_ka.wav",
-        "icon": "sounds/taiko_ka__icon.png"
-    },
-    {
-        "audio": "sounds/taunt.wav",
-        "icon": "sounds/taunt__icon.png"
-    },
-    {
-        "audio": "sounds/terraria_axe.wav",
-        "icon": "sounds/terraria_axe__icon.png"
-    },
-    {
-        "audio": "sounds/terraria_guitar.wav",
-        "icon": "sounds/terraria_guitar__icon.png"
-    },
-    {
-        "audio": "sounds/terraria_pot.wav",
-        "icon": "sounds/terraria_pot__icon.png"
-    },
-    {
-        "audio": "sounds/terraria_reforge.wav",
-        "icon": "sounds/terraria_reforge__icon.png"
-    },
-    {
-        "audio": "sounds/terraria_star.wav",
-        "icon": "sounds/terraria_star__icon.png"
-    },
-    {
-        "audio": "sounds/tf2_crit.wav",
-        "icon": "sounds/tf2_crit__icon.png"
-    },
-    {
-        "audio": "sounds/thwomp.wav",
-        "icon": "sounds/thwomp__icon.png"
-    },
-    {
-        "audio": "sounds/toby.wav",
-        "icon": "sounds/toby__icon.png"
-    },
-    {
-        "audio": "sounds/tom.wav",
-        "icon": "sounds/tom__icon.svg"
-    },
-    {
-        "audio": "sounds/tonk.wav",
-        "icon": "sounds/tonk__icon.png"
-    },
-    {
-        "audio": "sounds/ultrainstinct.wav",
-        "icon": "sounds/ultrainstinct__icon.png"
-    },
-    {
-        "audio": "sounds/undertale_crack.wav",
-        "icon": "sounds/undertale_crack__icon.png"
-    },
-    {
-        "audio": "sounds/undertale_encounter.wav",
-        "icon": "sounds/undertale_encounter__icon.png"
-    },
-    {
-        "audio": "sounds/undertale_hit.wav",
-        "icon": "sounds/undertale_hit__icon.png"
-    },
-    {
-        "audio": "sounds/vvvvvv_checkpoint.wav",
-        "icon": "sounds/vvvvvv_checkpoint__icon.png"
-    },
-    {
-        "audio": "sounds/vvvvvv_flash.wav",
-        "icon": "sounds/vvvvvv_flash__icon.png"
-    },
-    {
-        "audio": "sounds/vvvvvv_flip.wav",
-        "icon": "sounds/vvvvvv_flip__icon.png"
-    },
-    {
-        "audio": "sounds/vvvvvv_hurt.wav",
-        "icon": "sounds/vvvvvv_hurt__icon.png"
-    },
-    {
-        "audio": "sounds/wateronthehill.wav",
-        "icon": "sounds/wateronthehill__icon.png"
-    },
-    {
-        "audio": "sounds/waterphone.wav",
-        "icon": "sounds/waterphone__icon.svg"
-    },
-    {
-        "audio": "sounds/whatsapp.wav",
-        "icon": "sounds/whatsapp__icon.png"
-    },
-    {
-        "audio": "sounds/woo.wav",
-        "icon": "sounds/woo__icon.svg"
-    },
-    {
-        "audio": "sounds/wowowow.wav",
-        "icon": "sounds/wowowow__icon.svg"
-    },
-    {
-        "audio": "sounds/yahoo.wav",
-        "icon": "sounds/yahoo__icon.png"
-    },
-    {
-        "audio": "sounds/yawn.wav",
-        "icon": "sounds/yawn__icon.svg"
-    },
-    {
-        "audio": "sounds/yoda.wav",
-        "icon": "sounds/yoda__icon.png"
-    },
-    {
-        "audio": "sounds/zunpet.wav",
-        "icon": "sounds/zunpet__icon.svg"
-    }
+  {
+    "audio": "sounds/21.wav",
+    "icon": "sounds/21__icon.png"
+  },
+  {
+    "audio": "sounds/808cowbell.wav",
+    "icon": "sounds/808cowbell__icon.svg"
+  },
+  {
+    "audio": "sounds/BABA.wav",
+    "icon": "sounds/BABA__icon.png"
+  },
+  {
+    "audio": "sounds/DEFEAT.wav",
+    "icon": "sounds/DEFEAT__icon.png"
+  },
+  {
+    "audio": "sounds/SLAM.wav",
+    "icon": "sounds/SLAM__icon.png"
+  },
+  {
+    "audio": "sounds/YOU.wav",
+    "icon": "sounds/YOU__icon.png"
+  },
+  {
+    "audio": "sounds/aah.wav",
+    "icon": "sounds/aah__icon.svg"
+  },
+  {
+    "audio": "sounds/adofai_fire.wav",
+    "icon": "sounds/adofai_fire__icon.png"
+  },
+  {
+    "audio": "sounds/adofai_ice.wav",
+    "icon": "sounds/adofai_ice__icon.png"
+  },
+  {
+    "audio": "sounds/adofaicymbal.wav",
+    "icon": "sounds/adofaicymbal__icon.png"
+  },
+  {
+    "audio": "sounds/adofaikick.wav",
+    "icon": "sounds/adofaikick__icon.png"
+  },
+  {
+    "audio": "sounds/airhorn.wav",
+    "icon": "sounds/airhorn__icon.png"
+  },
+  {
+    "audio": "sounds/alarm.wav",
+    "icon": "sounds/alarm__icon.svg"
+  },
+  {
+    "audio": "sounds/alert.wav",
+    "icon": "sounds/alert__icon.svg"
+  },
+  {
+    "audio": "sounds/americano.wav",
+    "icon": "sounds/americano__icon.png"
+  },
+  {
+    "audio": "sounds/amogus.wav",
+    "icon": "sounds/amogus__icon.png"
+  },
+  {
+    "audio": "sounds/amogus_emergency.wav",
+    "icon": "sounds/amogus_emergency__icon.png"
+  },
+  {
+    "audio": "sounds/amogus_kill.wav",
+    "icon": "sounds/amogus_kill__icon.png"
+  },
+  {
+    "audio": "sounds/amongdrip.wav",
+    "icon": "sounds/amongdrip__icon.png"
+  },
+  {
+    "audio": "sounds/amongus.wav",
+    "icon": "sounds/amongus__icon.png"
+  },
+  {
+    "audio": "sounds/augh.wav",
+    "icon": "sounds/augh__icon.svg"
+  },
+  {
+    "audio": "sounds/babylaugh.wav",
+    "icon": "sounds/babylaugh__icon.svg"
+  },
+  {
+    "audio": "sounds/bell.wav",
+    "icon": "sounds/bell__icon.svg"
+  },
+  {
+    "audio": "sounds/bleep.wav",
+    "icon": "sounds/bleep__icon.svg"
+  },
+  {
+    "audio": "sounds/boing.wav",
+    "icon": "sounds/boing__icon.png"
+  },
+  {
+    "audio": "sounds/boink.wav",
+    "icon": "sounds/boink__icon.svg"
+  },
+  {
+    "audio": "sounds/bong.wav",
+    "icon": "sounds/bong__icon.png"
+  },
+  {
+    "audio": "sounds/bonk.wav",
+    "icon": "sounds/bonk__icon.svg"
+  },
+  {
+    "audio": "sounds/boom.wav",
+    "icon": "sounds/boom__icon.png"
+  },
+  {
+    "audio": "sounds/bruh.wav",
+    "icon": "sounds/bruh__icon.png"
+  },
+  {
+    "audio": "sounds/builttoscale.wav",
+    "icon": "sounds/builttoscale__icon.png"
+  },
+  {
+    "audio": "sounds/bup.wav",
+    "icon": "sounds/bup__icon.png"
+  },
+  {
+    "audio": "sounds/buttonpop.wav",
+    "icon": "sounds/buttonpop__icon.png"
+  },
+  {
+    "audio": "sounds/buzzer.wav",
+    "icon": "sounds/buzzer__icon.png"
+  },
+  {
+    "audio": "sounds/bwomp.wav",
+    "icon": "sounds/bwomp__icon.png"
+  },
+  {
+    "audio": "sounds/cave.wav",
+    "icon": "sounds/cave__icon.svg"
+  },
+  {
+    "audio": "sounds/celeste_dash.wav",
+    "icon": "sounds/celeste_dash__icon.png"
+  },
+  {
+    "audio": "sounds/celeste_death.wav",
+    "icon": "sounds/celeste_death__icon.png"
+  },
+  {
+    "audio": "sounds/celeste_diamond.wav",
+    "icon": "sounds/celeste_diamond__icon.png"
+  },
+  {
+    "audio": "sounds/celeste_spring.wav",
+    "icon": "sounds/celeste_spring__icon.png"
+  },
+  {
+    "audio": "sounds/chess.wav",
+    "icon": "sounds/chess__icon.png"
+  },
+  {
+    "audio": "sounds/choruskid.wav",
+    "icon": "sounds/choruskid__icon.png"
+  },
+  {
+    "audio": "sounds/clap.wav",
+    "icon": "sounds/clap__icon.svg"
+  },
+  {
+    "audio": "sounds/cop.wav",
+    "icon": "sounds/cop__icon.png"
+  },
+  {
+    "audio": "sounds/cowbell.wav",
+    "icon": "sounds/cowbell__icon.png"
+  },
+  {
+    "audio": "sounds/dimrainsynth.wav",
+    "icon": "sounds/dimrainsynth__icon.png"
+  },
+  {
+    "audio": "sounds/dkremote.wav",
+    "icon": "sounds/dkremote__icon.png"
+  },
+  {
+    "audio": "sounds/dodgeball.wav",
+    "icon": "sounds/dodgeball__icon.png"
+  },
+  {
+    "audio": "sounds/dog.wav",
+    "icon": "sounds/dog__icon.svg"
+  },
+  {
+    "audio": "sounds/doorbellcat.wav",
+    "icon": "sounds/doorbellcat__icon.png"
+  },
+  {
+    "audio": "sounds/e.wav",
+    "icon": "sounds/e__icon.png"
+  },
+  {
+    "audio": "sounds/eight.wav",
+    "icon": "sounds/eight__icon.png"
+  },
+  {
+    "audio": "sounds/error.wav",
+    "icon": "sounds/error__icon.svg"
+  },
+  {
+    "audio": "sounds/explosion.wav",
+    "icon": "sounds/explosion__icon.png"
+  },
+  {
+    "audio": "sounds/familyguy.wav",
+    "icon": "sounds/familyguy__icon.png"
+  },
+  {
+    "audio": "sounds/fart.wav",
+    "icon": "sounds/fart__icon.svg"
+  },
+  {
+    "audio": "sounds/fireinthehole.wav",
+    "icon": "sounds/fireinthehole__icon.png"
+  },
+  {
+    "audio": "sounds/flipnote.wav",
+    "icon": "sounds/flipnote__icon.png"
+  },
+  {
+    "audio": "sounds/fnf_death.wav",
+    "icon": "sounds/fnf_death__icon.png"
+  },
+  {
+    "audio": "sounds/fnf_down.wav",
+    "icon": "sounds/fnf_down__icon.png"
+  },
+  {
+    "audio": "sounds/fnf_left.wav",
+    "icon": "sounds/fnf_left__icon.png"
+  },
+  {
+    "audio": "sounds/fnf_right.wav",
+    "icon": "sounds/fnf_right__icon.png"
+  },
+  {
+    "audio": "sounds/fnf_up.wav",
+    "icon": "sounds/fnf_up__icon.png"
+  },
+  {
+    "audio": "sounds/gaster.wav",
+    "icon": "sounds/gaster__icon.png"
+  },
+  {
+    "audio": "sounds/gd_coin.wav",
+    "icon": "sounds/gd_coin__icon.png"
+  },
+  {
+    "audio": "sounds/gd_diamonds.wav",
+    "icon": "sounds/gd_diamonds__icon.png"
+  },
+  {
+    "audio": "sounds/gd_orbs.wav",
+    "icon": "sounds/gd_orbs__icon.png"
+  },
+  {
+    "audio": "sounds/gd_quit.wav",
+    "icon": "sounds/gd_quit__icon.png"
+  },
+  {
+    "audio": "sounds/gdcrash.wav",
+    "icon": "sounds/gdcrash__icon.png"
+  },
+  {
+    "audio": "sounds/gdcrash_orbs.wav",
+    "icon": "sounds/gdcrash_orbs__icon.png"
+  },
+  {
+    "audio": "sounds/gdexplosion.wav",
+    "icon": "sounds/gdexplosion__icon.png"
+  },
+  {
+    "audio": "sounds/geometrydash.wav",
+    "icon": "sounds/geometrydash__icon.png"
+  },
+  {
+    "audio": "sounds/getout.wav",
+    "icon": "sounds/getout__icon.svg"
+  },
+  {
+    "audio": "sounds/gnome.wav",
+    "icon": "sounds/gnome__icon.png"
+  },
+  {
+    "audio": "sounds/granddad.wav",
+    "icon": "sounds/granddad__icon.png"
+  },
+  {
+    "audio": "sounds/gun.wav",
+    "icon": "sounds/gun__icon.png"
+  },
+  {
+    "audio": "sounds/gura.wav",
+    "icon": "sounds/gura__icon.png"
+  },
+  {
+    "audio": "sounds/hammer.wav",
+    "icon": "sounds/hammer__icon.png"
+  },
+  {
+    "audio": "sounds/hehehehaw.wav",
+    "icon": "sounds/hehehehaw__icon.png"
+  },
+  {
+    "audio": "sounds/hitmarker.wav",
+    "icon": "sounds/hitmarker__icon.png"
+  },
+  {
+    "audio": "sounds/hoenn.wav",
+    "icon": "sounds/hoenn__icon.png"
+  },
+  {
+    "audio": "sounds/honk.wav",
+    "icon": "sounds/honk__icon.svg"
+  },
+  {
+    "audio": "sounds/huhcat.wav",
+    "icon": "sounds/huhcat__icon.png"
+  },
+  {
+    "audio": "sounds/huhdouyin.wav",
+    "icon": "sounds/huhdouyin__icon.png"
+  },
+  {
+    "audio": "sounds/isaac_dead.wav",
+    "icon": "sounds/isaac_dead__icon.png"
+  },
+  {
+    "audio": "sounds/isaac_hurt.wav",
+    "icon": "sounds/isaac_hurt__icon.png"
+  },
+  {
+    "audio": "sounds/isaac_mantle.wav",
+    "icon": "sounds/isaac_mantle__icon.png"
+  },
+  {
+    "audio": "sounds/jermawoo.wav",
+    "icon": "sounds/jermawoo__icon.png"
+  },
+  {
+    "audio": "sounds/kaching.wav",
+    "icon": "sounds/kaching__icon.svg"
+  },
+  {
+    "audio": "sounds/karateman_bulb.wav",
+    "icon": "sounds/karateman_bulb__icon.png"
+  },
+  {
+    "audio": "sounds/karateman_hit.wav",
+    "icon": "sounds/karateman_hit__icon.png"
+  },
+  {
+    "audio": "sounds/karateman_offbeat.wav",
+    "icon": "sounds/karateman_offbeat__icon.png"
+  },
+  {
+    "audio": "sounds/karateman_throw.wav",
+    "icon": "sounds/karateman_throw__icon.png"
+  },
+  {
+    "audio": "sounds/kick.wav",
+    "icon": "sounds/kick__icon.svg"
+  },
+  {
+    "audio": "sounds/krabs.wav",
+    "icon": "sounds/krabs__icon.svg"
+  },
+  {
+    "audio": "sounds/lancersplat.wav",
+    "icon": "sounds/lancersplat__icon.png"
+  },
+  {
+    "audio": "sounds/mariopaint_baby.wav",
+    "icon": "sounds/mariopaint_baby__icon.png"
+  },
+  {
+    "audio": "sounds/mariopaint_car.wav",
+    "icon": "sounds/mariopaint_car__icon.png"
+  },
+  {
+    "audio": "sounds/mariopaint_cat.wav",
+    "icon": "sounds/mariopaint_cat__icon.png"
+  },
+  {
+    "audio": "sounds/mariopaint_dog.wav",
+    "icon": "sounds/mariopaint_dog__icon.png"
+  },
+  {
+    "audio": "sounds/mariopaint_flower.wav",
+    "icon": "sounds/mariopaint_flower__icon.png"
+  },
+  {
+    "audio": "sounds/mariopaint_gameboy.wav",
+    "icon": "sounds/mariopaint_gameboy__icon.png"
+  },
+  {
+    "audio": "sounds/mariopaint_luigi.wav",
+    "icon": "sounds/mariopaint_luigi__icon.png"
+  },
+  {
+    "audio": "sounds/mariopaint_mario.wav",
+    "icon": "sounds/mariopaint_mario__icon.png"
+  },
+  {
+    "audio": "sounds/mariopaint_plane.wav",
+    "icon": "sounds/mariopaint_plane__icon.png"
+  },
+  {
+    "audio": "sounds/mariopaint_star.wav",
+    "icon": "sounds/mariopaint_star__icon.png"
+  },
+  {
+    "audio": "sounds/mariopaint_swan.wav",
+    "icon": "sounds/mariopaint_swan__icon.png"
+  },
+  {
+    "audio": "sounds/megalovania.wav",
+    "icon": "sounds/megalovania__icon.png"
+  },
+  {
+    "audio": "sounds/megalovania_note.wav",
+    "icon": "sounds/megalovania_note__icon.svg"
+  },
+  {
+    "audio": "sounds/meowsynth.wav",
+    "icon": "sounds/meowsynth__icon.png"
+  },
+  {
+    "audio": "sounds/metalpipe.wav",
+    "icon": "sounds/metalpipe__icon.png"
+  },
+  {
+    "audio": "sounds/midspin.wav",
+    "icon": "sounds/midspin__icon.png"
+  },
+  {
+    "audio": "sounds/minecraft_anvil.wav",
+    "icon": "sounds/minecraft_anvil__icon.png"
+  },
+  {
+    "audio": "sounds/minecraft_bell.wav",
+    "icon": "sounds/minecraft_bell__icon.png"
+  },
+  {
+    "audio": "sounds/minecraft_explosion.wav",
+    "icon": "sounds/minecraft_explosion__icon.png"
+  },
+  {
+    "audio": "sounds/morningflower.wav",
+    "icon": "sounds/morningflower__icon.svg"
+  },
+  {
+    "audio": "sounds/morshu.wav",
+    "icon": "sounds/morshu__icon.png"
+  },
+  {
+    "audio": "sounds/mrbeast.wav",
+    "icon": "sounds/mrbeast__icon.png"
+  },
+  {
+    "audio": "sounds/necoarc.wav",
+    "icon": "sounds/necoarc__icon.png"
+  },
+  {
+    "audio": "sounds/nerdhorn.wav",
+    "icon": "sounds/nerdhorn__icon.svg"
+  },
+  {
+    "audio": "sounds/noice.wav",
+    "icon": "sounds/noice__icon.svg"
+  },
+  {
+    "audio": "sounds/nope.wav",
+    "icon": "sounds/nope__icon.png"
+  },
+  {
+    "audio": "sounds/noteblock_banjo.wav",
+    "icon": "sounds/noteblock_banjo__icon.png"
+  },
+  {
+    "audio": "sounds/noteblock_bass.wav",
+    "icon": "sounds/noteblock_bass__icon.png"
+  },
+  {
+    "audio": "sounds/noteblock_bell.wav",
+    "icon": "sounds/noteblock_bell__icon.png"
+  },
+  {
+    "audio": "sounds/noteblock_bit.wav",
+    "icon": "sounds/noteblock_bit__icon.png"
+  },
+  {
+    "audio": "sounds/noteblock_chime.wav",
+    "icon": "sounds/noteblock_chime__icon.png"
+  },
+  {
+    "audio": "sounds/noteblock_click.wav",
+    "icon": "sounds/noteblock_click__icon.png"
+  },
+  {
+    "audio": "sounds/noteblock_flute.wav",
+    "icon": "sounds/noteblock_flute__icon.png"
+  },
+  {
+    "audio": "sounds/noteblock_guitar.wav",
+    "icon": "sounds/noteblock_guitar__icon.png"
+  },
+  {
+    "audio": "sounds/noteblock_harp.wav",
+    "icon": "sounds/noteblock_harp__icon.png"
+  },
+  {
+    "audio": "sounds/noteblock_pling.wav",
+    "icon": "sounds/noteblock_pling__icon.png"
+  },
+  {
+    "audio": "sounds/noteblock_snare.wav",
+    "icon": "sounds/noteblock_snare__icon.png"
+  },
+  {
+    "audio": "sounds/noteblock_xylophone.wav",
+    "icon": "sounds/noteblock_xylophone__icon.png"
+  },
+  {
+    "audio": "sounds/obama.wav",
+    "icon": "sounds/obama__icon.png"
+  },
+  {
+    "audio": "sounds/ohoho.wav",
+    "icon": "sounds/ohoho__icon.svg"
+  },
+  {
+    "audio": "sounds/oof.wav",
+    "icon": "sounds/oof__icon.png"
+  },
+  {
+    "audio": "sounds/ook.wav",
+    "icon": "sounds/ook__icon.png"
+  },
+  {
+    "audio": "sounds/op.wav",
+    "icon": "sounds/op__icon.png"
+  },
+  {
+    "audio": "sounds/otto_happy.wav",
+    "icon": "sounds/otto_happy__icon.png"
+  },
+  {
+    "audio": "sounds/otto_off.wav",
+    "icon": "sounds/otto_off__icon.png"
+  },
+  {
+    "audio": "sounds/otto_on.wav",
+    "icon": "sounds/otto_on__icon.png"
+  },
+  {
+    "audio": "sounds/otto_stress.wav",
+    "icon": "sounds/otto_stress__icon.png"
+  },
+  {
+    "audio": "sounds/pan.wav",
+    "icon": "sounds/pan__icon.png"
+  },
+  {
+    "audio": "sounds/perfectfail.wav",
+    "icon": "sounds/perfectfail__icon.png"
+  },
+  {
+    "audio": "sounds/pianoriff.wav",
+    "icon": "sounds/pianoriff__icon.svg"
+  },
+  {
+    "audio": "sounds/pingas.wav",
+    "icon": "sounds/pingas__icon.png"
+  },
+  {
+    "audio": "sounds/pizza.wav",
+    "icon": "sounds/pizza__icon.svg"
+  },
+  {
+    "audio": "sounds/preecho.wav",
+    "icon": "sounds/preecho__icon.png"
+  },
+  {
+    "audio": "sounds/puyo.wav",
+    "icon": "sounds/puyo__icon.png"
+  },
+  {
+    "audio": "sounds/quack.wav",
+    "icon": "sounds/quack__icon.svg"
+  },
+  {
+    "audio": "sounds/rattledash.wav",
+    "icon": "sounds/rattledash__icon.png"
+  },
+  {
+    "audio": "sounds/rdclap.wav",
+    "icon": "sounds/rdclap__icon.png"
+  },
+  {
+    "audio": "sounds/rdmistake.wav",
+    "icon": "sounds/rdmistake__icon.png"
+  },
+  {
+    "audio": "sounds/recordscratch.wav",
+    "icon": "sounds/recordscratch__icon.svg"
+  },
+  {
+    "audio": "sounds/ride2.wav",
+    "icon": "sounds/ride2__icon.png"
+  },
+  {
+    "audio": "sounds/robtopphone.wav",
+    "icon": "sounds/robtopphone__icon.png"
+  },
+  {
+    "audio": "sounds/samsung.wav",
+    "icon": "sounds/samsung__icon.svg"
+  },
+  {
+    "audio": "sounds/samurai.wav",
+    "icon": "sounds/samurai__icon.png"
+  },
+  {
+    "audio": "sounds/sans_voice.wav",
+    "icon": "sounds/sans_voice__icon.png"
+  },
+  {
+    "audio": "sounds/shaker.wav",
+    "icon": "sounds/shaker__icon.png"
+  },
+  {
+    "audio": "sounds/shatter.wav",
+    "icon": "sounds/shatter__icon.png"
+  },
+  {
+    "audio": "sounds/sidestick.wav",
+    "icon": "sounds/sidestick__icon.png"
+  },
+  {
+    "audio": "sounds/skeleton.wav",
+    "icon": "sounds/skeleton__icon.svg"
+  },
+  {
+    "audio": "sounds/skillstar.wav",
+    "icon": "sounds/skillstar__icon.svg"
+  },
+  {
+    "audio": "sounds/skipshot.wav",
+    "icon": "sounds/skipshot__icon.png"
+  },
+  {
+    "audio": "sounds/slap.wav",
+    "icon": "sounds/slap__icon.svg"
+  },
+  {
+    "audio": "sounds/slapbass.wav",
+    "icon": "sounds/slapbass__icon.svg"
+  },
+  {
+    "audio": "sounds/slip.wav",
+    "icon": "sounds/slip__icon.png"
+  },
+  {
+    "audio": "sounds/sm64_hurt.wav",
+    "icon": "sounds/sm64_hurt__icon.png"
+  },
+  {
+    "audio": "sounds/sm64_painting.wav",
+    "icon": "sounds/sm64_painting__icon.png"
+  },
+  {
+    "audio": "sounds/smm_scream.wav",
+    "icon": "sounds/smm_scream__icon.png"
+  },
+  {
+    "audio": "sounds/smokealarm.wav",
+    "icon": "sounds/smokealarm__icon.png"
+  },
+  {
+    "audio": "sounds/smw_1up.wav",
+    "icon": "sounds/smw_1up__icon.png"
+  },
+  {
+    "audio": "sounds/smw_coin.wav",
+    "icon": "sounds/smw_coin__icon.png"
+  },
+  {
+    "audio": "sounds/smw_kick.wav",
+    "icon": "sounds/smw_kick__icon.png"
+  },
+  {
+    "audio": "sounds/smw_spinjump.wav",
+    "icon": "sounds/smw_spinjump__icon.png"
+  },
+  {
+    "audio": "sounds/smw_stomp.wav",
+    "icon": "sounds/smw_stomp__icon.png"
+  },
+  {
+    "audio": "sounds/smw_stomp2.wav",
+    "icon": "sounds/smw_stomp2__icon.png"
+  },
+  {
+    "audio": "sounds/smw_yoshi.wav",
+    "icon": "sounds/smw_yoshi__icon.png"
+  },
+  {
+    "audio": "sounds/steve_oof.wav",
+    "icon": "sounds/steve_oof__icon.png"
+  },
+  {
+    "audio": "sounds/stopposting.wav",
+    "icon": "sounds/stopposting__icon.png"
+  },
+  {
+    "audio": "sounds/stylophone.wav",
+    "icon": "sounds/stylophone__icon.png"
+  },
+  {
+    "audio": "sounds/subaluwa.wav",
+    "icon": "sounds/subaluwa__icon.png"
+  },
+  {
+    "audio": "sounds/suspense.wav",
+    "icon": "sounds/suspense__icon.svg"
+  },
+  {
+    "audio": "sounds/tab_actions.wav",
+    "icon": "sounds/tab_actions__icon.png"
+  },
+  {
+    "audio": "sounds/tab_decorations.wav",
+    "icon": "sounds/tab_decorations__icon.png"
+  },
+  {
+    "audio": "sounds/tab_rooms.wav",
+    "icon": "sounds/tab_rooms__icon.png"
+  },
+  {
+    "audio": "sounds/tab_rows.wav",
+    "icon": "sounds/tab_rows__icon.png"
+  },
+  {
+    "audio": "sounds/tab_sounds.wav",
+    "icon": "sounds/tab_sounds__icon.png"
+  },
+  {
+    "audio": "sounds/tada.wav",
+    "icon": "sounds/tada__icon.svg"
+  },
+  {
+    "audio": "sounds/taiko_don.wav",
+    "icon": "sounds/taiko_don__icon.png"
+  },
+  {
+    "audio": "sounds/taiko_ka.wav",
+    "icon": "sounds/taiko_ka__icon.png"
+  },
+  {
+    "audio": "sounds/taunt.wav",
+    "icon": "sounds/taunt__icon.png"
+  },
+  {
+    "audio": "sounds/terraria_axe.wav",
+    "icon": "sounds/terraria_axe__icon.png"
+  },
+  {
+    "audio": "sounds/terraria_guitar.wav",
+    "icon": "sounds/terraria_guitar__icon.png"
+  },
+  {
+    "audio": "sounds/terraria_pot.wav",
+    "icon": "sounds/terraria_pot__icon.png"
+  },
+  {
+    "audio": "sounds/terraria_reforge.wav",
+    "icon": "sounds/terraria_reforge__icon.png"
+  },
+  {
+    "audio": "sounds/terraria_star.wav",
+    "icon": "sounds/terraria_star__icon.png"
+  },
+  {
+    "audio": "sounds/tf2_crit.wav",
+    "icon": "sounds/tf2_crit__icon.png"
+  },
+  {
+    "audio": "sounds/thwomp.wav",
+    "icon": "sounds/thwomp__icon.png"
+  },
+  {
+    "audio": "sounds/toby.wav",
+    "icon": "sounds/toby__icon.png"
+  },
+  {
+    "audio": "sounds/tom.wav",
+    "icon": "sounds/tom__icon.svg"
+  },
+  {
+    "audio": "sounds/tonk.wav",
+    "icon": "sounds/tonk__icon.png"
+  },
+  {
+    "audio": "sounds/ultrainstinct.wav",
+    "icon": "sounds/ultrainstinct__icon.png"
+  },
+  {
+    "audio": "sounds/undertale_crack.wav",
+    "icon": "sounds/undertale_crack__icon.png"
+  },
+  {
+    "audio": "sounds/undertale_encounter.wav",
+    "icon": "sounds/undertale_encounter__icon.png"
+  },
+  {
+    "audio": "sounds/undertale_hit.wav",
+    "icon": "sounds/undertale_hit__icon.png"
+  },
+  {
+    "audio": "sounds/vvvvvv_checkpoint.wav",
+    "icon": "sounds/vvvvvv_checkpoint__icon.png"
+  },
+  {
+    "audio": "sounds/vvvvvv_flash.wav",
+    "icon": "sounds/vvvvvv_flash__icon.png"
+  },
+  {
+    "audio": "sounds/vvvvvv_flip.wav",
+    "icon": "sounds/vvvvvv_flip__icon.png"
+  },
+  {
+    "audio": "sounds/vvvvvv_hurt.wav",
+    "icon": "sounds/vvvvvv_hurt__icon.png"
+  },
+  {
+    "audio": "sounds/wateronthehill.wav",
+    "icon": "sounds/wateronthehill__icon.png"
+  },
+  {
+    "audio": "sounds/waterphone.wav",
+    "icon": "sounds/waterphone__icon.svg"
+  },
+  {
+    "audio": "sounds/whatsapp.wav",
+    "icon": "sounds/whatsapp__icon.png"
+  },
+  {
+    "audio": "sounds/woo.wav",
+    "icon": "sounds/woo__icon.svg"
+  },
+  {
+    "audio": "sounds/wowowow.wav",
+    "icon": "sounds/wowowow__icon.svg"
+  },
+  {
+    "audio": "sounds/yahoo.wav",
+    "icon": "sounds/yahoo__icon.png"
+  },
+  {
+    "audio": "sounds/yawn.wav",
+    "icon": "sounds/yawn__icon.svg"
+  },
+  {
+    "audio": "sounds/yoda.wav",
+    "icon": "sounds/yoda__icon.png"
+  },
+  {
+    "audio": "sounds/zunpet.wav",
+    "icon": "sounds/zunpet__icon.svg"
+  }
 ]

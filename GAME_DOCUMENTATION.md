@@ -29,10 +29,12 @@ Players take turns adding to each other's musical creations, similar to the draw
 ### Server-Side (`server/server.js`)
 
 **Core Classes:**
+
 - `Lobby`: Manages game sessions, player assignments, and song rotation
 - Socket.IO handlers for real-time multiplayer communication
 
 **Key Features:**
+
 - Gartic Phone-style song rotation logic
 - Round management and phase transitions
 - Song segment storage and retrieval
@@ -41,7 +43,8 @@ Players take turns adding to each other's musical creations, similar to the draw
 ### Client-Side
 
 **Core Systems:**
-- `MultiplayerGame.js`: Main game orchestrator
+
+- `Game.js`: Main game orchestrator
 - `MultiplayerManager.js`: Server communication
 - `AudioEngine.js`: Audio playback and recording
 - `GameState.js`: Client-side state management
@@ -49,26 +52,30 @@ Players take turns adding to each other's musical creations, similar to the draw
 - `CanvasRenderer.js`: Timeline and visual rendering
 
 **Game Phases:**
+
 - `SelectionPhase.js`: Sound selection interface
 - `PerformancePhase.js`: Music recording with timeline
 - `EditingPhase.js`: Pitch/timing adjustment tools
 - `WaitingPhase.js`: Multiplayer synchronization screen
-- `SongPreviewPhase.js`: Preview previous work before adding
-- `FinalShowcasePhase.js`: Display completed collaborative songs
+- `PreviewPhase.js`: Preview previous work before adding
+- `ShowcasePhase.js`: Display completed collaborative songs
 
 ## 🎮 Controls
 
 ### Performance Phase
+
 - **Keys 1, 2, 3**: Play selected sounds and record them
 - **Right-click timeline**: Remove recorded notes
 - **Transport controls**: Play/pause, restart, seek, finish early
 
 ### Editing Phase
+
 - **Drag notes vertically**: Adjust pitch (-12 to +12 semitones)
 - **Transport controls**: Play/pause, restart, seek
 - **Done button**: Finish editing early
 
 ### Final Showcase
+
 - **Navigation**: Previous/Next song buttons
 - **Transport controls**: Play/pause, restart, seek
 - **Exit options**: Play again or return to menu
@@ -122,18 +129,21 @@ Lobby → Selection → Performance → Editing → Waiting
 ## 🚀 Setup and Running
 
 ### Prerequisites
+
 - Node.js (for server)
 - Modern web browser with Web Audio API support
 
 ### Installation
 
 1. **Install server dependencies:**
+
    ```bash
    cd server
    npm install
    ```
 
 2. **Start the server:**
+
    ```bash
    cd server
    node server.js
@@ -164,9 +174,9 @@ game_jam/
 │   │   ├── PerformancePhase.js
 │   │   ├── EditingPhase.js
 │   │   ├── WaitingPhase.js
-│   │   ├── SongPreviewPhase.js
-│   │   └── FinalShowcasePhase.js
-│   └── MultiplayerGame.js # Main game class
+│   │   ├── PreviewPhase.js
+│   │   └── ShowcasePhase.js
+│   └── Game.js # Main game class
 ├── sounds/               # Audio files and icons
 ├── index.html           # Main HTML file
 ├── style.css           # Game styling
@@ -190,7 +200,7 @@ Edit `GAME_CONFIG` in `server/server.js`:
 ```javascript
 // Server-side config (minimal)
 const GAME_CONFIG = {
-  segmentLength: 8        // Length of each song segment
+  segmentLength: 8, // Length of each song segment
 };
 ```
 

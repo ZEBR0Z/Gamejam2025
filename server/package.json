@@ -15,7 +15,12 @@
   "devDependencies": {
     "nodemon": "^3.0.1"
   },
-  "keywords": ["multiplayer", "music", "game", "websocket"],
+  "keywords": [
+    "multiplayer",
+    "music",
+    "game",
+    "websocket"
+  ],
   "author": "",
   "license": "MIT"
 }
