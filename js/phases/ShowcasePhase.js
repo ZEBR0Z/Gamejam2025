@@ -454,6 +454,9 @@ export class ShowcasePhase {
       totalTime,
       this.isSequentialMode,
     );
+
+    // Redraw canvas to show new position
+    this.draw();
   }
 
   previousSong() {

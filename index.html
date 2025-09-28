@@ -41,10 +41,10 @@
           />
         </div>
         <div class="lobby-buttons">
-          <button id="back-to-menu-btn" class="secondary-button nes-btn is-error">Back</button>
-          <button id="create-lobby-confirm-btn" class="primary-button nes-btn">
+          <button id="create-lobby-confirm-btn" class="primary-button nes-btn is-success">
             Create Lobby
           </button>
+          <button id="back-to-menu-btn" class="secondary-button nes-btn is-error">Back</button>
         </div>
       </div>
     </div>
@@ -75,11 +75,11 @@
           />
         </div>
         <div class="lobby-buttons">
+          <button id="join-lobby-confirm-btn" class="primary-button nes-btn is-success">
+            Join Lobby
+          </button>
           <button id="back-to-menu-from-join-btn" class="secondary-button nes-btn is-error">
             Back
-          </button>
-          <button id="join-lobby-confirm-btn" class="primary-button nes-btn">
-            Join Lobby
           </button>
         </div>
       </div>
@@ -109,10 +109,10 @@
         </div>
 
         <div class="lobby-buttons">
+          <button id="ready-btn" class="primary-button nes-btn">Ready</button>
           <button id="leave-lobby-btn" class="secondary-button nes-btn is-error">
             Leave Lobby
           </button>
-          <button id="ready-btn" class="primary-button nes-btn">Ready</button>
         </div>
 
         <div id="game-starting" class="game-starting" style="display: none">
@@ -126,7 +126,7 @@
 
     <!-- Tutorial Overlay -->
     <div id="tutorial" class="screen overlay">
-      <div class="tutorial-content">
+      <div class="tutorial-content" style="overflow: auto">
         <h2>How to Play</h2>
         <div class="tutorial-steps">
           <div class="step">
@@ -357,7 +357,7 @@
             >
           </div>
           <div class="phase-timer">
-            <span>Preview Time: <span id="preview-phase-timer">20</span>s</span>
+            <span>Preview Time:  <span id="preview-phase-timer">20</span></span>
           </div>
         </div>
 
