@@ -10,7 +10,7 @@
     <!-- Main Menu -->
     <div id="main-menu" class="screen active">
         <div class="menu-container">
-            <h1>Bring the Heat</h1>
+            <h1>Yo That's Heat</h1>
             <p class="subtitle">A Gartic Phone-style collaborative music creation game</p>
             <div class="menu-buttons">
                 <button id="tutorial-btn" class="menu-button">Tutorial</button>
@@ -204,28 +204,94 @@
         </div>
     </div>
 
-    <!-- Final Playback -->
-    <div id="final" class="screen">
-        <div class="phase-header">
-            <h2>Your Creation</h2>
-        </div>
+    <!-- Waiting for Players -->
+    <div id="waiting-for-players" class="screen">
+        <div class="waiting-container">
+            <h2>Waiting for Everyone to Finish...</h2>
+            <div class="waiting-info">
+                <p id="waiting-message">Please wait while other players complete their parts.</p>
+                <div class="round-info">
+                    <span>Round <span id="current-round">1</span> of <span id="total-rounds">3</span></span>
+                </div>
+            </div>
 
-        <div class="final-timeline-container">
-            <canvas id="final-canvas" width="800" height="200"></canvas>
-        </div>
+            <div class="players-progress">
+                <h3>Player Progress:</h3>
+                <div id="players-progress-container">
+                    <!-- Player progress will be populated here -->
+                </div>
+            </div>
 
-        <div class="transport-controls">
-            <button id="final-play-pause-btn" class="control-button">⏸️</button>
-            <button id="final-restart-btn" class="control-button">⏮️</button>
-            <div class="progress-container">
-                <input type="range" id="final-progress-bar" min="0" max="8" step="0.1" value="0">
-                <span id="final-time-display">0.0 / 8.0</span>
+            <div class="loading-spinner">
+                <div class="spinner"></div>
             </div>
         </div>
+    </div>
 
-        <div class="final-buttons">
-            <button id="restart-game-btn" class="secondary-button">Play Again</button>
-            <button id="exit-btn" class="primary-button">Exit</button>
+    <!-- Song Preview -->
+    <div id="song-preview" class="screen">
+        <div class="preview-container">
+            <h2>Listen to the Previous Part</h2>
+            <div class="preview-info">
+                <p>This is what <span id="previous-player-name">Player</span> created.</p>
+                <p>Now add your continuation to this song!</p>
+                <div class="round-info">
+                    <span>Round <span id="preview-current-round">2</span> of <span id="preview-total-rounds">3</span></span>
+                </div>
+            </div>
+
+            <div class="preview-timeline-container">
+                <canvas id="preview-canvas" width="800" height="200"></canvas>
+            </div>
+
+            <div class="transport-controls">
+                <button id="preview-play-pause-btn" class="control-button">▶️</button>
+                <button id="preview-restart-btn" class="control-button">⏮️</button>
+                <div class="progress-container">
+                    <input type="range" id="preview-progress-bar" min="0" max="8" step="0.1" value="0">
+                    <span id="preview-time-display">0.0 / 8.0</span>
+                </div>
+            </div>
+
+            <div class="preview-buttons">
+                <button id="continue-to-performance-btn" class="primary-button">Continue to Add Your Part</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Showcase -->
+    <div id="final-showcase" class="screen">
+        <div class="showcase-container">
+            <h2>Final Results</h2>
+            <div class="showcase-info">
+                <p>Here are all the completed collaborative songs!</p>
+                <div class="song-navigation">
+                    <span>Song <span id="current-song-number">1</span> of <span id="total-songs">3</span></span>
+                    <div class="song-info">
+                        <p>Created by: <span id="song-creators">Player1, Player2, Player3</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="showcase-timeline-container">
+                <canvas id="showcase-canvas" width="800" height="400"></canvas>
+            </div>
+
+            <div class="transport-controls">
+                <button id="showcase-play-pause-btn" class="control-button">⏸️</button>
+                <button id="showcase-restart-btn" class="control-button">⏮️</button>
+                <div class="progress-container">
+                    <input type="range" id="showcase-progress-bar" min="0" max="24" step="0.1" value="0">
+                    <span id="showcase-time-display">0.0 / 24.0</span>
+                </div>
+            </div>
+
+            <div class="showcase-buttons">
+                <button id="prev-song-btn" class="secondary-button">← Previous Song</button>
+                <button id="next-song-btn" class="secondary-button">Next Song →</button>
+                <button id="showcase-restart-game-btn" class="secondary-button">Play Again</button>
+                <button id="showcase-exit-btn" class="primary-button">Exit</button>
+            </div>
         </div>
     </div>
 

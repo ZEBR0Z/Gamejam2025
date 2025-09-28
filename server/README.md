@@ -1,6 +1,6 @@
 # Multiplayer Server
 
-> Backend server for "Bring the Heat" - A Gartic Phone-style collaborative music creation game
+> Backend server for "Yo That's Heat" - A Gartic Phone-style collaborative music creation game
 
 ## Setup Instructions
 

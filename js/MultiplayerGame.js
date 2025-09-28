@@ -17,6 +17,9 @@ import { SelectionPhase } from './phases/SelectionPhase.js';
 import { PerformancePhase } from './phases/PerformancePhase.js';
 import { EditingPhase } from './phases/EditingPhase.js';
 import { FinalPhase } from './phases/FinalPhase.js';
+import { WaitingPhase } from './phases/WaitingPhase.js';
+import { SongPreviewPhase } from './phases/SongPreviewPhase.js';
+import { FinalShowcasePhase } from './phases/FinalShowcasePhase.js';
 
 export class MultiplayerGame {
     constructor() {
@@ -53,6 +56,27 @@ export class MultiplayerGame {
             this.audioEngine,
             this.canvasRenderer,
             this.inputController
+        );
+        this.waitingPhase = new WaitingPhase(
+            this.gameState,
+            this.uiManager,
+            this.multiplayerManager
+        );
+        this.songPreviewPhase = new SongPreviewPhase(
+            this.gameState,
+            this.uiManager,
+            this.audioEngine,
+            this.canvasRenderer,
+            this.inputController,
+            this.multiplayerManager
+        );
+        this.finalShowcasePhase = new FinalShowcasePhase(
+            this.gameState,
+            this.uiManager,
+            this.audioEngine,
+            this.canvasRenderer,
+            this.inputController,
+            this.multiplayerManager
         );
 
         this.currentPhase = null;
@@ -165,6 +189,13 @@ export class MultiplayerGame {
 
         this.multiplayerManager.onPhaseChange = (gameState) => {
             this.handlePhaseChange(gameState);
+        };
+
+        this.multiplayerManager.onWaitingUpdate = (gameState) => {
+            // Update waiting screen if we're currently in waiting phase
+            if (this.currentPhase === this.waitingPhase) {
+                this.currentPhase.updateWaitingUI(gameState);
+            }
         };
     }
 
@@ -402,6 +433,15 @@ export class MultiplayerGame {
             case 'editing':
                 this.startEditingPhase();
                 break;
+            case 'waiting-for-players':
+                this.startWaitingPhase();
+                break;
+            case 'song-preview':
+                this.startSongPreviewPhase();
+                break;
+            case 'final-showcase':
+                this.startFinalShowcasePhase();
+                break;
             case 'final':
                 this.startFinalPhase();
                 break;
@@ -444,11 +484,51 @@ export class MultiplayerGame {
         this.currentPhase = this.editingPhase;
 
         this.editingPhase.start(() => {
-            // Editing complete - submit song to server and go to final phase
-            console.log('Editing phase complete, submitting song and moving to final phase');
+            // Editing complete - submit song to server and go to waiting phase
+            console.log('Editing phase complete, submitting song and moving to waiting phase');
             this.submitSongToServer();
-            this.startFinalPhase();
+            this.startWaitingPhase();
         });
+    }
+
+    startWaitingPhase() {
+        // Clean up current phase
+        this.cleanupCurrentPhase();
+
+        // Start waiting phase
+        this.currentPhase = this.waitingPhase;
+
+        this.waitingPhase.start((gameState) => {
+            // Waiting complete - transition based on server response
+            this.handlePhaseChange(gameState);
+        });
+    }
+
+    startSongPreviewPhase() {
+        // Clean up current phase
+        this.cleanupCurrentPhase();
+
+        // Start song preview phase
+        this.currentPhase = this.songPreviewPhase;
+
+        this.songPreviewPhase.start(() => {
+            // Preview complete - go to performance phase
+            console.log('Song preview complete, moving to performance phase');
+            this.startPerformancePhase();
+        });
+    }
+
+    startFinalShowcasePhase() {
+        // Clean up current phase
+        this.cleanupCurrentPhase();
+
+        // Start final showcase phase
+        this.currentPhase = this.finalShowcasePhase;
+
+        this.finalShowcasePhase.start(
+            () => this.restartGame(),  // onRestart
+            () => this.exitToMenu()    // onExit
+        );
     }
 
     startFinalPhase() {
@@ -496,8 +576,15 @@ export class MultiplayerGame {
             };
         });
 
+        // Include selected sounds for first round (so next player knows what sounds to use)
+        const selectedSounds = this.gameState.selectedSounds.map(sound => ({
+            audio: sound.audio,
+            icon: sound.icon,
+            audioBuffer: null // Don't send the buffer, just the filenames
+        }));
+
         // Submit song data to server
-        this.multiplayerManager.submitSong(songData);
+        this.multiplayerManager.submitSong(songData, selectedSounds);
         console.log('Song submitted to server:', songData);
     }
 

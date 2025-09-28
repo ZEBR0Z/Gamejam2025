@@ -45,6 +45,9 @@ export class UIManager {
             selection: document.getElementById('selection'),
             performance: document.getElementById('performance'),
             editing: document.getElementById('editing'),
+            'waiting-for-players': document.getElementById('waiting-for-players'),
+            'song-preview': document.getElementById('song-preview'),
+            'final-showcase': document.getElementById('final-showcase'),
             final: document.getElementById('final')
         };
     }
@@ -96,6 +99,35 @@ export class UIManager {
             document.getElementById('editing-canvas-3')
         ];
         this.elements.finalCanvas = document.getElementById('final-canvas');
+
+        // Waiting for players elements
+        this.elements.waitingMessage = document.getElementById('waiting-message');
+        this.elements.currentRound = document.getElementById('current-round');
+        this.elements.totalRounds = document.getElementById('total-rounds');
+        this.elements.playersProgressContainer = document.getElementById('players-progress-container');
+
+        // Song preview elements
+        this.elements.previousPlayerName = document.getElementById('previous-player-name');
+        this.elements.previewCurrentRound = document.getElementById('preview-current-round');
+        this.elements.previewTotalRounds = document.getElementById('preview-total-rounds');
+        this.elements.previewCanvas = document.getElementById('preview-canvas');
+        this.elements.previewPlayPauseBtn = document.getElementById('preview-play-pause-btn');
+        this.elements.previewRestartBtn = document.getElementById('preview-restart-btn');
+        this.elements.previewProgressBar = document.getElementById('preview-progress-bar');
+        this.elements.previewTimeDisplay = document.getElementById('preview-time-display');
+        this.elements.continueToPerformanceBtn = document.getElementById('continue-to-performance-btn');
+
+        // Final showcase elements
+        this.elements.currentSongNumber = document.getElementById('current-song-number');
+        this.elements.totalSongs = document.getElementById('total-songs');
+        this.elements.songCreators = document.getElementById('song-creators');
+        this.elements.showcaseCanvas = document.getElementById('showcase-canvas');
+        this.elements.showcasePlayPauseBtn = document.getElementById('showcase-play-pause-btn');
+        this.elements.showcaseRestartBtn = document.getElementById('showcase-restart-btn');
+        this.elements.showcaseProgressBar = document.getElementById('showcase-progress-bar');
+        this.elements.showcaseTimeDisplay = document.getElementById('showcase-time-display');
+        this.elements.prevSongBtn = document.getElementById('prev-song-btn');
+        this.elements.nextSongBtn = document.getElementById('next-song-btn');
     }
 
     // Screen management
@@ -281,5 +313,104 @@ export class UIManager {
         document.querySelectorAll('.sound-option:not(.selected)').forEach(el => {
             el.classList.add('disabled');
         });
+    }
+
+    // Waiting for players screen methods
+    updateWaitingScreen(gameState) {
+        if (this.elements.currentRound) {
+            this.elements.currentRound.textContent = gameState.currentRound + 1;
+        }
+        if (this.elements.totalRounds) {
+            this.elements.totalRounds.textContent = gameState.maxRounds;
+        }
+
+        // Update players progress
+        if (this.elements.playersProgressContainer) {
+            this.elements.playersProgressContainer.innerHTML = '';
+
+            gameState.players.forEach(player => {
+                const playerItem = document.createElement('div');
+                playerItem.className = 'player-progress-item';
+
+                const playerName = document.createElement('span');
+                playerName.className = 'player-name';
+                playerName.textContent = player.name;
+
+                const playerStatus = document.createElement('span');
+                playerStatus.className = 'player-progress-status';
+
+                if (player.hasSubmitted) {
+                    playerStatus.textContent = 'Completed ✓';
+                    playerStatus.classList.add('completed');
+                } else {
+                    playerStatus.textContent = 'Working...';
+                    playerStatus.classList.add('working');
+                }
+
+                playerItem.appendChild(playerName);
+                playerItem.appendChild(playerStatus);
+                this.elements.playersProgressContainer.appendChild(playerItem);
+            });
+        }
+    }
+
+    // Song preview screen methods
+    updatePreviewScreen(gameState, previousPlayerName) {
+        if (this.elements.previousPlayerName) {
+            this.elements.previousPlayerName.textContent = previousPlayerName;
+        }
+        if (this.elements.previewCurrentRound) {
+            this.elements.previewCurrentRound.textContent = gameState.currentRound + 1;
+        }
+        if (this.elements.previewTotalRounds) {
+            this.elements.previewTotalRounds.textContent = gameState.maxRounds;
+        }
+    }
+
+    updatePreviewTransportControls(isPlaying, currentTime, totalTime) {
+        if (this.elements.previewPlayPauseBtn) {
+            this.elements.previewPlayPauseBtn.textContent = isPlaying ? '⏸️' : '▶️';
+        }
+        if (this.elements.previewProgressBar) {
+            this.elements.previewProgressBar.value = currentTime;
+            this.elements.previewProgressBar.max = totalTime;
+        }
+        if (this.elements.previewTimeDisplay) {
+            this.elements.previewTimeDisplay.textContent = `${currentTime.toFixed(1)} / ${totalTime.toFixed(1)}`;
+        }
+    }
+
+    // Final showcase screen methods
+    updateShowcaseScreen(currentSongIndex, totalSongs, songCreators) {
+        if (this.elements.currentSongNumber) {
+            this.elements.currentSongNumber.textContent = currentSongIndex + 1;
+        }
+        if (this.elements.totalSongs) {
+            this.elements.totalSongs.textContent = totalSongs;
+        }
+        if (this.elements.songCreators) {
+            this.elements.songCreators.textContent = songCreators.join(', ');
+        }
+
+        // Update navigation buttons
+        if (this.elements.prevSongBtn) {
+            this.elements.prevSongBtn.disabled = currentSongIndex === 0;
+        }
+        if (this.elements.nextSongBtn) {
+            this.elements.nextSongBtn.disabled = currentSongIndex === totalSongs - 1;
+        }
+    }
+
+    updateShowcaseTransportControls(isPlaying, currentTime, totalTime) {
+        if (this.elements.showcasePlayPauseBtn) {
+            this.elements.showcasePlayPauseBtn.textContent = isPlaying ? '⏸️' : '▶️';
+        }
+        if (this.elements.showcaseProgressBar) {
+            this.elements.showcaseProgressBar.value = currentTime;
+            this.elements.showcaseProgressBar.max = totalTime;
+        }
+        if (this.elements.showcaseTimeDisplay) {
+            this.elements.showcaseTimeDisplay.textContent = `${currentTime.toFixed(1)} / ${totalTime.toFixed(1)}`;
+        }
     }
 }

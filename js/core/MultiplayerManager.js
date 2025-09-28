@@ -19,6 +19,7 @@ export class MultiplayerManager {
         this.onSongSubmitted = null;
         this.onGameStarted = null;
         this.onAllPlayersReady = null;
+        this.onWaitingUpdate = null;
     }
 
     async connect(serverUrl = 'http://localhost:3000') {
@@ -122,6 +123,14 @@ export class MultiplayerManager {
                 this.onSongSubmitted(data.playerId, data.gameState);
             }
         });
+
+        this.socket.on('waitingUpdate', (data) => {
+            console.log('Waiting for players update');
+            this.gameState = data.gameState;
+            if (this.onWaitingUpdate) {
+                this.onWaitingUpdate(data.gameState);
+            }
+        });
     }
 
     async createLobby(playerName) {
@@ -170,10 +179,10 @@ export class MultiplayerManager {
         console.log('Completed sound selection');
     }
 
-    submitSong(songData) {
+    submitSong(songData, selectedSounds = null) {
         if (!this.isConnected || !this.lobbyCode) return;
 
-        this.socket.emit('submitSong', { songData });
+        this.socket.emit('submitSong', { songData, selectedSounds });
         console.log('Submitted song with', songData.length, 'sound events');
     }
 
@@ -189,6 +198,23 @@ export class MultiplayerManager {
                 resolve(response);
             });
         });
+    }
+
+    async getPreviousSong() {
+        if (!this.isConnected || !this.lobbyCode) return null;
+
+        return new Promise((resolve) => {
+            this.socket.emit('getPreviousSong', (response) => {
+                resolve(response);
+            });
+        });
+    }
+
+    continueToPerformance() {
+        if (!this.isConnected || !this.lobbyCode) return;
+
+        this.socket.emit('continueToPerformance');
+        console.log('Continuing to performance phase');
     }
 
     async getFinalSongs() {
