@@ -293,6 +293,7 @@ export class UIManager {
     }
 
     if (progressBar) {
+      progressBar.max = segmentLength;
       progressBar.value = currentTime;
     }
 

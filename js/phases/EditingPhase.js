@@ -417,6 +417,9 @@ export class EditingPhase {
 
     // Sync backing track
     this.audioEngine.seekBackingTrack(time);
+
+    // Redraw canvas to show new position
+    this.draw();
   }
 
   selectSound(soundIndex) {

@@ -387,6 +387,9 @@ export class PerformancePhase {
 
     // Sync backing track
     this.audioEngine.seekBackingTrack(time);
+
+    // Redraw canvas to show new position
+    this.draw();
   }
 
   complete() {
