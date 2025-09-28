@@ -327,12 +327,25 @@ export class Game {
 
   async createLobby() {
     console.log("createLobby method called");
+
+    // Disable the button to prevent multiple clicks
+    const createButton = document.getElementById("create-lobby-confirm-btn");
+    if (createButton) {
+      createButton.disabled = true;
+      createButton.textContent = "Creating...";
+    }
+
     console.log("playerName element:", this.uiManager.elements.playerName);
     const playerName = this.uiManager.elements.playerName?.value.trim();
     console.log("playerName value:", playerName);
     if (!playerName) {
       console.log("No player name provided");
       alert("Please enter your name");
+      // Re-enable button on error
+      if (createButton) {
+        createButton.disabled = false;
+        createButton.textContent = "Create Lobby";
+      }
       return;
     }
 
@@ -344,6 +357,11 @@ export class Game {
       if (!connected) {
         console.log("Failed to connect to server");
         alert("Failed to connect to server. Please try again.");
+        // Re-enable button on error
+        if (createButton) {
+          createButton.disabled = false;
+          createButton.textContent = "Create Lobby";
+        }
         return;
       }
       console.log("Successfully connected to server");
@@ -354,27 +372,55 @@ export class Game {
       if (response.success) {
         console.log("Lobby created successfully, showing lobby waiting screen");
         this.showLobbyWaiting(response.gameState);
+        // Button will be hidden when we switch screens, so no need to re-enable
       } else {
         console.log("Failed to create lobby:", response.error);
         alert(response.error || "Failed to create lobby");
+        // Re-enable button on error
+        if (createButton) {
+          createButton.disabled = false;
+          createButton.textContent = "Create Lobby";
+        }
       }
     } catch (error) {
       console.error("Error creating lobby:", error);
       alert("Failed to create lobby. Please try again.");
+      // Re-enable button on error
+      if (createButton) {
+        createButton.disabled = false;
+        createButton.textContent = "Create Lobby";
+      }
     }
   }
 
   async joinLobby() {
+    // Disable the button to prevent multiple clicks
+    const joinButton = document.getElementById("join-lobby-confirm-btn");
+    if (joinButton) {
+      joinButton.disabled = true;
+      joinButton.textContent = "Joining...";
+    }
+
     const playerName = this.uiManager.elements.joinPlayerName?.value.trim();
     const lobbyCode = this.uiManager.elements.lobbyCodeInput?.value.trim();
 
     if (!playerName) {
       alert("Please enter your name");
+      // Re-enable button on error
+      if (joinButton) {
+        joinButton.disabled = false;
+        joinButton.textContent = "Join Lobby";
+      }
       return;
     }
 
     if (!lobbyCode || lobbyCode.length !== 6) {
       alert("Please enter a valid 6-character lobby code");
+      // Re-enable button on error
+      if (joinButton) {
+        joinButton.disabled = false;
+        joinButton.textContent = "Join Lobby";
+      }
       return;
     }
 
@@ -383,6 +429,11 @@ export class Game {
       const connected = await this.multiplayerManager.connect(this.serverUrl);
       if (!connected) {
         alert("Failed to connect to server. Please try again.");
+        // Re-enable button on error
+        if (joinButton) {
+          joinButton.disabled = false;
+          joinButton.textContent = "Join Lobby";
+        }
         return;
       }
 
@@ -393,12 +444,23 @@ export class Game {
       );
       if (response.success) {
         this.showLobbyWaiting(response.gameState);
+        // Button will be hidden when we switch screens, so no need to re-enable
       } else {
         alert(response.error || "Failed to join lobby");
+        // Re-enable button on error
+        if (joinButton) {
+          joinButton.disabled = false;
+          joinButton.textContent = "Join Lobby";
+        }
       }
     } catch (error) {
       console.error("Error joining lobby:", error);
       alert("Failed to join lobby. Please try again.");
+      // Re-enable button on error
+      if (joinButton) {
+        joinButton.disabled = false;
+        joinButton.textContent = "Join Lobby";
+      }
     }
   }
 
