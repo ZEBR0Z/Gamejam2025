@@ -92,6 +92,17 @@ export class GameState {
     return true;
   }
 
+  removeSelectedSound(originalIndex) {
+    const index = this.selectedSounds.findIndex(
+      (sound) => sound.originalIndex === originalIndex
+    );
+    if (index !== -1) {
+      this.selectedSounds.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
+
   clearSelectedSounds() {
     this.selectedSounds = [];
   }

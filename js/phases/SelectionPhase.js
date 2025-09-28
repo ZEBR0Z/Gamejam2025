@@ -70,29 +70,42 @@ export class SelectionPhase {
   }
 
   async selectSound(index) {
-    if (this.gameState.selectedSounds.length >= 3) return;
-
     const soundOption = document.querySelector(`[data-index="${index}"]`);
-    if (!soundOption || soundOption.classList.contains("selected")) return;
+    if (!soundOption) return;
 
     try {
       const soundData = this.gameState.availableSounds[index];
 
-      // Add to selected sounds (no need to load audio buffer yet)
-      const success = this.gameState.addSelectedSound(soundData, index);
+      // Check if sound is already selected
+      if (soundOption.classList.contains("selected")) {
+        // Unselect the sound
+        const success = this.gameState.removeSelectedSound(index);
+        if (success) {
+          soundOption.classList.remove("selected");
+          this.updateUI();
 
-      if (success) {
-        // Update UI
-        soundOption.classList.add("selected");
-        this.updateUI();
+          // Re-enable all sounds since we're no longer at the limit
+          this.uiManager.enableAllSounds();
+        }
+      } else {
+        // Select the sound (if we haven't reached the limit)
+        if (this.gameState.selectedSounds.length >= 3) return;
 
-        if (this.gameState.selectedSounds.length === 3) {
-          this.uiManager.updateContinueButton(true);
-          this.uiManager.disableNonSelectedSounds();
+        const success = this.gameState.addSelectedSound(soundData, index);
+
+        if (success) {
+          // Update UI
+          soundOption.classList.add("selected");
+          this.updateUI();
+
+          if (this.gameState.selectedSounds.length === 3) {
+            this.uiManager.updateContinueButton(true);
+            this.uiManager.disableNonSelectedSounds();
+          }
         }
       }
     } catch (error) {
-      console.error("Failed to select sound:", error);
+      console.error("Failed to select/unselect sound:", error);
     }
   }
 

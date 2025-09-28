@@ -111,25 +111,44 @@ export class SoundReplacementPhase {
   }
 
   async selectReplacement(index) {
-    if (this.selectedReplacementIndex !== -1) return; // Already selected
-
     const soundOption = document.querySelector(
       `[data-replacement-index="${index}"]`,
     );
     if (!soundOption) return;
 
     try {
-      this.selectedReplacementIndex = index;
+      // Check if this replacement is already selected
+      if (this.selectedReplacementIndex === index) {
+        // Unselect the replacement
+        this.selectedReplacementIndex = -1;
+        soundOption.classList.remove("selected");
+        this.updateUI();
 
-      // Update UI
-      soundOption.classList.add("selected");
-      this.updateUI();
+        // Disable continue button and re-enable all replacements
+        this.uiManager.updateReplacementContinueButton(false);
+        this.uiManager.enableAllReplacements();
+      } else {
+        // First, clear any previous selection
+        if (this.selectedReplacementIndex !== -1) {
+          const previousOption = document.querySelector(
+            `[data-replacement-index="${this.selectedReplacementIndex}"]`,
+          );
+          if (previousOption) {
+            previousOption.classList.remove("selected");
+          }
+        }
 
-      // Enable continue button
-      this.uiManager.updateReplacementContinueButton(true);
-      this.uiManager.disableNonSelectedReplacements();
+        // Select this replacement
+        this.selectedReplacementIndex = index;
+        soundOption.classList.add("selected");
+        this.updateUI();
+
+        // Enable continue button
+        this.uiManager.updateReplacementContinueButton(true);
+        this.uiManager.disableNonSelectedReplacements();
+      }
     } catch (error) {
-      console.error("Failed to select replacement sound:", error);
+      console.error("Failed to select/unselect replacement sound:", error);
     }
   }
 

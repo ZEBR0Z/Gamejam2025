@@ -108,6 +108,19 @@ export class EditingPhase {
     // Draw the editing view immediately when starting
     this.draw();
 
+    // Auto-start playback after countdown (like performance phase)
+    this.gameState.setPlaybackState(true, 0, this.audioEngine.getCurrentTime());
+    this.uiManager.updateTransportControls(
+      "editing",
+      true,
+      0,
+      this.gameState.config.segmentLength,
+    );
+
+    // Start scheduling and animation
+    this.startScheduling();
+    this.startAnimation();
+
     // Start editing countdown
     this.timer.startEditingTimer(() => this.complete());
   }

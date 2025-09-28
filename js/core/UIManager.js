@@ -383,6 +383,12 @@ export class UIManager {
     });
   }
 
+  enableAllSounds() {
+    document.querySelectorAll(".sound-option").forEach((el) => {
+      el.classList.remove("disabled");
+    });
+  }
+
   // Waiting for players screen methods
   updateWaitingScreen(gameState) {
     if (this.elements.currentRound) {
@@ -531,6 +537,19 @@ export class UIManager {
     const status = this.getElement("replacementStatus");
     if (status) {
       status.textContent = "Replacement selected!";
+    }
+  }
+
+  enableAllReplacements() {
+    const options = document.querySelectorAll(".replacement-option");
+    options.forEach((option) => {
+      option.style.opacity = "";
+      option.style.pointerEvents = "";
+    });
+
+    const status = this.getElement("replacementStatus");
+    if (status) {
+      status.textContent = "Choose a replacement sound:";
     }
   }
 }
