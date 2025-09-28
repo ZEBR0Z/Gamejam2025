@@ -490,7 +490,8 @@ canvas {
 }
 
 .pause-play-btn {
-  background: url("./assets/art/pauseButton.png") no-repeat center center;
+  background-image: url("./assets/art/pauseButton.png") no-repeat center center;
+
   aspect-ratio: 1 / 1;
   width: 32px;
   border: none;
@@ -498,7 +499,7 @@ canvas {
 }
 
 .rewind-btn {
-  background: url("./assets/art/rewind.png") no-repeat center center;
+  background-image: url("./assets/art/rewind.png") no-repeat center center;
   aspect-ratio: 1 / 1;
   width: 32px;
   border: none;
