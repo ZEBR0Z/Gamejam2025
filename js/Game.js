@@ -76,7 +76,7 @@ export class Game {
       this.uiManager,
       this.multiplayerManager,
     );
-    this.songPreviewPhase = new PreviewPhase(
+    this.previewPhase = new PreviewPhase(
       this.gameState,
       this.uiManager,
       this.audioEngine,
@@ -84,7 +84,7 @@ export class Game {
       this.inputController,
       this.multiplayerManager,
     );
-    this.finalShowcasePhase = new ShowcasePhase(
+    this.showcasePhase = new ShowcasePhase(
       this.gameState,
       this.uiManager,
       this.audioEngine,
@@ -106,8 +106,8 @@ export class Game {
     this.phaseManager.registerPhase("performance", this.performancePhase);
     this.phaseManager.registerPhase("editing", this.editingPhase);
     this.phaseManager.registerPhase("waiting-for-players", this.waitingPhase);
-    this.phaseManager.registerPhase("preview", this.songPreviewPhase);
-    this.phaseManager.registerPhase("showcase", this.finalShowcasePhase);
+    this.phaseManager.registerPhase("preview", this.previewPhase);
+    this.phaseManager.registerPhase("showcase", this.showcasePhase);
 
     // Set up phase transition callback
     this.phaseManager.onTransition = (phaseName, phaseInstance) => {
