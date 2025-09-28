@@ -77,6 +77,7 @@ export class Game {
     this.waitingPhase = new WaitingPhase(
       this.gameState,
       this.uiManager,
+      this.audioEngine,
       this.multiplayerManager,
     );
     this.previewPhase = new PreviewPhase(
