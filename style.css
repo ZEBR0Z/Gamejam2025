@@ -376,7 +376,7 @@ input, button, textarea {
 }
 
 .key {
-  background: #333;
+  background-color: transparent;
   color: #fff;
   width: 40px;
   height: 40px;
@@ -388,10 +388,31 @@ input, button, textarea {
 }
 
 .sound-icon {
+  position: relative;
+  display: inline-block;
   width: 60px;
   height: 60px;
   object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.bg-image, 
+.over-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none
+}
+
+.over-img {
+  z-index: 1;
+}
+.bg-image {
+  overflow: hidden;
+  border-radius: 50%;
+  z-index: 0;
 }
 
 /* Timeline and Canvas */
