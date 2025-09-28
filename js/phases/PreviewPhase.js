@@ -336,6 +336,9 @@ export class PreviewPhase {
       time,
       totalTime,
     );
+
+    // Redraw canvas to show new position
+    this.draw();
   }
 
   startPhaseTimer() {
