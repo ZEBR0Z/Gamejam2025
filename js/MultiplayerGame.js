@@ -127,8 +127,8 @@ export class MultiplayerGame {
         this.uiManager.screens.lobbyWaiting = document.getElementById('lobby-waiting');
 
         // Initialize multiplayer elements
-        this.uiManager.elements.hostName = document.getElementById('host-name');
         this.uiManager.elements.playerName = document.getElementById('player-name');
+        this.uiManager.elements.joinPlayerName = document.getElementById('join-player-name');
         this.uiManager.elements.lobbyCodeInput = document.getElementById('lobby-code');
         this.uiManager.elements.lobbyCodeDisplay = document.getElementById('lobby-code-display');
         this.uiManager.elements.shareableCode = document.getElementById('shareable-code');
@@ -217,23 +217,23 @@ export class MultiplayerGame {
 
     showCreateLobby() {
         this.uiManager.showScreen('create-lobby');
-        const hostNameInput = this.uiManager.elements.hostName;
-        if (hostNameInput) {
-            hostNameInput.focus();
-        }
-    }
-
-    showJoinLobby() {
-        this.uiManager.showScreen('join-lobby');
         const playerNameInput = this.uiManager.elements.playerName;
         if (playerNameInput) {
             playerNameInput.focus();
         }
     }
 
+    showJoinLobby() {
+        this.uiManager.showScreen('join-lobby');
+        const playerNameInput = this.uiManager.elements.joinPlayerName;
+        if (playerNameInput) {
+            playerNameInput.focus();
+        }
+    }
+
     async createLobby() {
-        const hostName = this.uiManager.elements.hostName?.value.trim();
-        if (!hostName) {
+        const playerName = this.uiManager.elements.playerName?.value.trim();
+        if (!playerName) {
             alert('Please enter your name');
             return;
         }
@@ -247,7 +247,7 @@ export class MultiplayerGame {
             }
 
             // Create lobby
-            const response = await this.multiplayerManager.createLobby(hostName);
+            const response = await this.multiplayerManager.createLobby(playerName);
             if (response.success) {
                 this.showLobbyWaiting(response.gameState);
             } else {
@@ -260,7 +260,7 @@ export class MultiplayerGame {
     }
 
     async joinLobby() {
-        const playerName = this.uiManager.elements.playerName?.value.trim();
+        const playerName = this.uiManager.elements.joinPlayerName?.value.trim();
         const lobbyCode = this.uiManager.elements.lobbyCodeInput?.value.trim();
 
         if (!playerName) {
@@ -331,10 +331,7 @@ export class MultiplayerGame {
                 const playerStatus = document.createElement('span');
                 playerStatus.className = 'player-status';
 
-                if (player.isHost) {
-                    playerStatus.textContent = 'Host';
-                    playerStatus.classList.add('host');
-                } else if (player.isReady) {
+                if (player.isReady) {
                     playerStatus.textContent = 'Ready';
                     playerStatus.classList.add('ready');
                 } else {

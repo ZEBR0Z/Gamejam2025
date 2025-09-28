@@ -25,8 +25,8 @@
         <div class="lobby-container">
             <h2>Create Lobby</h2>
             <div class="form-group">
-                <label for="host-name">Your Name:</label>
-                <input type="text" id="host-name" placeholder="Enter your name" maxlength="20">
+                <label for="player-name">Your Name:</label>
+                <input type="text" id="player-name" placeholder="Enter your name" maxlength="20">
             </div>
             <div class="lobby-buttons">
                 <button id="back-to-menu-btn" class="secondary-button">Back</button>
@@ -40,8 +40,8 @@
         <div class="lobby-container">
             <h2>Join Lobby</h2>
             <div class="form-group">
-                <label for="player-name">Your Name:</label>
-                <input type="text" id="player-name" placeholder="Enter your name" maxlength="20">
+                <label for="join-player-name">Your Name:</label>
+                <input type="text" id="join-player-name" placeholder="Enter your name" maxlength="20">
             </div>
             <div class="form-group">
                 <label for="lobby-code">Lobby Code:</label>
@@ -210,18 +210,12 @@
         <div class="waiting-container">
             <h2>Waiting for Everyone to Finish...</h2>
             <div class="waiting-info">
-                <p id="waiting-message">Please wait while other players complete their parts.</p>
+                <p id="waiting-message">Waiting for people to finish...</p>
                 <div class="round-info">
                     <span>Round <span id="current-round">1</span> of <span id="total-rounds">3</span></span>
                 </div>
             </div>
 
-            <div class="players-progress">
-                <h3>Player Progress:</h3>
-                <div id="players-progress-container">
-                    <!-- Player progress will be populated here -->
-                </div>
-            </div>
 
             <div class="loading-spinner">
                 <div class="spinner"></div>

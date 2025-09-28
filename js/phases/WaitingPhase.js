@@ -1,6 +1,6 @@
 /**
  * WaitingPhase - Handles the waiting for players phase
- * Shows progress of all players and waits for everyone to submit their songs
+ * Shows a simple waiting screen while everyone completes their songs
  */
 export class WaitingPhase {
     constructor(gameState, uiManager, multiplayerManager) {

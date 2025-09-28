@@ -104,7 +104,6 @@ export class UIManager {
         this.elements.waitingMessage = document.getElementById('waiting-message');
         this.elements.currentRound = document.getElementById('current-round');
         this.elements.totalRounds = document.getElementById('total-rounds');
-        this.elements.playersProgressContainer = document.getElementById('players-progress-container');
 
         // Song preview elements
         this.elements.previousPlayerName = document.getElementById('previous-player-name');
@@ -323,35 +322,7 @@ export class UIManager {
         if (this.elements.totalRounds) {
             this.elements.totalRounds.textContent = gameState.maxRounds;
         }
-
-        // Update players progress
-        if (this.elements.playersProgressContainer) {
-            this.elements.playersProgressContainer.innerHTML = '';
-
-            gameState.players.forEach(player => {
-                const playerItem = document.createElement('div');
-                playerItem.className = 'player-progress-item';
-
-                const playerName = document.createElement('span');
-                playerName.className = 'player-name';
-                playerName.textContent = player.name;
-
-                const playerStatus = document.createElement('span');
-                playerStatus.className = 'player-progress-status';
-
-                if (player.hasSubmitted) {
-                    playerStatus.textContent = 'Completed ✓';
-                    playerStatus.classList.add('completed');
-                } else {
-                    playerStatus.textContent = 'Working...';
-                    playerStatus.classList.add('working');
-                }
-
-                playerItem.appendChild(playerName);
-                playerItem.appendChild(playerStatus);
-                this.elements.playersProgressContainer.appendChild(playerItem);
-            });
-        }
+        // Simple waiting screen - no individual player progress shown
     }
 
     // Song preview screen methods

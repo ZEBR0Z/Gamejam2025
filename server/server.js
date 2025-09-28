@@ -66,9 +66,8 @@ function generatePlayerId() {
  * - Songs rotate between players each round (Gartic Phone style)
  */
 class Lobby {
-  constructor(code, hostSocketId) {
+  constructor(code) {
     this.code = code;
-    this.hostSocketId = hostSocketId;
     this.players = new Map(); // playerId -> player object
     this.state = 'waiting'; // waiting, selection, performance, editing, waiting-for-players, song-preview, final-showcase
     this.currentRound = 0;
@@ -87,8 +86,7 @@ class Lobby {
       id: playerId,
       socketId: socketId,
       name: playerName,
-      isReady: false,
-      isHost: socketId === this.hostSocketId
+      isReady: false
     };
 
     this.players.set(playerId, player);
@@ -101,13 +99,6 @@ class Lobby {
     if (playerId) {
       this.players.delete(playerId);
       playerSockets.delete(socketId);
-
-      // If host left, assign new host
-      if (socketId === this.hostSocketId && this.players.size > 0) {
-        const newHost = this.players.values().next().value;
-        this.hostSocketId = newHost.socketId;
-        newHost.isHost = true;
-      }
     }
     return playerId;
   }
@@ -396,7 +387,6 @@ class Lobby {
         id: p.id,
         name: p.name,
         isReady: p.isReady,
-        isHost: p.isHost,
         hasSubmitted: this.roundSubmissions.get(p.id) || false
       })),
       availableSounds: this.availableSounds,
@@ -440,7 +430,7 @@ class Lobby {
  * SOCKET.IO EVENT HANDLERS
  *
  * Main events:
- * - createLobby: Host creates a new game lobby
+ * - createLobby: Creates a new game lobby
  * - joinLobby: Player joins existing lobby
  * - playerReady: Player indicates ready to start
  * - submitSong: Player submits completed song segment
@@ -453,7 +443,7 @@ io.on('connection', (socket) => {
   socket.on('createLobby', (data, callback) => {
     const { playerName } = data;
     const code = generateLobbyCode();
-    const lobby = new Lobby(code, socket.id);
+    const lobby = new Lobby(code);
 
     lobbies.set(code, lobby);
     const player = lobby.addPlayer(socket.id, playerName);
@@ -502,7 +492,6 @@ io.on('connection', (socket) => {
         id: player.id,
         name: player.name,
         isReady: player.isReady,
-        isHost: player.isHost
       },
       gameState: gameState
     });

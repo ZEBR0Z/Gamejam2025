@@ -260,9 +260,4 @@ export class MultiplayerManager {
         return this.isConnected && this.lobbyCode && this.playerId;
     }
 
-    isHost() {
-        if (!this.gameState || !this.playerId) return false;
-        const player = this.gameState.players.find(p => p.id === this.playerId);
-        return player ? player.isHost : false;
-    }
 }
