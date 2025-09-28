@@ -94,7 +94,7 @@ export class GameState {
 
   removeSelectedSound(originalIndex) {
     const index = this.selectedSounds.findIndex(
-      (sound) => sound.originalIndex === originalIndex
+      (sound) => sound.originalIndex === originalIndex,
     );
     if (index !== -1) {
       this.selectedSounds.splice(index, 1);

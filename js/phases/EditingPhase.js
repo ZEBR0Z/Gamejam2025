@@ -136,6 +136,7 @@ export class EditingPhase {
       canvas,
       this.gameState.config.segmentLength,
       canvasIndex, // Only events for this sound
+      this.gameState.playback.currentTime, // currentTime for viewport calculation
     );
 
     if (clickedEvent) {

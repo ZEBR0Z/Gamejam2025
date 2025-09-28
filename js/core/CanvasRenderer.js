@@ -8,6 +8,11 @@ export class CanvasRenderer {
     this.semitoneHeight = 25;
     this.iconCache = new Map(); // Cache for loaded icons
     this.colorCache = new Map(); // Cache for generated colors
+
+    // Scrollable timeline properties
+    this.pixelsPerSecond = 200; // How many pixels per second of audio
+    this.viewportOffset = 0; // Current scroll position in seconds
+    this.autoScrollEnabled = true; // Whether to auto-scroll with playhead
   }
 
   // Generate a simple hash from a string
@@ -148,7 +153,45 @@ export class CanvasRenderer {
     return false; // Did not draw icon
   }
 
-  // Timeline rendering (Performance phase)
+  // Calculate viewport parameters for scrollable timeline
+  calculateViewport(currentTime, segmentLength, canvasWidth) {
+    const viewportDuration = canvasWidth / this.pixelsPerSecond;
+
+    if (this.autoScrollEnabled) {
+      // Auto-scroll logic: start scrolling when playhead passes halfway across screen
+      const halfViewport = viewportDuration / 2;
+
+      if (currentTime > halfViewport) {
+        // Keep playhead at center of screen once scrolling starts
+        this.viewportOffset = currentTime - halfViewport;
+      } else {
+        // Show from beginning until playhead reaches center
+        this.viewportOffset = 0;
+      }
+
+      // Don't scroll past the end
+      const maxOffset = Math.max(0, segmentLength - viewportDuration);
+      this.viewportOffset = Math.min(this.viewportOffset, maxOffset);
+    }
+
+    return {
+      startTime: this.viewportOffset,
+      endTime: this.viewportOffset + viewportDuration,
+      viewportDuration,
+    };
+  }
+
+  // Convert time to screen X coordinate
+  timeToX(time, viewport) {
+    return (time - viewport.startTime) * this.pixelsPerSecond;
+  }
+
+  // Convert screen X coordinate to time
+  xToTime(x, viewport) {
+    return viewport.startTime + x / this.pixelsPerSecond;
+  }
+
+  // Timeline rendering (Performance phase) - now with scrolling support
   drawTimeline(
     canvas,
     events,
@@ -161,6 +204,9 @@ export class CanvasRenderer {
 
     const width = canvas.width;
     const height = canvas.height;
+
+    // Calculate viewport for scrolling
+    const viewport = this.calculateViewport(currentTime, segmentLength, width);
 
     // Clear canvas
     ctx.clearRect(0, 0, width, height);
@@ -183,34 +229,43 @@ export class CanvasRenderer {
       ctx.stroke();
     }
 
-    // Draw time grid
-    this.drawTimeGrid(ctx, width, height, segmentLength);
+    // Draw time grid for viewport
+    this.drawScrollableTimeGrid(ctx, width, height, viewport);
 
     // Draw track labels
     this.drawTrackLabels(ctx, trackHeight);
 
-    // Draw events on their respective tracks
+    // Draw events that are visible in the current viewport
     events.forEach((event) => {
-      const x = (event.startTimeSec / segmentLength) * width;
-      const trackY = event.soundIndex * trackHeight + trackHeight / 2;
+      if (
+        event.startTimeSec >= viewport.startTime &&
+        event.startTimeSec <= viewport.endTime
+      ) {
+        const x = this.timeToX(event.startTimeSec, viewport);
+        const trackY = event.soundIndex * trackHeight + trackHeight / 2;
 
-      // Draw event marker with icon
-      this.drawNoteWithIcon(
-        ctx,
-        x,
-        trackY,
-        8,
-        event,
-        selectedSounds,
-        event.soundIndex + 1,
-      );
+        // Draw event marker with icon
+        this.drawNoteWithIcon(
+          ctx,
+          x,
+          trackY,
+          8,
+          event,
+          selectedSounds,
+          event.soundIndex + 1,
+        );
+
+        // Store display coordinates for interaction
+        event.displayX = x;
+        event.displayY = trackY;
+      }
     });
 
     // Draw playhead
-    this.drawPlayhead(ctx, currentTime, segmentLength, width, height);
+    this.drawScrollablePlayhead(ctx, currentTime, viewport, width, height);
   }
 
-  // Editing view rendering (individual sound tracks)
+  // Editing view rendering (individual sound tracks) - now with scrolling support
   drawEditingTrack(
     canvas,
     events,
@@ -226,6 +281,9 @@ export class CanvasRenderer {
     const width = canvas.width;
     const height = canvas.height;
 
+    // Calculate viewport for scrolling
+    const viewport = this.calculateViewport(currentTime, segmentLength, width);
+
     // Clear canvas
     ctx.clearRect(0, 0, width, height);
 
@@ -233,19 +291,22 @@ export class CanvasRenderer {
     ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
     ctx.fillRect(0, 0, width, height);
 
-    // Draw time grid
-    this.drawTimeGrid(ctx, width, height, segmentLength);
+    // Draw time grid for viewport
+    this.drawScrollableTimeGrid(ctx, width, height, viewport);
 
     // Draw pitch grid
     this.drawPitchGrid(ctx, width, height);
 
-    // Draw events for this sound type only
+    // Draw events for this sound type only that are visible in viewport
     const soundEvents = events.filter(
-      (event) => event.soundIndex === soundIndex,
+      (event) =>
+        event.soundIndex === soundIndex &&
+        event.startTimeSec >= viewport.startTime &&
+        event.startTimeSec <= viewport.endTime,
     );
 
     soundEvents.forEach((event) => {
-      const x = (event.startTimeSec / segmentLength) * width;
+      const x = this.timeToX(event.startTimeSec, viewport);
       const centerY = height / 2;
       const y = centerY - event.pitchSemitones * this.semitoneHeight;
 
@@ -268,17 +329,20 @@ export class CanvasRenderer {
 
     // Draw playhead if playing
     if (isPlaying) {
-      this.drawPlayhead(ctx, currentTime, segmentLength, width, height);
+      this.drawScrollablePlayhead(ctx, currentTime, viewport, width, height);
     }
   }
 
-  // Final view rendering (combined timeline)
+  // Final view rendering (combined timeline) - now with scrolling support
   drawFinalView(canvas, events, currentTime, totalTime) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const width = canvas.width;
     const height = canvas.height;
+
+    // Calculate viewport for scrolling (use totalTime as segmentLength)
+    const viewport = this.calculateViewport(currentTime, totalTime, width);
 
     // Clear canvas
     ctx.clearRect(0, 0, width, height);
@@ -287,29 +351,34 @@ export class CanvasRenderer {
     ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
     ctx.fillRect(0, 0, width, height);
 
-    // Draw time grid for the full timeline
-    this.drawTimeGrid(ctx, width, height, totalTime);
+    // Draw time grid for viewport
+    this.drawScrollableTimeGrid(ctx, width, height, viewport);
 
-    // Draw events
+    // Draw events that are visible in the current viewport
     events.forEach((event) => {
-      const x = (event.startTimeSec / totalTime) * width;
-      const centerY = height / 2;
-      const y = centerY - event.pitchSemitones * 5; // Visual offset for pitch
+      if (
+        event.startTimeSec >= viewport.startTime &&
+        event.startTimeSec <= viewport.endTime
+      ) {
+        const x = this.timeToX(event.startTimeSec, viewport);
+        const centerY = height / 2;
+        const y = centerY - event.pitchSemitones * 5; // Visual offset for pitch
 
-      // Draw event with icon (events already have icon property from server)
-      this.drawNoteWithIcon(
-        ctx,
-        x,
-        y,
-        10,
-        event,
-        null, // No selectedSounds needed as events have direct icon property
-        event.soundIndex + 1,
-      );
+        // Draw event with icon (events already have icon property from server)
+        this.drawNoteWithIcon(
+          ctx,
+          x,
+          y,
+          10,
+          event,
+          null, // No selectedSounds needed as events have direct icon property
+          event.soundIndex + 1,
+        );
+      }
     });
 
     // Draw playhead
-    this.drawPlayhead(ctx, currentTime, totalTime, width, height);
+    this.drawScrollablePlayhead(ctx, currentTime, viewport, width, height);
   }
 
   // Helper methods
@@ -324,6 +393,32 @@ export class CanvasRenderer {
       ctx.moveTo(x, 0);
       ctx.lineTo(x, height);
       ctx.stroke();
+    }
+  }
+
+  // Scrollable time grid for viewport-based timeline
+  drawScrollableTimeGrid(ctx, width, height, viewport) {
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+    ctx.lineWidth = 1;
+
+    // Draw grid lines at second intervals
+    const startSecond = Math.floor(viewport.startTime);
+    const endSecond = Math.ceil(viewport.endTime);
+
+    for (let i = startSecond; i <= endSecond; i++) {
+      const x = this.timeToX(i, viewport);
+      if (x >= 0 && x <= width) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+
+        // Draw time labels
+        ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+        ctx.font = "10px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(`${i}s`, x, 15);
+      }
     }
   }
 
@@ -373,7 +468,31 @@ export class CanvasRenderer {
     ctx.stroke();
   }
 
-  // Interaction helpers
+  // Scrollable playhead for viewport-based timeline
+  drawScrollablePlayhead(ctx, currentTime, viewport, width, height) {
+    const playheadX = this.timeToX(currentTime, viewport);
+
+    // Only draw playhead if it's visible in the current viewport
+    if (playheadX >= 0 && playheadX <= width) {
+      ctx.strokeStyle = "#ff4757";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(playheadX, 0);
+      ctx.lineTo(playheadX, height);
+      ctx.stroke();
+
+      // Add a triangular playhead indicator at the top
+      ctx.fillStyle = "#ff4757";
+      ctx.beginPath();
+      ctx.moveTo(playheadX - 6, 0);
+      ctx.lineTo(playheadX + 6, 0);
+      ctx.lineTo(playheadX, 12);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  // Interaction helpers - updated for scrollable timeline
   getEventAtPosition(
     events,
     mouseX,
@@ -381,11 +500,15 @@ export class CanvasRenderer {
     canvas,
     segmentLength,
     soundIndex = null,
+    currentTime = 0,
   ) {
     if (!canvas) return null;
 
     const width = canvas.width;
     const height = canvas.height;
+
+    // Calculate viewport for scrollable timeline
+    const viewport = this.calculateViewport(currentTime, segmentLength, width);
 
     // Find events near the click position
     const candidateEvents = events.filter((event) => {
@@ -393,10 +516,18 @@ export class CanvasRenderer {
         return false;
       }
 
-      // Check if event has display coordinates
+      // Only consider events visible in current viewport
+      if (
+        event.startTimeSec < viewport.startTime ||
+        event.startTimeSec > viewport.endTime
+      ) {
+        return false;
+      }
+
+      // Check if event has display coordinates, otherwise calculate them
       if (!event.displayX || !event.displayY) {
-        // Calculate coordinates if not available
-        const x = (event.startTimeSec / segmentLength) * width;
+        // Calculate coordinates using viewport
+        const x = this.timeToX(event.startTimeSec, viewport);
         let y;
 
         if (soundIndex !== null) {
@@ -438,6 +569,18 @@ export class CanvasRenderer {
     });
   }
 
+  // Add method to convert mouse position to time in scrollable timeline
+  getTimeAtPosition(mouseX, canvas, segmentLength, currentTime = 0) {
+    if (!canvas) return 0;
+
+    const viewport = this.calculateViewport(
+      currentTime,
+      segmentLength,
+      canvas.width,
+    );
+    return this.xToTime(mouseX, viewport);
+  }
+
   // Calculate pitch change from mouse movement
   calculatePitchChange(deltaY) {
     return Math.round(deltaY / this.semitoneHeight);
@@ -446,5 +589,26 @@ export class CanvasRenderer {
   // Constrain pitch to valid range
   constrainPitch(pitch, min = -12, max = 12) {
     return Math.max(min, Math.min(max, pitch));
+  }
+
+  // Manual scrolling controls
+  setAutoScroll(enabled) {
+    this.autoScrollEnabled = enabled;
+  }
+
+  scrollToTime(time) {
+    this.autoScrollEnabled = false;
+    this.viewportOffset = time;
+  }
+
+  scrollBy(deltaTime) {
+    this.autoScrollEnabled = false;
+    this.viewportOffset += deltaTime;
+    this.viewportOffset = Math.max(0, this.viewportOffset);
+  }
+
+  resetScroll() {
+    this.viewportOffset = 0;
+    this.autoScrollEnabled = true;
   }
 }

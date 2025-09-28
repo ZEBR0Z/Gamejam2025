@@ -262,6 +262,8 @@ export class PerformancePhase {
       mouseY,
       canvas,
       this.gameState.config.segmentLength,
+      null, // soundIndex (null for main timeline)
+      this.gameState.playback.currentTime, // currentTime for viewport calculation
     );
 
     if (clickedEvent) {
