@@ -14,7 +14,7 @@ Players take turns adding to each other's musical creations, similar to the draw
    - **Performance Phase**: Record 8-second music segments (90 seconds)
    - **Editing Phase**: Adjust pitch and timing of recorded notes (60 seconds)
    - **Waiting Phase**: Wait for all players to complete their segments
-   - **Preview Phase**: Listen to previous player's work (rounds 2+)
+   - **Preview Phase**: Listen to previous player's work (rounds 2+) (this shows only the past 1 segment, not all previous segments)
 4. **Final Showcase**: Play all completed collaborative songs
 
 ### Example with 3 Players
