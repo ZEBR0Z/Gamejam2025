@@ -30,6 +30,8 @@ export class ShowcasePhase {
     this.finalSongs = [];
     this.currentSongIndex = 0;
     this.currentSongEvents = [];
+    this.isSequentialMode = true;
+    this.hasPlayedAllSongs = false;
   }
 
   async start(onRestart, onExit) {
@@ -72,20 +74,19 @@ export class ShowcasePhase {
   }
 
   setupEventHandlers() {
-    // Transport controls
+    // Transport controls - only enabled in navigation mode
     const transportHandlers = {
-      "showcase-play-pause-btn": () => this.togglePlayback(),
-      "showcase-restart-btn": () => this.restart(),
-      "showcase-progress-bar": (value) => this.seekTo(value),
+      "showcase-play-pause-btn": () => !this.isSequentialMode && this.togglePlayback(),
+      "showcase-restart-btn": () => !this.isSequentialMode && this.restart(),
+      "showcase-progress-bar": (value) => !this.isSequentialMode && this.seekTo(value),
     };
 
     this.inputController.setupTransportEvents(transportHandlers);
 
     // Navigation and exit buttons
     const buttonHandlers = {
-      "prev-song-btn": () => this.previousSong(),
-      "next-song-btn": () => this.nextSong(),
-      "showcase-restart-game-btn": () => this.restartGame(),
+      "prev-song-btn": () => !this.isSequentialMode && this.previousSong(),
+      "next-song-btn": () => !this.isSequentialMode && this.nextSong(),
       "showcase-exit-btn": () => this.exitToMenu(),
     };
 
@@ -107,6 +108,7 @@ export class ShowcasePhase {
       songIndex,
       this.finalSongs.length,
       creators,
+      this.isSequentialMode,
     );
 
     // Calculate total time for this song
@@ -115,7 +117,7 @@ export class ShowcasePhase {
 
     // Reset playback and start
     this.gameState.setPlaybackState(true, 0, this.audioEngine.getCurrentTime());
-    this.uiManager.updateShowcaseTransportControls(true, 0, totalTime);
+    this.uiManager.updateShowcaseTransportControls(true, 0, totalTime, this.isSequentialMode);
 
     // Start playback
     this.startScheduling();
@@ -178,29 +180,43 @@ export class ShowcasePhase {
       ? song.segments.length * this.gameState.config.segmentLength
       : this.gameState.config.segmentLength;
 
-    // Handle looping
-    const loopedPlaybackTime = playbackTime % totalTime;
+    // In sequential mode, don't loop - just play once
+    const effectivePlaybackTime = this.isSequentialMode ? playbackTime : playbackTime % totalTime;
 
     this.currentSongEvents.forEach((event) => {
       if (!event.scheduled) {
         const eventTime = event.startTimeSec;
         let nextEventTime = eventTime;
 
-        if (eventTime < loopedPlaybackTime) {
-          nextEventTime = eventTime + totalTime;
+        if (this.isSequentialMode) {
+          // In sequential mode, only schedule events that haven't passed yet
+          if (eventTime >= effectivePlaybackTime) {
+            nextEventTime = eventTime;
+          } else {
+            return; // Skip events that have already passed
+          }
+        } else {
+          // In navigation mode, handle looping
+          if (eventTime < effectivePlaybackTime) {
+            nextEventTime = eventTime + totalTime;
+          }
         }
 
-        const scheduleTime = currentTime + (nextEventTime - loopedPlaybackTime);
+        const scheduleTime = currentTime + (nextEventTime - effectivePlaybackTime);
 
         if (scheduleTime <= currentTime + this.audioEngine.lookaheadTime) {
           this.playEvent(event, scheduleTime);
           event.scheduled = true;
 
+          const resetDelay = this.isSequentialMode
+            ? (nextEventTime - effectivePlaybackTime + 0.1) * 1000
+            : (totalTime - eventTime + 0.1) * 1000;
+
           setTimeout(
             () => {
               event.scheduled = false;
             },
-            (totalTime - eventTime + 0.1) * 1000,
+            resetDelay,
           );
         }
       }
@@ -237,15 +253,35 @@ export class ShowcasePhase {
       ? song.segments.length * this.gameState.config.segmentLength
       : this.gameState.config.segmentLength;
 
-    this.gameState.updateCurrentTime(
-      this.audioEngine.getCurrentTime(),
-      totalTime,
-    );
-    this.uiManager.updateShowcaseTransportControls(
-      this.gameState.playback.isPlaying,
-      this.gameState.playback.currentTime,
-      totalTime,
-    );
+    const currentTime = this.audioEngine.getCurrentTime();
+    const elapsed = currentTime - this.gameState.playback.startTime;
+
+    if (this.isSequentialMode) {
+      // In sequential mode, use raw elapsed time for advancement detection
+      const actualCurrentTime = Math.min(elapsed, totalTime);
+      this.gameState.playback.currentTime = actualCurrentTime;
+
+      this.uiManager.updateShowcaseTransportControls(
+        this.gameState.playback.isPlaying,
+        actualCurrentTime,
+        totalTime,
+        this.isSequentialMode,
+      );
+
+      // Check if current song finished
+      if (elapsed >= totalTime) {
+        this.advanceToNextSong();
+      }
+    } else {
+      // In navigation mode, use normal looping behavior
+      this.gameState.updateCurrentTime(currentTime, totalTime);
+      this.uiManager.updateShowcaseTransportControls(
+        this.gameState.playback.isPlaying,
+        this.gameState.playback.currentTime,
+        totalTime,
+        this.isSequentialMode,
+      );
+    }
   }
 
   draw() {
@@ -262,6 +298,39 @@ export class ShowcasePhase {
         this.currentSongEvents,
         this.gameState.playback.currentTime,
         totalTime,
+      );
+    }
+  }
+
+  advanceToNextSong() {
+    if (this.currentSongIndex < this.finalSongs.length - 1) {
+      // Move to next song
+      this.pause();
+      setTimeout(() => {
+        this.showSong(this.currentSongIndex + 1);
+      }, 500); // Brief pause between songs
+    } else {
+      // Finished all songs - enable navigation mode
+      this.isSequentialMode = false;
+      this.hasPlayedAllSongs = true;
+      this.pause();
+
+      // Update UI to show navigation controls
+      const song = this.finalSongs[this.currentSongIndex];
+      const creators = song.contributors || [];
+      this.uiManager.updateShowcaseScreen(
+        this.currentSongIndex,
+        this.finalSongs.length,
+        creators,
+        this.isSequentialMode,
+      );
+
+      const totalTime = song.segments.length * this.gameState.config.segmentLength;
+      this.uiManager.updateShowcaseTransportControls(
+        false,
+        this.gameState.playback.currentTime,
+        totalTime,
+        this.isSequentialMode,
       );
     }
   }
@@ -298,6 +367,7 @@ export class ShowcasePhase {
       true,
       this.gameState.playback.currentTime,
       totalTime,
+      this.isSequentialMode,
     );
   }
 
@@ -315,6 +385,7 @@ export class ShowcasePhase {
       false,
       this.gameState.playback.currentTime,
       totalTime,
+      this.isSequentialMode,
     );
   }
 
@@ -338,6 +409,7 @@ export class ShowcasePhase {
       this.gameState.playback.isPlaying,
       0,
       totalTime,
+      this.isSequentialMode,
     );
   }
 
@@ -361,31 +433,24 @@ export class ShowcasePhase {
       this.gameState.playback.isPlaying,
       time,
       totalTime,
+      this.isSequentialMode,
     );
   }
 
   previousSong() {
-    if (this.currentSongIndex > 0) {
+    if (this.currentSongIndex > 0 && !this.isSequentialMode) {
       this.pause();
       this.showSong(this.currentSongIndex - 1);
     }
   }
 
   nextSong() {
-    if (this.currentSongIndex < this.finalSongs.length - 1) {
+    if (this.currentSongIndex < this.finalSongs.length - 1 && !this.isSequentialMode) {
       this.pause();
       this.showSong(this.currentSongIndex + 1);
     }
   }
 
-  restartGame() {
-    this.cleanup();
-
-    console.log("Restarting game");
-    if (this.onRestart) {
-      this.onRestart();
-    }
-  }
 
   exitToMenu() {
     this.cleanup();
@@ -413,7 +478,10 @@ export class ShowcasePhase {
       cancelAnimationFrame(this.animationFrameId);
     }
 
-    // Reset playback state
+    // Reset playback state and sequential mode
     this.gameState.setPlaybackState(false, 0, 0);
+    this.isSequentialMode = true;
+    this.hasPlayedAllSongs = false;
+    this.currentSongIndex = 0;
   }
 }
