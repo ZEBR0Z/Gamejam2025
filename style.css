@@ -387,6 +387,10 @@ input, button, textarea {
   font-weight: bold;
 }
 
+.key img {
+  height: 60px;
+}
+
 .sound-icon {
   position: relative;
   display: inline-block;
@@ -505,6 +509,7 @@ canvas {
 .transport-controls {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 1rem;
   background: rgba(0, 0, 0, 0.3);
   padding: 1rem;
@@ -522,21 +527,34 @@ canvas {
     filter: brightness(80%);
 }
 
-.pause-play-btn {
-  background-image: url("./assets/art/pauseButton.png") no-repeat center center;
-
+.play-pause-btn {
+  background-image: url("./assets/art/play.png");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: contain;
   aspect-ratio: 1 / 1;
-  width: 32px;
+  width: 48px;
+  height: 48px;
   border: none;
   padding: 0;
+  background-color: transparent;
+}
+
+.play-pause-btn.playing {
+  background-image: url("./assets/art/pauseButton.png");
 }
 
 .rewind-btn {
-  background-image: url("./assets/art/rewind.png") no-repeat center center;
+  background-image: url("./assets/art/rewind.png");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: contain;
   aspect-ratio: 1 / 1;
-  width: 32px;
+  width: 48px;
+  height: 48px;
   border: none;
   padding: 0;
+  background-color: transparent;
 }
 .progress-container {
   display: flex;
@@ -547,6 +565,8 @@ canvas {
 
 #progress-bar,
 #edit-progress-bar,
+#preview-progress-bar,
+#showcase-progress-bar,
 #final-progress-bar {
   flex: 1;
   height: 8px;
@@ -557,6 +577,8 @@ canvas {
 
 #progress-bar::-webkit-slider-thumb,
 #edit-progress-bar::-webkit-slider-thumb,
+#preview-progress-bar::-webkit-slider-thumb,
+#showcase-progress-bar::-webkit-slider-thumb,
 #final-progress-bar::-webkit-slider-thumb {
   appearance: none;
   width: 20px;
@@ -567,9 +589,11 @@ canvas {
 
 #time-display,
 #edit-time-display,
+#preview-time-display,
+#showcase-time-display,
 #final-time-display {
-  font-family: monospace;
-  font-size: 1rem;
+  font-family: readableFont;
+  font-size: 20px;
   min-width: 80px;
 }
 
@@ -617,8 +641,7 @@ canvas {
 
 /* Key press animations */
 .key.pressed {
-  background: #4caf50;
-  transform: scale(0.95);
+  transform: scale(0.92);
   transition: all 0.1s ease;
 }
 

@@ -20,6 +20,16 @@ export class UIManager {
         progressBar: "editProgressBar",
         timeDisplay: "editTimeDisplay",
       },
+      preview: {
+        playPauseBtn: "previewPlayPauseBtn",
+        progressBar: "previewProgressBar",
+        timeDisplay: "previewTimeDisplay",
+      },
+      showcase: {
+        playPauseBtn: "showcasePlayPauseBtn",
+        progressBar: "showcaseProgressBar",
+        timeDisplay: "showcaseTimeDisplay",
+      },
       final: {
         playPauseBtn: "finalPlayPauseBtn",
         progressBar: "finalProgressBar",
@@ -275,8 +285,11 @@ export class UIManager {
     const timeDisplay = this.getElement(controls.timeDisplay);
 
     if (playPauseBtn) {
-      playPauseBtn.style.backgroundImage = isPlaying
-        ? "url('./assets/art/pauseButton.png')" : "url('./assets/art/play.png')";
+      if (isPlaying) {
+        playPauseBtn.classList.add("playing");
+      } else {
+        playPauseBtn.classList.remove("playing");
+      }
     }
 
     if (progressBar) {
@@ -469,7 +482,11 @@ export class UIManager {
 
   updatePreviewTransportControls(isPlaying, currentTime, totalTime) {
     if (this.elements.previewPlayPauseBtn) {
-      this.elements.previewPlayPauseBtn.textContent = isPlaying ? "⏸️" : "▶️";
+      if (isPlaying) {
+        this.elements.previewPlayPauseBtn.classList.add("playing");
+      } else {
+        this.elements.previewPlayPauseBtn.classList.remove("playing");
+      }
     }
     if (this.elements.previewProgressBar) {
       this.elements.previewProgressBar.value = currentTime;
@@ -505,7 +522,11 @@ export class UIManager {
 
   updateShowcaseTransportControls(isPlaying, currentTime, totalTime, isSequentialMode = false) {
     if (this.elements.showcasePlayPauseBtn) {
-      this.elements.showcasePlayPauseBtn.textContent = isPlaying ? "⏸️" : "▶️";
+      if (isPlaying) {
+        this.elements.showcasePlayPauseBtn.classList.add("playing");
+      } else {
+        this.elements.showcasePlayPauseBtn.classList.remove("playing");
+      }
       this.elements.showcasePlayPauseBtn.disabled = isSequentialMode;
       this.elements.showcasePlayPauseBtn.style.opacity = isSequentialMode ? "0.3" : "1";
     }
