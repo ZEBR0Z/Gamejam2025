@@ -1,8 +1,8 @@
 /**
  * SongPreviewPhase - Preview previous player's work before adding to it
  *
- * - Loads and displays the song segments created so far
- * - Plays back the full timeline (all previous segments)
+ * - Loads and displays only the most recent segment (from previous player)
+ * - Plays back a single 8-second segment timeline
  * - Loads the original sound selection for the next performance phase
  * - Transitions to performance when player is ready
  */
@@ -58,43 +58,40 @@ export class SongPreviewPhase {
     }
 
     async convertSongToEvents() {
-        if (!this.previousSong || !this.previousSong.segments) return;
+        if (!this.previousSong || !this.previousSong.segments || this.previousSong.segments.length === 0) return;
 
         this.previewEvents = [];
         let eventId = 0;
 
-        // Process all segments in sequence
-        for (let segmentIndex = 0; segmentIndex < this.previousSong.segments.length; segmentIndex++) {
-            const segment = this.previousSong.segments[segmentIndex];
-            const timeOffset = segmentIndex * this.gameState.config.segmentLength;
+        // Only process the most recent segment (from the previous player)
+        const mostRecentSegment = this.previousSong.segments[this.previousSong.segments.length - 1];
 
-            // Convert each sound event in the segment
-            for (const soundEvent of segment.songData) {
-                // Load the audio buffer for this sound
-                try {
-                    const audioBuffer = await this.audioEngine.loadAudioBuffer(soundEvent.audio);
+        // Convert each sound event in the most recent segment
+        for (const soundEvent of mostRecentSegment.songData) {
+            // Load the audio buffer for this sound
+            try {
+                const audioBuffer = await this.audioEngine.loadAudioBuffer(soundEvent.audio);
 
-                    this.previewEvents.push({
-                        id: eventId++,
-                        soundIndex: 0, // We'll map this to the loaded sound
-                        startTimeSec: soundEvent.time + timeOffset,
-                        pitchSemitones: soundEvent.pitch || 0,
-                        scheduled: false,
-                        audioBuffer: audioBuffer,
-                        icon: soundEvent.icon
-                    });
-                } catch (error) {
-                    console.error('Failed to load sound for preview:', soundEvent.audio, error);
-                }
+                this.previewEvents.push({
+                    id: eventId++,
+                    soundIndex: 0, // We'll map this to the loaded sound
+                    startTimeSec: soundEvent.time, // No time offset needed since we're only showing one segment
+                    pitchSemitones: soundEvent.pitch || 0,
+                    scheduled: false,
+                    audioBuffer: audioBuffer,
+                    icon: soundEvent.icon
+                });
+            } catch (error) {
+                console.error('Failed to load sound for preview:', soundEvent.audio, error);
             }
         }
 
-        // Preview ready - converted segments to playable events
+        // Preview ready - converted most recent segment to playable events
     }
 
     setupUI() {
-        // Calculate total preview time (all segments)
-        const totalTime = this.previousSong ? this.previousSong.segments.length * this.gameState.config.segmentLength : this.gameState.config.segmentLength;
+        // Calculate total preview time (single segment only)
+        const totalTime = this.gameState.config.segmentLength;
 
         // Reset transport controls
         this.uiManager.updatePreviewTransportControls(false, 0, totalTime);
@@ -116,7 +113,7 @@ export class SongPreviewPhase {
     }
 
     startPreviewPlayback() {
-        const totalTime = this.previousSong ? this.previousSong.segments.length * this.gameState.config.segmentLength : this.gameState.config.segmentLength;
+        const totalTime = this.gameState.config.segmentLength;
 
         this.gameState.setPlaybackState(true, 0, this.audioEngine.getCurrentTime());
         this.uiManager.updatePreviewTransportControls(true, 0, totalTime);
@@ -143,7 +140,7 @@ export class SongPreviewPhase {
 
         const currentTime = this.audioEngine.getCurrentTime();
         const playbackTime = currentTime - this.gameState.playback.startTime;
-        const totalTime = this.previousSong ? this.previousSong.segments.length * this.gameState.config.segmentLength : this.gameState.config.segmentLength;
+        const totalTime = this.gameState.config.segmentLength;
 
         this.previewEvents.forEach(event => {
             if (!event.scheduled) {
@@ -181,7 +178,7 @@ export class SongPreviewPhase {
     }
 
     updateCurrentTime() {
-        const totalTime = this.previousSong ? this.previousSong.segments.length * this.gameState.config.segmentLength : this.gameState.config.segmentLength;
+        const totalTime = this.gameState.config.segmentLength;
         this.gameState.updateCurrentTime(this.audioEngine.getCurrentTime());
         this.uiManager.updatePreviewTransportControls(
             this.gameState.playback.isPlaying,
@@ -193,9 +190,9 @@ export class SongPreviewPhase {
     draw() {
         const canvas = this.uiManager.elements.previewCanvas;
         if (canvas && this.previewEvents.length > 0) {
-            const totalTime = this.previousSong ? this.previousSong.segments.length * this.gameState.config.segmentLength : this.gameState.config.segmentLength;
+            const totalTime = this.gameState.config.segmentLength;
 
-            // Use the final view renderer to show the full preview timeline
+            // Use the final view renderer to show the single segment preview timeline
             this.canvasRenderer.drawFinalView(
                 canvas,
                 this.previewEvents,
@@ -214,7 +211,7 @@ export class SongPreviewPhase {
     }
 
     play() {
-        const totalTime = this.previousSong ? this.previousSong.segments.length * this.gameState.config.segmentLength : this.gameState.config.segmentLength;
+        const totalTime = this.gameState.config.segmentLength;
 
         this.gameState.setPlaybackState(
             true,
@@ -239,12 +236,12 @@ export class SongPreviewPhase {
             clearInterval(this.scheduleInterval);
         }
 
-        const totalTime = this.previousSong ? this.previousSong.segments.length * this.gameState.config.segmentLength : this.gameState.config.segmentLength;
+        const totalTime = this.gameState.config.segmentLength;
         this.uiManager.updatePreviewTransportControls(false, this.gameState.playback.currentTime, totalTime);
     }
 
     restart() {
-        const totalTime = this.previousSong ? this.previousSong.segments.length * this.gameState.config.segmentLength : this.gameState.config.segmentLength;
+        const totalTime = this.gameState.config.segmentLength;
 
         this.gameState.setPlaybackState(
             this.gameState.playback.isPlaying,
@@ -260,7 +257,7 @@ export class SongPreviewPhase {
     }
 
     seekTo(time) {
-        const totalTime = this.previousSong ? this.previousSong.segments.length * this.gameState.config.segmentLength : this.gameState.config.segmentLength;
+        const totalTime = this.gameState.config.segmentLength;
 
         this.gameState.setPlaybackState(
             this.gameState.playback.isPlaying,
