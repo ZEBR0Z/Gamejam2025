@@ -15,6 +15,10 @@ export class AudioEngine {
     this.backingTrackAudio = null;
     this.backingTrackStartTime = 0;
     this.isBackingTrackLoaded = false;
+
+    // Menu music playback using HTML5 Audio for easy looping
+    this.menuMusicAudio = null;
+    this.isMenuMusicLoaded = false;
   }
 
   async initialize() {
@@ -240,5 +244,63 @@ export class AudioEngine {
 
   isBackingTrackPlaying() {
     return this.backingTrackAudio && !this.backingTrackAudio.paused;
+  }
+
+  // Menu music management
+  async loadMenuMusic() {
+    try {
+      this.stopMenuMusic();
+
+      this.menuMusicAudio = new Audio('assets/sfx/menu.mp3');
+      this.menuMusicAudio.loop = true;
+      this.menuMusicAudio.volume = 0.3; // Lower volume for background music
+
+      // Wait for the audio to be loadable
+      await new Promise((resolve, reject) => {
+        this.menuMusicAudio.addEventListener('canplaythrough', resolve, { once: true });
+        this.menuMusicAudio.addEventListener('error', reject, { once: true });
+        this.menuMusicAudio.load();
+      });
+
+      this.isMenuMusicLoaded = true;
+      console.log("Menu music loaded");
+    } catch (error) {
+      console.error("Failed to load menu music:", error);
+      this.isMenuMusicLoaded = false;
+    }
+  }
+
+  startMenuMusic() {
+    if (this.menuMusicAudio && this.isMenuMusicLoaded) {
+      this.menuMusicAudio.currentTime = 0;
+      return this.menuMusicAudio.play();
+    }
+    return Promise.resolve();
+  }
+
+  pauseMenuMusic() {
+    if (this.menuMusicAudio) {
+      this.menuMusicAudio.pause();
+    }
+  }
+
+  resumeMenuMusic() {
+    if (this.menuMusicAudio && this.isMenuMusicLoaded) {
+      return this.menuMusicAudio.play();
+    }
+    return Promise.resolve();
+  }
+
+  stopMenuMusic() {
+    if (this.menuMusicAudio) {
+      this.menuMusicAudio.pause();
+      this.menuMusicAudio.currentTime = 0;
+      this.menuMusicAudio = null;
+    }
+    this.isMenuMusicLoaded = false;
+  }
+
+  isMenuMusicPlaying() {
+    return this.menuMusicAudio && !this.menuMusicAudio.paused;
   }
 }

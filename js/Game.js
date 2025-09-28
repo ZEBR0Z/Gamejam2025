@@ -105,6 +105,7 @@ export class Game {
 
     this.isMultiplayer = true;
     this.serverUrl = "http://localhost:3000";
+    this.hasUserInteracted = false;
 
     // Set up icon preloading callback
     this.gameState.onIconPreload = (iconUrl) => {
@@ -132,6 +133,11 @@ export class Game {
     this.phaseManager.onTransition = (phaseName, phaseInstance) => {
       console.log(`Transitioned to phase: ${phaseName}`);
       this.gameState.setState(phaseName);
+
+      // Stop menu music when entering game phases
+      if (this.audioEngine.isMenuMusicPlaying()) {
+        this.audioEngine.stopMenuMusic();
+      }
     };
   }
 
@@ -144,6 +150,9 @@ export class Game {
       await this.gameState.loadSoundList();
       this.uiManager.initialize();
 
+      // Load menu music (but don't start until user interaction)
+      await this.audioEngine.loadMenuMusic();
+
       // Initialize multiplayer screens
       this.initializeMultiplayerScreens();
 
@@ -152,6 +161,9 @@ export class Game {
 
       // Setup multiplayer event handlers
       this.setupMultiplayerHandlers();
+
+      // Setup user interaction detection for menu music
+      this.setupUserInteractionDetection();
 
       console.log("Game initialized successfully");
     } catch (error) {
@@ -202,6 +214,30 @@ export class Game {
     };
 
     this.inputController.setupPersistentButtonEvents(menuHandlers);
+  }
+
+  setupUserInteractionDetection() {
+    // Listen for first user interaction to start menu music
+    const handleFirstInteraction = () => {
+      if (!this.hasUserInteracted) {
+        this.handleFirstUserInteraction();
+      }
+    };
+
+    // Listen for various interaction events
+    document.addEventListener('click', handleFirstInteraction, { once: true });
+    document.addEventListener('keydown', handleFirstInteraction, { once: true });
+    document.addEventListener('touchstart', handleFirstInteraction, { once: true });
+  }
+
+  handleFirstUserInteraction() {
+    this.hasUserInteracted = true;
+    console.log("First user interaction detected, starting menu music");
+
+    // Start menu music if we're not in a game phase
+    if (!this.audioEngine.isMenuMusicPlaying()) {
+      this.audioEngine.startMenuMusic();
+    }
   }
 
   setupMultiplayerHandlers() {
@@ -467,6 +503,11 @@ export class Game {
   leaveLobby() {
     this.multiplayerManager.disconnect();
     this.uiManager.showScreen("main-menu");
+
+    // Restart menu music when returning to main menu (if user has interacted)
+    if (this.hasUserInteracted && !this.audioEngine.isMenuMusicPlaying()) {
+      this.audioEngine.startMenuMusic();
+    }
   }
 
   async startMultiplayerGame(gameState) {
@@ -611,6 +652,11 @@ export class Game {
     this.gameState.resetForNewGame();
     this.timer.resetAllTimers();
     this.uiManager.showScreen("main-menu");
+
+    // Restart menu music (if user has interacted)
+    if (this.hasUserInteracted && !this.audioEngine.isMenuMusicPlaying()) {
+      this.audioEngine.startMenuMusic();
+    }
   }
 
   cleanupCurrentPhase() {
@@ -629,6 +675,7 @@ export class Game {
     this.timer.stopAllTimers();
     this.audioEngine.stopPreview();
     this.audioEngine.stopEditPreview();
+    this.audioEngine.stopMenuMusic();
     this.inputController.cleanup();
     this.multiplayerManager.disconnect();
   }
