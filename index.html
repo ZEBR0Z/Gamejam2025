@@ -3,23 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Music Mini-Game</title>
+    <title>YO, THAT'S HEAT</title>
+    <link rel="stylesheet" href="./server/node_modules/nes.css/css/nes.min.css">
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <!-- Main Menu -->
     <div id="main-menu" class="screen active">
       <div class="menu-container">
-        <h1>Yo That's Heat</h1>
+        <img src="./assets/art/logo.png" id="logo">
         <p class="subtitle">
           A Gartic Phone-style collaborative music creation game
         </p>
         <div class="menu-buttons">
-          <button id="tutorial-btn" class="menu-button">Tutorial</button>
-          <button id="create-lobby-btn" class="menu-button primary">
+          <button id="tutorial-btn" class="menu-button nes-btn">Tutorial</button>
+          <button id="create-lobby-btn" class="menu-button nes-btn is-primary">
             Create Lobby
           </button>
-          <button id="join-lobby-btn" class="menu-button">Join Lobby</button>
+          <button id="join-lobby-btn" class="menu-button nes-btn">Join Lobby</button>
         </div>
       </div>
     </div>
@@ -35,11 +36,12 @@
             id="player-name"
             placeholder="Enter your name"
             maxlength="20"
+            class="nes-input"
           />
         </div>
         <div class="lobby-buttons">
-          <button id="back-to-menu-btn" class="secondary-button">Back</button>
-          <button id="create-lobby-confirm-btn" class="primary-button">
+          <button id="back-to-menu-btn" class="secondary-button nes-btn is-error">Back</button>
+          <button id="create-lobby-confirm-btn" class="primary-button nes-btn">
             Create Lobby
           </button>
         </div>
@@ -57,11 +59,13 @@
             id="join-player-name"
             placeholder="Enter your name"
             maxlength="20"
+            class="nes-input"
           />
         </div>
         <div class="form-group">
           <label for="lobby-code">Lobby Code:</label>
           <input
+            class="nes-input"
             type="text"
             id="lobby-code"
             placeholder="Enter lobby code"
@@ -70,10 +74,10 @@
           />
         </div>
         <div class="lobby-buttons">
-          <button id="back-to-menu-from-join-btn" class="secondary-button">
+          <button id="back-to-menu-from-join-btn" class="secondary-button nes-btn is-error">
             Back
           </button>
-          <button id="join-lobby-confirm-btn" class="primary-button">
+          <button id="join-lobby-confirm-btn" class="primary-button nes-btn">
             Join Lobby
           </button>
         </div>
@@ -97,17 +101,17 @@
         </div>
 
         <div class="lobby-info">
-          <p>
-            Share this code with friends: <strong id="shareable-code"></strong>
+          <p style="font-family: readableFont; font-size:x-large;">
+            Share this code with friends: <strong id=shareable-code></strong>
           </p>
           <p>Minimum 2 players required to start</p>
         </div>
 
         <div class="lobby-buttons">
-          <button id="leave-lobby-btn" class="secondary-button">
+          <button id="leave-lobby-btn" class="secondary-button nes-btn is-error">
             Leave Lobby
           </button>
-          <button id="ready-btn" class="primary-button">Ready</button>
+          <button id="ready-btn" class="primary-button nes-btn">Ready</button>
         </div>
 
         <div id="game-starting" class="game-starting" style="display: none">
@@ -151,14 +155,13 @@
           </div>
         </div>
         <div class="tutorial-buttons">
-          <button id="skip-tutorial-btn" class="secondary-button">Skip</button>
-          <button id="start-tutorial-btn" class="primary-button">Start</button>
+          <button id="skip-tutorial-btn" class="nes-btn">Back</button>
         </div>
       </div>
     </div>
 
     <!-- Sound Selection -->
-    <div id="selection" class="screen">
+    <div id="selection" class="screen oven">
       <div class="selection-header">
         <h2>Choose 3 Sounds</h2>
         <div class="countdown" id="selection-countdown">10</div>
@@ -170,31 +173,46 @@
         <div class="selected-count">
           Selected: <span id="selected-count">0</span>/3
         </div>
-        <button id="continue-btn" class="primary-button" disabled>
+        <button id="continue-btn" class="nes-btn is-disabled" disabled>
           Continue
         </button>
       </div>
     </div>
 
     <!-- Performance Phase -->
-    <div id="performance" class="screen">
+    <div id="performance" class="screen oven">
       <div class="phase-header">
-        <h2>Performance Phase</h2>
+        <h2>Record That Heat</h2>
         <div class="countdown" id="performance-countdown">--</div>
       </div>
 
       <div class="chosen-sounds">
         <div class="sound-key">
-          <span class="key">1</span>
-          <img id="sound-1-icon" class="sound-icon" alt="Sound 1" />
+          <span class="key">
+            <img src="assets/art/oneButton.png" alt="1">
+          </span>
+          <div class="sound-icon">
+            <img src="assets/art/record.png" class="over-img">
+            <img id="sound-1-icon" class="bg-image" alt="Sound 1" />
+          </div>
         </div>
         <div class="sound-key">
-          <span class="key">2</span>
-          <img id="sound-2-icon" class="sound-icon" alt="Sound 2" />
+          <span class="key">
+            <img src="assets/art/twoButton.png" alt="2">
+          </span>
+          <div class="sound-icon">
+            <img src="assets/art/blueRecord.png" class="over-img">
+            <img id="sound-2-icon" class="bg-image" alt="Sound 2" />
+          </div>
         </div>
         <div class="sound-key">
-          <span class="key">3</span>
-          <img id="sound-3-icon" class="sound-icon" alt="Sound 3" />
+          <span class="key">
+            <img src="assets/art/threeButton.png" alt="3">
+          </span>
+          <div class="sound-icon">
+            <img src="assets/art/greenRecord.png" class="over-img">
+            <img id="sound-3-icon" class="bg-image" alt="Sound 3" />
+          </div>
         </div>
       </div>
 
@@ -203,8 +221,8 @@
       </div>
 
       <div class="transport-controls">
-        <button id="play-pause-btn" class="control-button">⏸️</button>
-        <button id="restart-btn" class="control-button">⏮️</button>
+        <button id="play-pause-btn" class="control-button play-pause-btn"></button>
+        <button id="restart-btn" class="control-button rewind-btn"></button>
         <div class="progress-container">
           <input
             type="range"
@@ -216,31 +234,46 @@
           />
           <span id="time-display">0.0 / 8.0</span>
         </div>
-        <button id="performance-continue-btn" class="primary-button">
+        <button id="performance-continue-btn" class="primary-button nes-btn">
           Finish Early
         </button>
       </div>
     </div>
 
     <!-- Editing Phase -->
-    <div id="editing" class="screen">
+    <div id="editing" class="screen oven">
       <div class="phase-header">
-        <h2>Editing Phase</h2>
+        <h2>Mix That Heat</h2>
         <div class="countdown" id="editing-countdown">--</div>
       </div>
 
       <div class="editing-sounds">
         <div class="sound-key editing-sound" id="editing-sound-0">
-          <span class="key">1</span>
-          <img id="editing-sound-1-icon" class="sound-icon" alt="Sound 1" />
+          <span class="key">
+            <img src="assets/art/oneButton.png" alt="1">
+          </span>
+          <div class="sound-icon">
+            <img src="assets/art/record.png" class="over-img">
+            <img src="assets/art/record.png" id="editing-sound-1-icon" class="sound-icon bg-image" alt="Sound 1" />
+          </div>
         </div>
         <div class="sound-key editing-sound" id="editing-sound-1">
-          <span class="key">2</span>
-          <img id="editing-sound-2-icon" class="sound-icon" alt="Sound 2" />
+          <span class="key">
+            <img src="assets/art/twoButton.png" alt="2">
+          </span>
+          <div class="sound-icon">
+            <img src="assets/art/blueRecord.png" class="over-img">
+            <img src="assets/art/blueRecord.png" id="editing-sound-2-icon" class="sound-icon bg-image" alt="Sound 2" />
+          </div>
         </div>
         <div class="sound-key editing-sound" id="editing-sound-2">
-          <span class="key">3</span>
-          <img id="editing-sound-3-icon" class="sound-icon" alt="Sound 3" />
+          <span class="key">
+            <img src="assets/art/threeButton.png" alt="3">
+          </span>
+          <div class="sound-icon">
+            <img src="assets/art/greenRecord.png" class="over-img">
+            <img src="assets/art/greenRecord.png" id="editing-sound-3-icon" class="sound-icon bg-image" alt="Sound 3" />
+          </div>
         </div>
       </div>
 
@@ -249,8 +282,8 @@
       </div>
 
       <div class="transport-controls">
-        <button id="edit-play-pause-btn" class="control-button">▶️</button>
-        <button id="edit-restart-btn" class="control-button">⏮️</button>
+        <button id="edit-play-pause-btn" class="control-button play-pause-btn"></button>
+        <button id="edit-restart-btn" class="control-button rewind-btn"></button>
         <div class="progress-container">
           <input
             type="range"
@@ -262,7 +295,7 @@
           />
           <span id="edit-time-display">0.0 / 8.0</span>
         </div>
-        <button id="editing-continue-btn" class="primary-button">Done!</button>
+        <button id="editing-continue-btn" class="primary-button nes-btn">Done!</button>
       </div>
     </div>
 
@@ -287,7 +320,7 @@
     </div>
 
     <!-- Song Preview -->
-    <div id="preview" class="screen">
+    <div id="preview" class="screen oven">
       <div class="preview-container">
         <h2>Listen to the Previous Part</h2>
         <div class="preview-info">
@@ -311,8 +344,8 @@
         </div>
 
         <div class="transport-controls">
-          <button id="preview-play-pause-btn" class="control-button">▶️</button>
-          <button id="preview-restart-btn" class="control-button">⏮️</button>
+          <button id="preview-play-pause-btn" class="control-button play-pause-btn"></button>
+          <button id="preview-restart-btn" class="control-button rewind-btn"></button>
           <div class="progress-container">
             <input
               type="range"
@@ -327,7 +360,7 @@
         </div>
 
         <div class="preview-buttons">
-          <button id="continue-to-performance-btn" class="primary-button">
+          <button id="continue-to-performance-btn" class="primary-button nes-btn">
             Continue to Add Your Part
           </button>
         </div>
@@ -335,7 +368,7 @@
     </div>
 
     <!-- Sound Replacement -->
-    <div id="sound-replacement" class="screen">
+    <div id="sound-replacement" class="screen oven">
       <div class="replacement-container">
         <h2>Evolve Your Sound Palette</h2>
         <div class="replacement-info">
@@ -365,7 +398,7 @@
           <div class="replacement-selected">
             <span id="replacement-status">Choose a replacement sound</span>
           </div>
-          <button id="replacement-continue-btn" class="primary-button" disabled>
+          <button id="replacement-continue-btn" class="primary-button nes-btn is-disabled" disabled>
             Continue
           </button>
         </div>
@@ -373,9 +406,9 @@
     </div>
 
     <!-- Final Showcase -->
-    <div id="showcase" class="screen">
+    <div id="showcase" class="screen party">
       <div class="showcase-container">
-        <h2>Final Results</h2>
+        <h2>Yo, That's Heat!</h2>
         <div class="showcase-info">
           <p>Here are all the completed collaborative songs!</p>
           <div class="song-navigation">
@@ -397,10 +430,8 @@
         </div>
 
         <div class="transport-controls">
-          <button id="showcase-play-pause-btn" class="control-button">
-            ⏸️
-          </button>
-          <button id="showcase-restart-btn" class="control-button">⏮️</button>
+          <button id="showcase-play-pause-btn" class="control-button play-pause-btn"></button>
+          <button id="showcase-restart-btn" class="control-button rewind-btn"></button>
           <div class="progress-container">
             <input
               type="range"
@@ -415,13 +446,13 @@
         </div>
 
         <div class="showcase-buttons">
-          <button id="prev-song-btn" class="secondary-button">
+          <button id="prev-song-btn" class="secondary-button nes-btn">
             ← Previous Song
           </button>
-          <button id="next-song-btn" class="secondary-button">
+          <button id="next-song-btn" class="secondary-button nes-btn">
             Next Song →
           </button>
-          <button id="showcase-exit-btn" class="primary-button">Exit</button>
+          <button id="showcase-exit-btn" class="primary-button nes-btn is-error">Exit</button>
         </div>
       </div>
     </div>

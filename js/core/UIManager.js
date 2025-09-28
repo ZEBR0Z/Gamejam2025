@@ -275,7 +275,8 @@ export class UIManager {
     const timeDisplay = this.getElement(controls.timeDisplay);
 
     if (playPauseBtn) {
-      playPauseBtn.textContent = isPlaying ? "⏸️" : "▶️";
+      playPauseBtn.style.backgroundImage = isPlaying
+        ? "url('./assets/art/pauseButton.png')" : "url('./assets/art/play.png')";
     }
 
     if (progressBar) {
