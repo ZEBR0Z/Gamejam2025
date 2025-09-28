@@ -5,6 +5,9 @@ const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
 
+// Handle subpath deployment
+const subPath = '/ythserver';
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -12,12 +15,13 @@ const io = socketIo(server, {
     origin: "*",
     methods: ["GET", "POST"],
   },
+  path: `${subPath}/socket.io`
 });
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "..")));
+app.use(subPath, express.static(path.join(__dirname, "..")));
 
 /**
  * GARTIC PHONE-STYLE MUSIC GAME SERVER
@@ -740,7 +744,7 @@ function findLobbyBySocket(socketId) {
 }
 
 // API endpoints
-app.get("/api/lobbies", (req, res) => {
+app.get(`${subPath}/api/lobbies`, (req, res) => {
   const lobbyList = Array.from(lobbies.values()).map((lobby) => ({
     code: lobby.code,
     playerCount: lobby.players.size,
@@ -750,7 +754,7 @@ app.get("/api/lobbies", (req, res) => {
   res.json(lobbyList);
 });
 
-app.get("/api/lobby/:code", (req, res) => {
+app.get(`${subPath}/api/lobby/:code`, (req, res) => {
   const lobby = lobbies.get(req.params.code.toUpperCase());
   if (!lobby) {
     res.status(404).json({ error: "Lobby not found" });
@@ -760,12 +764,22 @@ app.get("/api/lobby/:code", (req, res) => {
   res.json(lobby.getGameState());
 });
 
+// Serve Socket.io client script at subpath
+app.get(`${subPath}/socket.io/socket.io.js`, (req, res) => {
+  const socketIoPath = path.join(__dirname, "node_modules", "socket.io", "client-dist", "socket.io.js");
+  res.sendFile(socketIoPath);
+});
+
 // Serve the main game
-app.get("/", (req, res) => {
+app.get(`${subPath}`, (req, res) => {
   res.sendFile(path.join(__dirname, "..", "index.html"));
 });
 
-const PORT = process.env.PORT || 3000;
+app.get("/", (req, res) => {
+  res.redirect(subPath);
+});
+
+const PORT = process.env.PORT || 443;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Game available at http://localhost:${PORT}`);

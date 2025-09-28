@@ -104,7 +104,7 @@ export class Game {
     );
 
     this.isMultiplayer = true;
-    this.serverUrl = "http://localhost:3000";
+    this.serverUrl = "https://ruelalarcon.dev/ythserver";
     this.hasUserInteracted = false;
 
     // Set up icon preloading callback
@@ -241,17 +241,22 @@ export class Game {
   }
 
   setupMultiplayerHandlers() {
+    console.log("Setting up multiplayer handlers");
     // Lobby creation and joining
     const lobbyHandlers = {
       "back-to-menu-btn": () => this.uiManager.showScreen("main-menu"),
       "back-to-menu-from-join-btn": () =>
         this.uiManager.showScreen("main-menu"),
-      "create-lobby-confirm-btn": () => this.createLobby(),
+      "create-lobby-confirm-btn": () => {
+        console.log("Create lobby button clicked!");
+        this.createLobby();
+      },
       "join-lobby-confirm-btn": () => this.joinLobby(),
       "leave-lobby-btn": () => this.leaveLobby(),
       "ready-btn": () => this.setReady(),
     };
 
+    console.log("Setting up persistent button events with handlers:", Object.keys(lobbyHandlers));
     this.inputController.setupPersistentButtonEvents(lobbyHandlers);
 
     // Input field handlers
@@ -321,25 +326,36 @@ export class Game {
   }
 
   async createLobby() {
+    console.log("createLobby method called");
+    console.log("playerName element:", this.uiManager.elements.playerName);
     const playerName = this.uiManager.elements.playerName?.value.trim();
+    console.log("playerName value:", playerName);
     if (!playerName) {
+      console.log("No player name provided");
       alert("Please enter your name");
       return;
     }
 
     try {
       // Connect to server
+      console.log("Attempting to connect to server:", this.serverUrl);
       const connected = await this.multiplayerManager.connect(this.serverUrl);
+      console.log("Connection result:", connected);
       if (!connected) {
+        console.log("Failed to connect to server");
         alert("Failed to connect to server. Please try again.");
         return;
       }
+      console.log("Successfully connected to server");
 
       // Create lobby
       const response = await this.multiplayerManager.createLobby(playerName);
+      console.log("CreateLobby response in Game.js:", response);
       if (response.success) {
+        console.log("Lobby created successfully, showing lobby waiting screen");
         this.showLobbyWaiting(response.gameState);
       } else {
+        console.log("Failed to create lobby:", response.error);
         alert(response.error || "Failed to create lobby");
       }
     } catch (error) {
@@ -387,6 +403,7 @@ export class Game {
   }
 
   showLobbyWaiting(gameState) {
+    console.log("showLobbyWaiting called with gameState:", gameState);
     this.uiManager.showScreen("lobby-waiting");
     this.updateLobbyUI(gameState);
 

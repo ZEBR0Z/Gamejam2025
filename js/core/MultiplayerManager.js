@@ -22,17 +22,32 @@ export class MultiplayerManager {
     this.onWaitingUpdate = null;
   }
 
-  async connect(serverUrl = "http://localhost:3000") {
+  async connect(serverUrl = "https://ruelalarcon.dev/ythserver") {
     try {
+      console.log("MultiplayerManager.connect called with:", serverUrl);
       // Load Socket.IO client
       if (!window.io) {
+        console.log("Loading Socket.IO client script...");
         await this.loadSocketIO(serverUrl);
+        console.log("Socket.IO client script loaded");
+      } else {
+        console.log("Socket.IO client already loaded");
       }
 
-      this.socket = window.io(serverUrl);
+      console.log("Creating Socket.IO connection...");
+      // Connect to the base URL, not the subpath
+      const baseUrl = serverUrl.replace('/ythserver', '');
+      console.log("Base URL:", baseUrl);
+      this.socket = window.io(baseUrl, {
+        path: "/ythserver/socket.io",
+        transports: ["polling"], // Force HTTP polling instead of WebSockets
+        upgrade: false // Disable automatic upgrade to WebSockets
+      });
+      console.log("Socket.IO connection object created:", this.socket);
 
       this.socket.on("connect", () => {
         console.log("Connected to multiplayer server");
+        console.log("Socket ID:", this.socket.id);
         this.isConnected = true;
       });
 
@@ -43,8 +58,25 @@ export class MultiplayerManager {
 
       this.setupEventHandlers();
 
-      return new Promise((resolve) => {
-        this.socket.on("connect", () => resolve(true));
+      console.log("Setting up connection promise...");
+      return new Promise((resolve, reject) => {
+        // Set a timeout to avoid hanging forever
+        const timeout = setTimeout(() => {
+          console.log("Connection timeout after 10 seconds");
+          reject(new Error("Connection timeout"));
+        }, 10000);
+
+        this.socket.on("connect", () => {
+          console.log("Socket connected successfully");
+          clearTimeout(timeout);
+          resolve(true);
+        });
+
+        this.socket.on("connect_error", (error) => {
+          console.log("Socket connection error:", error);
+          clearTimeout(timeout);
+          resolve(false);
+        });
       });
     } catch (error) {
       console.error("Failed to connect to multiplayer server:", error);
@@ -134,10 +166,15 @@ export class MultiplayerManager {
   }
 
   async createLobby(playerName) {
-    if (!this.isConnected) return null;
+    if (!this.isConnected) {
+      console.log("Not connected to server");
+      return null;
+    }
 
+    console.log("Attempting to create lobby for:", playerName);
     return new Promise((resolve) => {
       this.socket.emit("createLobby", { playerName }, (response) => {
+        console.log("Create lobby response:", response);
         if (response.success) {
           this.playerId = response.playerId;
           this.lobbyCode = response.lobbyCode;

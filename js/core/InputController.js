@@ -254,6 +254,7 @@ export class InputController {
 
   // Button event setup for persistent UI (like main menu)
   setupPersistentButtonEvents(buttonHandlers) {
+    console.log("setupPersistentButtonEvents called with:", Object.keys(buttonHandlers));
     // Store persistent handler references separately
     if (!this.persistentButtonHandlers) {
       this.persistentButtonHandlers = new Map();
@@ -261,8 +262,10 @@ export class InputController {
 
     Object.entries(buttonHandlers).forEach(([buttonId, handler]) => {
       const button = document.getElementById(buttonId);
+      console.log(`Setting up button ${buttonId}:`, button ? "found" : "NOT FOUND");
       if (button) {
         button.addEventListener("click", handler);
+        console.log(`Added click listener to ${buttonId}`);
 
         // Store the handler reference for cleanup
         this.persistentButtonHandlers.set(buttonId, {
