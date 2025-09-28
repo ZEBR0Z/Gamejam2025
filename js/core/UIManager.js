@@ -337,6 +337,11 @@ export class UIManager {
     const continueBtn = this.getElement("continueBtn");
     if (continueBtn) {
       continueBtn.disabled = !enabled;
+      if (enabled) {
+        continueBtn.classList.remove("is-disabled");
+      } else {
+        continueBtn.classList.add("is-disabled");
+      }
     }
   }
 

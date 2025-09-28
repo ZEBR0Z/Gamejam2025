@@ -446,14 +446,17 @@ export class Game {
       const hasEnoughPlayers = gameState.players.length >= 2;
 
       if (currentPlayer.isReady) {
-        readyBtn.textContent = "Ready ✓";
+        readyBtn.textContent = "Ready";
         readyBtn.disabled = true;
+        readyBtn.classList.add("is-disabled");
       } else if (!hasEnoughPlayers) {
         readyBtn.textContent = "Ready";
         readyBtn.disabled = true;
+        readyBtn.classList.add("is-disabled");
       } else {
         readyBtn.textContent = "Ready";
         readyBtn.disabled = false;
+        readyBtn.classList.remove("is-disabled");
       }
     }
   }
