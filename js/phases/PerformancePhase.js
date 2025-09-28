@@ -193,11 +193,11 @@ export class PerformancePhase {
     });
   }
 
-  playEvent(event, scheduleTime) {
+  async playEvent(event, scheduleTime) {
     const selectedSound = this.gameState.selectedSounds[event.soundIndex];
     if (selectedSound) {
-      this.audioEngine.playSound(
-        selectedSound.audioBuffer,
+      await this.audioEngine.playSoundFromUrl(
+        selectedSound.audio,
         event.pitchSemitones,
         scheduleTime,
       );
@@ -240,11 +240,11 @@ export class PerformancePhase {
     }
   }
 
-  handleKeyPress(soundIndex) {
+  async handleKeyPress(soundIndex) {
     // Play sound immediately
     const selectedSound = this.gameState.selectedSounds[soundIndex];
     if (selectedSound) {
-      this.audioEngine.playSound(selectedSound.audioBuffer, 0);
+      await this.audioEngine.playSoundFromUrl(selectedSound.audio, 0);
     }
 
     // Record event

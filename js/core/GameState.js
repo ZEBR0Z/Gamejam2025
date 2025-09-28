@@ -20,7 +20,7 @@ export class GameState {
     this.config = {
       bpm: 120,
       segmentLength: 8, // seconds
-      selectionTime: 10,
+      selectionTime: 15,
       performanceTime: 90, // 1.5 minutes
       editingTime: 60,
       phaseCountdownTime: 3,
@@ -70,12 +70,11 @@ export class GameState {
     this.availableSounds = shuffled.slice(0, count);
   }
 
-  addSelectedSound(soundData, audioBuffer, originalIndex) {
+  addSelectedSound(soundData, originalIndex) {
     if (this.selectedSounds.length >= 3) return false;
 
     this.selectedSounds.push({
       originalIndex,
-      audioBuffer,
       icon: soundData.icon,
       audio: soundData.audio,
     });

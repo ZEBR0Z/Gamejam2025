@@ -561,7 +561,6 @@ export class Game {
     const selectedSounds = this.gameState.selectedSounds.map((sound) => ({
       audio: sound.audio,
       icon: sound.icon,
-      audioBuffer: null, // Server only needs filenames
     }));
 
     this.multiplayerManager.submitSong(songData, selectedSounds);

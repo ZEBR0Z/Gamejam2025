@@ -130,8 +130,8 @@ export class EditingPhase {
       const selectedSound =
         this.gameState.selectedSounds[clickedEvent.soundIndex];
       if (selectedSound) {
-        this.audioEngine.startEditPreview(
-          selectedSound.audioBuffer,
+        this.audioEngine.startEditPreviewFromUrl(
+          selectedSound.audio,
           clickedEvent.pitchSemitones,
         );
       }
@@ -158,7 +158,7 @@ export class EditingPhase {
       const selectedSound =
         this.gameState.selectedSounds[draggedNote.soundIndex];
       if (selectedSound) {
-        this.audioEngine.startEditPreview(selectedSound.audioBuffer, newPitch);
+        this.audioEngine.startEditPreviewFromUrl(selectedSound.audio, newPitch);
       }
     }
 
@@ -233,11 +233,11 @@ export class EditingPhase {
     });
   }
 
-  playEvent(event, scheduleTime) {
+  async playEvent(event, scheduleTime) {
     const selectedSound = this.gameState.selectedSounds[event.soundIndex];
     if (selectedSound) {
-      this.audioEngine.playSound(
-        selectedSound.audioBuffer,
+      await this.audioEngine.playSoundFromUrl(
+        selectedSound.audio,
         event.pitchSemitones,
         scheduleTime,
       );

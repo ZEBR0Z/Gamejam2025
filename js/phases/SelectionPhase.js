@@ -59,10 +59,7 @@ export class SelectionPhase {
 
     try {
       const soundData = this.gameState.availableSounds[index];
-      const audioBuffer = await this.audioEngine.loadAudioBuffer(
-        soundData.audio,
-      );
-      this.audioEngine.startPreview(audioBuffer);
+      await this.audioEngine.startPreviewFromUrl(soundData.audio);
     } catch (error) {
       console.error("Failed to preview sound:", error);
     }
@@ -81,17 +78,8 @@ export class SelectionPhase {
     try {
       const soundData = this.gameState.availableSounds[index];
 
-      // Load audio buffer
-      const audioBuffer = await this.audioEngine.loadAudioBuffer(
-        soundData.audio,
-      );
-
-      // Add to selected sounds
-      const success = this.gameState.addSelectedSound(
-        soundData,
-        audioBuffer,
-        index,
-      );
+      // Add to selected sounds (no need to load audio buffer yet)
+      const success = this.gameState.addSelectedSound(soundData, index);
 
       if (success) {
         // Update UI
@@ -104,7 +92,7 @@ export class SelectionPhase {
         }
       }
     } catch (error) {
-      console.error("Failed to load sound:", error);
+      console.error("Failed to select sound:", error);
     }
   }
 

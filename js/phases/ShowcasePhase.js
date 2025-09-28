@@ -140,27 +140,15 @@ export class ShowcasePhase {
 
       // Convert each sound event in the segment
       for (const soundEvent of segment.songData) {
-        try {
-          const audioBuffer = await this.audioEngine.loadAudioBuffer(
-            soundEvent.audio,
-          );
-
-          this.currentSongEvents.push({
-            id: eventId++,
-            soundIndex: 0,
-            startTimeSec: soundEvent.time + timeOffset,
-            pitchSemitones: soundEvent.pitch || 0,
-            scheduled: false,
-            audioBuffer: audioBuffer,
-            icon: soundEvent.icon,
-          });
-        } catch (error) {
-          console.error(
-            "Failed to load sound for showcase:",
-            soundEvent.audio,
-            error,
-          );
-        }
+        this.currentSongEvents.push({
+          id: eventId++,
+          soundIndex: 0,
+          startTimeSec: soundEvent.time + timeOffset,
+          pitchSemitones: soundEvent.pitch || 0,
+          scheduled: false,
+          audio: soundEvent.audio, // Store audio URL instead of buffer
+          icon: soundEvent.icon,
+        });
       }
     }
 
@@ -219,10 +207,10 @@ export class ShowcasePhase {
     });
   }
 
-  playEvent(event, scheduleTime) {
-    if (event.audioBuffer) {
-      this.audioEngine.playSound(
-        event.audioBuffer,
+  async playEvent(event, scheduleTime) {
+    if (event.audio) {
+      await this.audioEngine.playSoundFromUrl(
+        event.audio,
         event.pitchSemitones,
         scheduleTime,
       );

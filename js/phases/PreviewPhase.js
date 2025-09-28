@@ -88,28 +88,15 @@ export class PreviewPhase {
 
     // Convert each sound event in the most recent segment
     for (const soundEvent of mostRecentSegment.songData) {
-      // Load the audio buffer for this sound
-      try {
-        const audioBuffer = await this.audioEngine.loadAudioBuffer(
-          soundEvent.audio,
-        );
-
-        this.previewEvents.push({
-          id: eventId++,
-          soundIndex: 0, // We'll map this to the loaded sound
-          startTimeSec: soundEvent.time, // No time offset needed since we're only showing one segment
-          pitchSemitones: soundEvent.pitch || 0,
-          scheduled: false,
-          audioBuffer: audioBuffer,
-          icon: soundEvent.icon,
-        });
-      } catch (error) {
-        console.error(
-          "Failed to load sound for preview:",
-          soundEvent.audio,
-          error,
-        );
-      }
+      this.previewEvents.push({
+        id: eventId++,
+        soundIndex: 0, // We'll map this to the loaded sound
+        startTimeSec: soundEvent.time, // No time offset needed since we're only showing one segment
+        pitchSemitones: soundEvent.pitch || 0,
+        scheduled: false,
+        audio: soundEvent.audio, // Store the audio URL instead of buffer
+        icon: soundEvent.icon,
+      });
     }
 
     // Preview ready - converted most recent segment to playable events
@@ -193,10 +180,10 @@ export class PreviewPhase {
     });
   }
 
-  playEvent(event, scheduleTime) {
-    if (event.audioBuffer) {
-      this.audioEngine.playSound(
-        event.audioBuffer,
+  async playEvent(event, scheduleTime) {
+    if (event.audio) {
+      await this.audioEngine.playSoundFromUrl(
+        event.audio,
         event.pitchSemitones,
         scheduleTime,
       );
@@ -384,29 +371,12 @@ export class PreviewPhase {
 
     // Load the selected sounds from the previous song for the next performance
     if (this.previousSong && this.previousSong.selectedSounds) {
-      try {
-        // Load audio buffers for the selected sounds
-        const loadedSounds = await Promise.all(
-          this.previousSong.selectedSounds.map(async (sound, index) => {
-            const audioBuffer = await this.audioEngine.loadAudioBuffer(
-              sound.audio,
-            );
-            return {
-              audio: sound.audio,
-              icon: sound.icon,
-              audioBuffer: audioBuffer,
-              originalIndex: index,
-            };
-          }),
-        );
-
-        // Set the properly loaded sounds in game state
-        this.gameState.selectedSounds = loadedSounds;
-      } catch (error) {
-        console.error("Failed to load selected sounds:", error);
-        // Fallback to the sounds without buffers
-        this.gameState.selectedSounds = this.previousSong.selectedSounds;
-      }
+      // Set the selected sounds in game state (no need to load audio buffers)
+      this.gameState.selectedSounds = this.previousSong.selectedSounds.map((sound, index) => ({
+        audio: sound.audio,
+        icon: sound.icon,
+        originalIndex: index,
+      }));
     }
 
     // Notify server that this player is ready to continue
