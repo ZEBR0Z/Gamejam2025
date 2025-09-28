@@ -483,7 +483,7 @@ export class UIManager {
       this.elements.totalSongs.textContent = totalSongs;
     }
     if (this.elements.songCreators) {
-      this.elements.songCreators.textContent = songCreators.join(", ");
+      this.elements.songCreators.textContent = songCreators.join(", then ");
     }
 
     // Update navigation buttons - disable in sequential mode

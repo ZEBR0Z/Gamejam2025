@@ -647,7 +647,10 @@ io.on("connection", (socket) => {
       originalCreator: song.originalCreator,
       segments: song.segments,
       selectedSounds: song.selectedSounds,
-      contributors: song.contributors,
+      contributors: song.contributors.map(playerId => {
+        const player = lobby.players.get(playerId);
+        return player ? player.name : playerId;
+      }),
     }));
 
     callback({
