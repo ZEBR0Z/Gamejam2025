@@ -20,11 +20,18 @@ body {
     font-family: heatFont;
     font-size: small;
     text-transform: uppercase;
-    background: pink;
-    color: #000;
+    background-image: url("/assets/art/bricks.png");
+    background-size: cover;
+    image-rendering: pixelated;
+    color: #fff;
     overflow: hidden;
     height: 100vh;
     image-rendering: pixelated;
+}
+
+.logo {
+  align-items: center;
+  justify-content: center;
 }
 
 #final {
@@ -78,7 +85,7 @@ input, button, textarea {
 .menu-container,
 .lobby-container {
   text-align: center;
-  max-width: 500px;
+  max-width: 700px;
   padding: 2rem;
 }
 
@@ -750,6 +757,8 @@ canvas {
 .spinner {
   width: 40px;
   height: 40px;
+  background-image: url('./assets/art/blackRecord.png');
+  background-size: cover;
   border: 4px solid rgba(255, 255, 255, 0.3);
   border-top: 4px solid #fff;
   animation: spin 1s linear infinite;
