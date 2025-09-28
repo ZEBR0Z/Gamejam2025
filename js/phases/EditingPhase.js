@@ -368,6 +368,9 @@ export class EditingPhase {
     this.inputController.unregisterHandler("editingMouseMove", "editing");
     this.inputController.unregisterHandler("editingMouseUp", "editing");
 
+    // Clean up transport event listeners
+    this.inputController.cleanupTransportEvents();
+
     // Stop scheduling and animation
     if (this.scheduleInterval) {
       clearInterval(this.scheduleInterval);

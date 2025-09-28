@@ -182,7 +182,7 @@ export class Game {
       "start-tutorial-btn": () => this.uiManager.showScreen("main-menu"),
     };
 
-    this.inputController.setupButtonEvents(menuHandlers);
+    this.inputController.setupPersistentButtonEvents(menuHandlers);
   }
 
   setupMultiplayerHandlers() {
@@ -197,7 +197,7 @@ export class Game {
       "ready-btn": () => this.setReady(),
     };
 
-    this.inputController.setupButtonEvents(lobbyHandlers);
+    this.inputController.setupPersistentButtonEvents(lobbyHandlers);
 
     // Input field handlers
     const lobbyCodeInput = this.uiManager.elements.lobbyCodeInput;

@@ -34,10 +34,7 @@ export class WaitingPhase {
 
     // Listen for phase changes (when all players have submitted)
     this.multiplayerManager.onPhaseChange = (gameState) => {
-      if (
-        gameState.state === "preview" ||
-        gameState.state === "showcase"
-      ) {
+      if (gameState.state === "preview" || gameState.state === "showcase") {
         this.complete(gameState);
       }
     };

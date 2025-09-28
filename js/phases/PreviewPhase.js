@@ -418,6 +418,9 @@ export class PreviewPhase {
   }
 
   cleanup() {
+    // Clean up transport event listeners
+    this.inputController.cleanupTransportEvents();
+
     // Stop scheduling and animation
     if (this.scheduleInterval) {
       clearInterval(this.scheduleInterval);

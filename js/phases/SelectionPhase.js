@@ -138,7 +138,8 @@ export class SelectionPhase {
   setupEventHandlers() {
     const continueBtn = this.uiManager.getElement("continueBtn");
     if (continueBtn) {
-      continueBtn.addEventListener("click", () => this.complete());
+      this.continueHandler = () => this.complete();
+      continueBtn.addEventListener("click", this.continueHandler);
     }
   }
 
@@ -164,6 +165,12 @@ export class SelectionPhase {
   }
 
   cleanup() {
+    // Clean up event listeners
+    const continueBtn = this.uiManager.getElement("continueBtn");
+    if (continueBtn && this.continueHandler) {
+      continueBtn.removeEventListener("click", this.continueHandler);
+    }
+
     this.stopPreview();
     this.timer.stopTimer("selectionTimeLeft");
   }

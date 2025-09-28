@@ -369,6 +369,9 @@ export class PerformancePhase {
     this.inputController.unregisterHandler("keyPress", "performance");
     this.inputController.unregisterHandler("timelineRightClick", "performance");
 
+    // Clean up transport event listeners
+    this.inputController.cleanupTransportEvents();
+
     // Stop scheduling and animation
     if (this.scheduleInterval) {
       clearInterval(this.scheduleInterval);

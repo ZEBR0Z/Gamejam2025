@@ -409,6 +409,10 @@ export class ShowcasePhase {
   }
 
   cleanup() {
+    // Clean up transport and button event listeners
+    this.inputController.cleanupTransportEvents();
+    this.inputController.cleanupButtonEvents();
+
     // Stop all audio previews
     this.audioEngine.stopPreview();
     this.audioEngine.stopEditPreview();

@@ -18,6 +18,9 @@ export class InputController {
     };
 
     this.eventHandlers = new Map();
+    this.currentTransportHandlers = new Map();
+    this.currentButtonHandlers = new Map();
+    this.persistentButtonHandlers = new Map();
     this.setupEventListeners();
   }
 
@@ -233,30 +236,109 @@ export class InputController {
     }
   }
 
-  // Button event setup
-  setupButtonEvents(buttonHandlers) {
+  // Button event setup for persistent UI (like main menu)
+  setupPersistentButtonEvents(buttonHandlers) {
+    // Store persistent handler references separately
+    if (!this.persistentButtonHandlers) {
+      this.persistentButtonHandlers = new Map();
+    }
+
     Object.entries(buttonHandlers).forEach(([buttonId, handler]) => {
       const button = document.getElementById(buttonId);
       if (button) {
         button.addEventListener("click", handler);
+
+        // Store the handler reference for cleanup
+        this.persistentButtonHandlers.set(buttonId, {
+          element: button,
+          handler: handler,
+        });
       }
     });
   }
 
+  // Button event setup for phase-specific events
+  setupButtonEvents(buttonHandlers) {
+    // Clean up any existing phase-specific button events first
+    this.cleanupButtonEvents();
+
+    // Store handler references for cleanup
+    this.currentButtonHandlers = new Map();
+
+    Object.entries(buttonHandlers).forEach(([buttonId, handler]) => {
+      const button = document.getElementById(buttonId);
+      if (button) {
+        button.addEventListener("click", handler);
+
+        // Store the handler reference for cleanup
+        this.currentButtonHandlers.set(buttonId, {
+          element: button,
+          handler: handler,
+        });
+      }
+    });
+  }
+
+  // Clean up phase-specific button event listeners
+  cleanupButtonEvents() {
+    if (this.currentButtonHandlers) {
+      this.currentButtonHandlers.forEach(({ element, handler }) => {
+        element.removeEventListener("click", handler);
+      });
+      this.currentButtonHandlers.clear();
+    }
+  }
+
+  // Clean up persistent button event listeners (called on full cleanup)
+  cleanupPersistentButtonEvents() {
+    if (this.persistentButtonHandlers) {
+      this.persistentButtonHandlers.forEach(({ element, handler }) => {
+        element.removeEventListener("click", handler);
+      });
+      this.persistentButtonHandlers.clear();
+    }
+  }
+
   // Transport control setup
   setupTransportEvents(transportHandlers) {
+    // Clean up any existing transport events first
+    this.cleanupTransportEvents();
+
+    // Store handler references for cleanup
+    this.currentTransportHandlers = new Map();
+
     Object.entries(transportHandlers).forEach(([controlId, handler]) => {
       const control = document.getElementById(controlId);
       if (control) {
+        let eventHandler;
         if (control.type === "range") {
-          control.addEventListener("input", (e) =>
-            handler(parseFloat(e.target.value)),
-          );
+          eventHandler = (e) => handler(parseFloat(e.target.value));
+          control.addEventListener("input", eventHandler);
         } else {
-          control.addEventListener("click", handler);
+          eventHandler = handler;
+          control.addEventListener("click", eventHandler);
         }
+
+        // Store the handler reference for cleanup
+        this.currentTransportHandlers.set(controlId, {
+          element: control,
+          eventType: control.type === "range" ? "input" : "click",
+          handler: eventHandler,
+        });
       }
     });
+  }
+
+  // Clean up transport event listeners
+  cleanupTransportEvents() {
+    if (this.currentTransportHandlers) {
+      this.currentTransportHandlers.forEach(
+        ({ element, eventType, handler }) => {
+          element.removeEventListener(eventType, handler);
+        },
+      );
+      this.currentTransportHandlers.clear();
+    }
   }
 
   // Clean up event listeners
@@ -266,6 +348,11 @@ export class InputController {
     document.removeEventListener("keyup", this.handleKeyUp);
     document.removeEventListener("mousemove", this.handleGlobalMouseMove);
     document.removeEventListener("mouseup", this.handleGlobalMouseUp);
+
+    // Clean up transport and button events
+    this.cleanupTransportEvents();
+    this.cleanupButtonEvents();
+    this.cleanupPersistentButtonEvents();
 
     // Clear handlers
     this.eventHandlers.clear();

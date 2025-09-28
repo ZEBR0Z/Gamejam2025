@@ -46,8 +46,8 @@ export class UIManager {
       performance: document.getElementById("performance"),
       editing: document.getElementById("editing"),
       "waiting-for-players": document.getElementById("waiting-for-players"),
-      "preview": document.getElementById("preview"),
-      "showcase": document.getElementById("showcase"),
+      preview: document.getElementById("preview"),
+      showcase: document.getElementById("showcase"),
       final: document.getElementById("final"),
     };
   }
