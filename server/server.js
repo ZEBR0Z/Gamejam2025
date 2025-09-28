@@ -39,8 +39,20 @@ const playerSockets = new Map(); // socketId -> playerId mapping
 
 // Game configuration
 const GAME_CONFIG = {
-  segmentLength: 8, // Length of each song segment
+  segmentLength: 8, // Length of each song segment (will be overridden by backing track length)
 };
+
+// Backing track configuration
+const BACKING_TRACKS = [
+  {
+    path: "assets/backing_tracks/klezmer.mp3",
+    duration: 12.722 // seconds - you should measure these accurately
+  },
+  {
+    path: "assets/backing_tracks/sad.mp3",
+    duration: 14.785 // seconds - you should measure these accurately
+  }
+];
 
 // Utility functions
 function generateLobbyCode() {
@@ -126,21 +138,28 @@ class Lobby {
     this.maxRounds = this.players.size; // Each song passes through all players
     this.currentRound = 0;
 
-    // Initialize one song per player
+    // Initialize one song per player with random backing tracks
     this.players.forEach((player) => {
       const songId = `song_${player.id}`;
+      const backingTrack = this.selectRandomBackingTrack();
       this.songs.set(songId, {
         id: songId,
         originalCreator: player.id,
         segments: [], // Will contain one segment per round
         contributors: [player.id],
         selectedSounds: null, // Set by first player in round 0
+        backingTrack: backingTrack, // Assigned backing track for this song
       });
     });
 
     this.selectRandomSounds(); // Pick 5 sounds for this lobby
     this.startSelectionPhase();
     return true;
+  }
+
+  selectRandomBackingTrack() {
+    const randomIndex = Math.floor(Math.random() * BACKING_TRACKS.length);
+    return BACKING_TRACKS[randomIndex];
   }
 
   selectRandomSounds() {
@@ -557,6 +576,7 @@ io.on("connection", (socket) => {
             id: song.id,
             events: song.events,
             contributors: song.contributors,
+            backingTrack: song.backingTrack,
           }
         : null,
       gameState: {
@@ -601,6 +621,7 @@ io.on("connection", (socket) => {
         segments: song.segments,
         selectedSounds: song.selectedSounds,
         contributors: song.contributors,
+        backingTrack: song.backingTrack,
       },
       previousPlayerName: previousPlayer ? previousPlayer.name : "Unknown",
       gameState: lobby.getGameState(),
@@ -651,6 +672,7 @@ io.on("connection", (socket) => {
         const player = lobby.players.get(playerId);
         return player ? player.name : playerId;
       }),
+      backingTrack: song.backingTrack,
     }));
 
     callback({

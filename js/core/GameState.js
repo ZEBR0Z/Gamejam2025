@@ -19,11 +19,20 @@ export class GameState {
     // Timing configuration
     this.config = {
       bpm: 120,
-      segmentLength: 8, // seconds
+      segmentLength: 8, // seconds - will be overridden by backing track duration
       selectionTime: 15,
       performanceTime: 90, // 1.5 minutes
       editingTime: 60,
       replacementTime: 15, // 15 seconds for sound replacement
+    };
+
+    // Backing track state
+    this.backingTrack = {
+      path: null,
+      duration: 8, // default fallback
+      isPlaying: false,
+      currentTime: 0,
+      audioElement: null,
     };
 
     // Playback state
@@ -148,8 +157,28 @@ export class GameState {
   updateCurrentTime(audioCurrentTime, totalTime = null) {
     if (this.playback.isPlaying) {
       const elapsed = audioCurrentTime - this.playback.startTime;
-      const timeLimit = totalTime || this.config.segmentLength;
+      const timeLimit = totalTime || this.getSegmentLength();
       this.playback.currentTime = elapsed % timeLimit;
+    }
+  }
+
+  // Backing track management
+  setBackingTrack(backingTrackInfo) {
+    if (backingTrackInfo) {
+      this.backingTrack.path = backingTrackInfo.path;
+      this.backingTrack.duration = backingTrackInfo.duration;
+      this.config.segmentLength = backingTrackInfo.duration; // Override segment length
+    }
+  }
+
+  getSegmentLength() {
+    return this.backingTrack.duration || this.config.segmentLength;
+  }
+
+  setBackingTrackPlayback(isPlaying, currentTime = null) {
+    this.backingTrack.isPlaying = isPlaying;
+    if (currentTime !== null) {
+      this.backingTrack.currentTime = currentTime;
     }
   }
 

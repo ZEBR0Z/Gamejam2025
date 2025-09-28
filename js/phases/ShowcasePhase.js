@@ -3,7 +3,7 @@
  *
  * - Loads all final songs from server
  * - Allows navigation between different songs
- * - Plays full-length collaborative pieces (N × 8 seconds each)
+ * - Plays full-length collaborative pieces with backing tracks
  * - Shows song contributors and creation timeline
  */
 export class ShowcasePhase {
@@ -111,15 +111,20 @@ export class ShowcasePhase {
       this.isSequentialMode,
     );
 
-    // Calculate total time for this song
+    // Set backing track for this song and calculate total time
+    if (song.backingTrack) {
+      this.gameState.setBackingTrack(song.backingTrack);
+      await this.audioEngine.loadBackingTrack(song.backingTrack.path);
+    }
     const totalTime =
-      song.segments.length * this.gameState.config.segmentLength;
+      song.segments.length * this.gameState.getSegmentLength();
 
     // Reset playback and start
     this.gameState.setPlaybackState(true, 0, this.audioEngine.getCurrentTime());
     this.uiManager.updateShowcaseTransportControls(true, 0, totalTime, this.isSequentialMode);
 
-    // Start playback
+    // Start backing track and playback
+    this.audioEngine.startBackingTrack();
     this.startScheduling();
     this.startAnimation();
     this.draw();
@@ -138,7 +143,7 @@ export class ShowcasePhase {
       segmentIndex++
     ) {
       const segment = song.segments[segmentIndex];
-      const timeOffset = segmentIndex * this.gameState.config.segmentLength;
+      const timeOffset = segmentIndex * this.gameState.getSegmentLength();
 
       // Convert each sound event in the segment
       for (const soundEvent of segment.songData) {
@@ -177,8 +182,8 @@ export class ShowcasePhase {
     const playbackTime = currentTime - this.gameState.playback.startTime;
     const song = this.finalSongs[this.currentSongIndex];
     const totalTime = song
-      ? song.segments.length * this.gameState.config.segmentLength
-      : this.gameState.config.segmentLength;
+      ? song.segments.length * this.gameState.getSegmentLength()
+      : this.gameState.getSegmentLength();
 
     // In sequential mode, don't loop - just play once
     const effectivePlaybackTime = this.isSequentialMode ? playbackTime : playbackTime % totalTime;
@@ -250,8 +255,8 @@ export class ShowcasePhase {
   updateCurrentTime() {
     const song = this.finalSongs[this.currentSongIndex];
     const totalTime = song
-      ? song.segments.length * this.gameState.config.segmentLength
-      : this.gameState.config.segmentLength;
+      ? song.segments.length * this.gameState.getSegmentLength()
+      : this.gameState.getSegmentLength();
 
     const currentTime = this.audioEngine.getCurrentTime();
     const elapsed = currentTime - this.gameState.playback.startTime;
@@ -325,7 +330,7 @@ export class ShowcasePhase {
         this.isSequentialMode,
       );
 
-      const totalTime = song.segments.length * this.gameState.config.segmentLength;
+      const totalTime = song.segments.length * this.gameState.getSegmentLength();
       this.uiManager.updateShowcaseTransportControls(
         false,
         this.gameState.playback.currentTime,
@@ -346,8 +351,8 @@ export class ShowcasePhase {
   play() {
     const song = this.finalSongs[this.currentSongIndex];
     const totalTime = song
-      ? song.segments.length * this.gameState.config.segmentLength
-      : this.gameState.config.segmentLength;
+      ? song.segments.length * this.gameState.getSegmentLength()
+      : this.gameState.getSegmentLength();
 
     this.gameState.setPlaybackState(
       true,
@@ -359,6 +364,9 @@ export class ShowcasePhase {
     this.currentSongEvents.forEach((event) => {
       event.scheduled = false;
     });
+
+    // Resume backing track
+    this.audioEngine.resumeBackingTrack();
 
     this.startScheduling();
     this.startAnimation();
@@ -377,10 +385,13 @@ export class ShowcasePhase {
       clearInterval(this.scheduleInterval);
     }
 
+    // Pause backing track
+    this.audioEngine.pauseBackingTrack();
+
     const song = this.finalSongs[this.currentSongIndex];
     const totalTime = song
-      ? song.segments.length * this.gameState.config.segmentLength
-      : this.gameState.config.segmentLength;
+      ? song.segments.length * this.gameState.getSegmentLength()
+      : this.gameState.getSegmentLength();
     this.uiManager.updateShowcaseTransportControls(
       false,
       this.gameState.playback.currentTime,
@@ -392,8 +403,8 @@ export class ShowcasePhase {
   restart() {
     const song = this.finalSongs[this.currentSongIndex];
     const totalTime = song
-      ? song.segments.length * this.gameState.config.segmentLength
-      : this.gameState.config.segmentLength;
+      ? song.segments.length * this.gameState.getSegmentLength()
+      : this.gameState.getSegmentLength();
 
     this.gameState.setPlaybackState(
       this.gameState.playback.isPlaying,
@@ -404,6 +415,11 @@ export class ShowcasePhase {
     this.currentSongEvents.forEach((event) => {
       event.scheduled = false;
     });
+
+    // Restart backing track
+    if (this.gameState.playback.isPlaying) {
+      this.audioEngine.startBackingTrack();
+    }
 
     this.uiManager.updateShowcaseTransportControls(
       this.gameState.playback.isPlaying,
@@ -416,8 +432,8 @@ export class ShowcasePhase {
   seekTo(time) {
     const song = this.finalSongs[this.currentSongIndex];
     const totalTime = song
-      ? song.segments.length * this.gameState.config.segmentLength
-      : this.gameState.config.segmentLength;
+      ? song.segments.length * this.gameState.getSegmentLength()
+      : this.gameState.getSegmentLength();
 
     this.gameState.setPlaybackState(
       this.gameState.playback.isPlaying,
@@ -428,6 +444,9 @@ export class ShowcasePhase {
     this.currentSongEvents.forEach((event) => {
       event.scheduled = false;
     });
+
+    // Sync backing track
+    this.audioEngine.seekBackingTrack(time);
 
     this.uiManager.updateShowcaseTransportControls(
       this.gameState.playback.isPlaying,
@@ -477,6 +496,9 @@ export class ShowcasePhase {
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
+
+    // Stop backing track
+    this.audioEngine.stopBackingTrack();
 
     // Reset playback state and sequential mode
     this.gameState.setPlaybackState(false, 0, 0);

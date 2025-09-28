@@ -10,6 +10,11 @@ export class AudioEngine {
     this.lookaheadTime = 0.2; // seconds
     this.audioBufferCache = new Map(); // Cache for loaded audio buffers
     this.loadingPromises = new Map(); // Track ongoing loads to prevent duplicates
+
+    // Backing track playback using HTML5 Audio for easy looping
+    this.backingTrackAudio = null;
+    this.backingTrackStartTime = 0;
+    this.isBackingTrackLoaded = false;
   }
 
   async initialize() {
@@ -166,5 +171,74 @@ export class AudioEngine {
 
   getCurrentTime() {
     return this.context ? this.context.currentTime : 0;
+  }
+
+  // Backing track management
+  async loadBackingTrack(trackPath) {
+    try {
+      this.stopBackingTrack();
+
+      this.backingTrackAudio = new Audio(trackPath);
+      this.backingTrackAudio.loop = true;
+      this.backingTrackAudio.volume = 0.6; // Slightly lower volume so user sounds are prominent
+
+      // Wait for the audio to be loadable
+      await new Promise((resolve, reject) => {
+        this.backingTrackAudio.addEventListener('canplaythrough', resolve, { once: true });
+        this.backingTrackAudio.addEventListener('error', reject, { once: true });
+        this.backingTrackAudio.load();
+      });
+
+      this.isBackingTrackLoaded = true;
+      console.log("Backing track loaded:", trackPath);
+    } catch (error) {
+      console.error("Failed to load backing track:", error);
+      this.isBackingTrackLoaded = false;
+    }
+  }
+
+  startBackingTrack() {
+    if (this.backingTrackAudio && this.isBackingTrackLoaded) {
+      this.backingTrackAudio.currentTime = 0;
+      this.backingTrackStartTime = this.getCurrentTime();
+      return this.backingTrackAudio.play();
+    }
+    return Promise.resolve();
+  }
+
+  pauseBackingTrack() {
+    if (this.backingTrackAudio) {
+      this.backingTrackAudio.pause();
+    }
+  }
+
+  resumeBackingTrack() {
+    if (this.backingTrackAudio && this.isBackingTrackLoaded) {
+      return this.backingTrackAudio.play();
+    }
+    return Promise.resolve();
+  }
+
+  stopBackingTrack() {
+    if (this.backingTrackAudio) {
+      this.backingTrackAudio.pause();
+      this.backingTrackAudio.currentTime = 0;
+      this.backingTrackAudio = null;
+    }
+    this.isBackingTrackLoaded = false;
+  }
+
+  seekBackingTrack(time) {
+    if (this.backingTrackAudio) {
+      this.backingTrackAudio.currentTime = time;
+    }
+  }
+
+  getBackingTrackCurrentTime() {
+    return this.backingTrackAudio ? this.backingTrackAudio.currentTime : 0;
+  }
+
+  isBackingTrackPlaying() {
+    return this.backingTrackAudio && !this.backingTrackAudio.paused;
   }
 }

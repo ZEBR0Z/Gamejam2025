@@ -63,6 +63,7 @@ export class Game {
       this.timer,
       this.canvasRenderer,
       this.inputController,
+      this.multiplayerManager,
     );
     this.editingPhase = new EditingPhase(
       this.gameState,
@@ -71,6 +72,7 @@ export class Game {
       this.timer,
       this.canvasRenderer,
       this.inputController,
+      this.multiplayerManager,
     );
     this.waitingPhase = new WaitingPhase(
       this.gameState,

@@ -10,6 +10,7 @@ export class EditingPhase {
     timer,
     canvasRenderer,
     inputController,
+    multiplayerManager,
   ) {
     this.gameState = gameState;
     this.uiManager = uiManager;
@@ -17,6 +18,7 @@ export class EditingPhase {
     this.timer = timer;
     this.canvasRenderer = canvasRenderer;
     this.inputController = inputController;
+    this.multiplayerManager = multiplayerManager;
 
     this.onPhaseComplete = null;
     this.scheduleInterval = null;
@@ -24,7 +26,7 @@ export class EditingPhase {
     this.selectedSoundIndex = 0; // Currently selected sound for editing (0, 1, or 2)
   }
 
-  start(onComplete) {
+  async start(onComplete) {
     this.onPhaseComplete = onComplete;
 
     console.log("Starting editing phase");
@@ -33,6 +35,10 @@ export class EditingPhase {
     // Reset editing state
     this.gameState.setPlaybackState(false, 0, 0);
     this.gameState.timers.editingTimeLeft = this.gameState.config.editingTime;
+
+    // Load backing track for current song (backing track should already be set from preview/performance)
+    // But load it again in case we're starting editing without going through those phases
+    await this.loadCurrentSongBackingTrack();
 
     // Setup UI
     this.setupUI();
@@ -56,7 +62,7 @@ export class EditingPhase {
       "editing",
       false,
       0,
-      this.gameState.config.segmentLength,
+      this.gameState.getSegmentLength(),
     );
 
     // Draw initial editing view
@@ -135,8 +141,11 @@ export class EditingPhase {
       "editing",
       true,
       0,
-      this.gameState.config.segmentLength,
+      this.gameState.getSegmentLength(),
     );
+
+    // Start backing track
+    this.audioEngine.startBackingTrack();
 
     // Start scheduling and animation
     this.startScheduling();
@@ -144,6 +153,17 @@ export class EditingPhase {
 
     // Start editing countdown
     this.timer.startEditingTimer(() => this.complete());
+  }
+
+  async loadCurrentSongBackingTrack() {
+    // Backing track should already be loaded from previous phases, but ensure it's loaded
+    if (this.gameState.backingTrack.path && !this.audioEngine.isBackingTrackLoaded) {
+      try {
+        await this.audioEngine.loadBackingTrack(this.gameState.backingTrack.path);
+      } catch (error) {
+        console.error("Failed to load backing track in editing phase:", error);
+      }
+    }
   }
 
   handleMouseDown(mouseX, mouseY) {
@@ -155,7 +175,7 @@ export class EditingPhase {
       mouseX,
       mouseY,
       canvas,
-      this.gameState.config.segmentLength,
+      this.gameState.getSegmentLength(),
       this.selectedSoundIndex, // Only events for currently selected sound
       this.gameState.playback.currentTime, // currentTime for viewport calculation
     );
@@ -213,7 +233,7 @@ export class EditingPhase {
         canvas,
         this.gameState.events,
         this.gameState.playback.currentTime,
-        this.gameState.config.segmentLength,
+        this.gameState.getSegmentLength(),
         this.selectedSoundIndex,
         this.gameState.playback.isPlaying,
         this.gameState.selectedSounds,
@@ -239,7 +259,7 @@ export class EditingPhase {
     const currentTime = this.audioEngine.getCurrentTime();
     const playbackTime =
       (currentTime - this.gameState.playback.startTime) %
-      this.gameState.config.segmentLength;
+      this.gameState.getSegmentLength();
 
     this.gameState.events.forEach((event) => {
       if (!event.scheduled) {
@@ -247,7 +267,7 @@ export class EditingPhase {
         let nextEventTime = eventTime;
 
         if (eventTime < playbackTime) {
-          nextEventTime = eventTime + this.gameState.config.segmentLength;
+          nextEventTime = eventTime + this.gameState.getSegmentLength();
         }
 
         const scheduleTime = currentTime + (nextEventTime - playbackTime);
@@ -260,7 +280,7 @@ export class EditingPhase {
             () => {
               event.scheduled = false;
             },
-            (this.gameState.config.segmentLength - eventTime + 0.1) * 1000,
+            (this.gameState.getSegmentLength() - eventTime + 0.1) * 1000,
           );
         }
       }
@@ -298,7 +318,7 @@ export class EditingPhase {
       "editing",
       this.gameState.playback.isPlaying,
       this.gameState.playback.currentTime,
-      this.gameState.config.segmentLength,
+      this.gameState.getSegmentLength(),
     );
   }
 
@@ -329,8 +349,11 @@ export class EditingPhase {
       "editing",
       true,
       this.gameState.playback.currentTime,
-      this.gameState.config.segmentLength,
+      this.gameState.getSegmentLength(),
     );
+
+    // Resume backing track
+    this.audioEngine.resumeBackingTrack();
   }
 
   pause() {
@@ -343,8 +366,11 @@ export class EditingPhase {
       "editing",
       false,
       this.gameState.playback.currentTime,
-      this.gameState.config.segmentLength,
+      this.gameState.getSegmentLength(),
     );
+
+    // Pause backing track
+    this.audioEngine.pauseBackingTrack();
   }
 
   restart() {
@@ -362,8 +388,13 @@ export class EditingPhase {
       "editing",
       this.gameState.playback.isPlaying,
       0,
-      this.gameState.config.segmentLength,
+      this.gameState.getSegmentLength(),
     );
+
+    // Restart backing track
+    if (this.gameState.playback.isPlaying) {
+      this.audioEngine.startBackingTrack();
+    }
   }
 
   seekTo(time) {
@@ -381,8 +412,11 @@ export class EditingPhase {
       "editing",
       this.gameState.playback.isPlaying,
       time,
-      this.gameState.config.segmentLength,
+      this.gameState.getSegmentLength(),
     );
+
+    // Sync backing track
+    this.audioEngine.seekBackingTrack(time);
   }
 
   selectSound(soundIndex) {
@@ -399,6 +433,7 @@ export class EditingPhase {
   complete() {
     this.pause();
     this.audioEngine.stopEditPreview();
+    this.audioEngine.stopBackingTrack();
     this.timer.stopTimer("editingTimeLeft");
 
     console.log("Editing phase complete");
@@ -434,6 +469,7 @@ export class EditingPhase {
     }
 
     this.audioEngine.stopEditPreview();
+    this.audioEngine.stopBackingTrack();
     this.timer.stopTimer("editingTimeLeft");
   }
 }

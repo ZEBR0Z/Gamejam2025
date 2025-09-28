@@ -1,6 +1,6 @@
 /**
  * PerformancePhase - Handles the performance recording phase
- * Players record sounds using keys 1, 2, 3 on an 8-second loop
+ * Players record sounds using keys 1, 2, 3 over a backing track loop
  */
 export class PerformancePhase {
   constructor(
@@ -10,6 +10,7 @@ export class PerformancePhase {
     timer,
     canvasRenderer,
     inputController,
+    multiplayerManager,
   ) {
     this.gameState = gameState;
     this.uiManager = uiManager;
@@ -17,13 +18,14 @@ export class PerformancePhase {
     this.timer = timer;
     this.canvasRenderer = canvasRenderer;
     this.inputController = inputController;
+    this.multiplayerManager = multiplayerManager;
 
     this.onPhaseComplete = null;
     this.scheduleInterval = null;
     this.animationFrameId = null;
   }
 
-  start(onComplete) {
+  async start(onComplete) {
     this.onPhaseComplete = onComplete;
 
     console.log("Starting performance phase");
@@ -35,6 +37,9 @@ export class PerformancePhase {
     this.gameState.timers.performanceTimeLeft =
       this.gameState.config.performanceTime;
 
+    // Load backing track for current song
+    await this.loadCurrentSongBackingTrack();
+
     // Setup UI
     this.setupUI();
 
@@ -43,6 +48,20 @@ export class PerformancePhase {
 
     // Start loop
     this.startLoop();
+  }
+
+  async loadCurrentSongBackingTrack() {
+    try {
+      const response = await this.multiplayerManager.getCurrentSong();
+      if (response.success && response.song && response.song.backingTrack) {
+        const backingTrack = response.song.backingTrack;
+        this.gameState.setBackingTrack(backingTrack);
+        await this.audioEngine.loadBackingTrack(backingTrack.path);
+        console.log("Loaded backing track:", backingTrack.path, "duration:", backingTrack.duration);
+      }
+    } catch (error) {
+      console.error("Failed to load backing track:", error);
+    }
   }
 
   setupUI() {
@@ -56,7 +75,7 @@ export class PerformancePhase {
         canvas,
         [],
         0,
-        this.gameState.config.segmentLength,
+        this.gameState.getSegmentLength(),
       );
     }
 
@@ -65,7 +84,7 @@ export class PerformancePhase {
       "performance",
       false,
       0,
-      this.gameState.config.segmentLength,
+      this.gameState.getSegmentLength(),
     );
   }
 
@@ -113,8 +132,11 @@ export class PerformancePhase {
       "performance",
       true,
       0,
-      this.gameState.config.segmentLength,
+      this.gameState.getSegmentLength(),
     );
+
+    // Start backing track
+    this.audioEngine.startBackingTrack();
 
     // Start performance countdown
     this.timer.startPerformanceTimer(() => this.complete());
@@ -135,7 +157,7 @@ export class PerformancePhase {
         canvas,
         [],
         0,
-        this.gameState.config.segmentLength,
+        this.gameState.getSegmentLength(),
       );
     }
   }
@@ -158,7 +180,7 @@ export class PerformancePhase {
     const currentTime = this.audioEngine.getCurrentTime();
     const playbackTime =
       (currentTime - this.gameState.playback.startTime) %
-      this.gameState.config.segmentLength;
+      this.gameState.getSegmentLength();
 
     // Schedule events that should play in the next lookahead window
     this.gameState.events.forEach((event) => {
@@ -168,7 +190,7 @@ export class PerformancePhase {
 
         // Handle looping
         if (eventTime < playbackTime) {
-          nextEventTime = eventTime + this.gameState.config.segmentLength;
+          nextEventTime = eventTime + this.gameState.getSegmentLength();
         }
 
         const scheduleTime = currentTime + (nextEventTime - playbackTime);
@@ -182,7 +204,7 @@ export class PerformancePhase {
             () => {
               event.scheduled = false;
             },
-            (this.gameState.config.segmentLength - eventTime + 0.1) * 1000,
+            (this.gameState.getSegmentLength() - eventTime + 0.1) * 1000,
           );
         }
       }
@@ -220,7 +242,7 @@ export class PerformancePhase {
       "performance",
       this.gameState.playback.isPlaying,
       this.gameState.playback.currentTime,
-      this.gameState.config.segmentLength,
+      this.gameState.getSegmentLength(),
     );
   }
 
@@ -231,7 +253,7 @@ export class PerformancePhase {
         canvas,
         this.gameState.events,
         this.gameState.playback.currentTime,
-        this.gameState.config.segmentLength,
+        this.gameState.getSegmentLength(),
         this.gameState.selectedSounds,
       );
     }
@@ -257,7 +279,7 @@ export class PerformancePhase {
       mouseX,
       mouseY,
       canvas,
-      this.gameState.config.segmentLength,
+      this.gameState.getSegmentLength(),
       null, // soundIndex (null for main timeline)
       this.gameState.playback.currentTime, // currentTime for viewport calculation
     );
@@ -295,8 +317,11 @@ export class PerformancePhase {
       "performance",
       true,
       this.gameState.playback.currentTime,
-      this.gameState.config.segmentLength,
+      this.gameState.getSegmentLength(),
     );
+
+    // Resume backing track if needed
+    this.audioEngine.resumeBackingTrack();
   }
 
   pause() {
@@ -309,8 +334,11 @@ export class PerformancePhase {
       "performance",
       false,
       this.gameState.playback.currentTime,
-      this.gameState.config.segmentLength,
+      this.gameState.getSegmentLength(),
     );
+
+    // Pause backing track
+    this.audioEngine.pauseBackingTrack();
   }
 
   restart() {
@@ -329,8 +357,13 @@ export class PerformancePhase {
       "performance",
       this.gameState.playback.isPlaying,
       0,
-      this.gameState.config.segmentLength,
+      this.gameState.getSegmentLength(),
     );
+
+    // Restart backing track
+    if (this.gameState.playback.isPlaying) {
+      this.audioEngine.startBackingTrack();
+    }
   }
 
   seekTo(time) {
@@ -349,12 +382,16 @@ export class PerformancePhase {
       "performance",
       this.gameState.playback.isPlaying,
       time,
-      this.gameState.config.segmentLength,
+      this.gameState.getSegmentLength(),
     );
+
+    // Sync backing track
+    this.audioEngine.seekBackingTrack(time);
   }
 
   complete() {
     this.pause();
+    this.audioEngine.stopBackingTrack();
     this.timer.stopTimer("performanceTimeLeft");
 
     console.log("Performance phase complete");
@@ -378,6 +415,9 @@ export class PerformancePhase {
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
+
+    // Stop backing track
+    this.audioEngine.stopBackingTrack();
 
     this.timer.stopTimer("performanceTimeLeft");
   }

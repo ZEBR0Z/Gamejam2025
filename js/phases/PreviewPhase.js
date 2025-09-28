@@ -2,7 +2,7 @@
  * PreviewPhase - Preview previous player's work before adding to it
  *
  * - Loads and displays only the most recent segment (from previous player)
- * - Plays back a single 8-second segment timeline
+ * - Plays back a single segment timeline with backing track
  * - Loads the original sound selection for the next performance phase
  * - Transitions to performance when player is ready
  */
@@ -55,6 +55,12 @@ export class PreviewPhase {
       if (response.success) {
         this.previousSong = response.song;
 
+        // Set backing track info and load it
+        if (this.previousSong.backingTrack) {
+          this.gameState.setBackingTrack(this.previousSong.backingTrack);
+          await this.audioEngine.loadBackingTrack(this.previousSong.backingTrack.path);
+        }
+
         // Update UI with previous player info
         this.uiManager.updatePreviewScreen(
           response.gameState,
@@ -104,7 +110,7 @@ export class PreviewPhase {
 
   setupUI() {
     // Calculate total preview time (single segment only)
-    const totalTime = this.gameState.config.segmentLength;
+    const totalTime = this.gameState.getSegmentLength();
 
     // Reset transport controls
     this.uiManager.updatePreviewTransportControls(false, 0, totalTime);
@@ -126,10 +132,13 @@ export class PreviewPhase {
   }
 
   startPreviewPlayback() {
-    const totalTime = this.gameState.config.segmentLength;
+    const totalTime = this.gameState.getSegmentLength();
 
     this.gameState.setPlaybackState(true, 0, this.audioEngine.getCurrentTime());
     this.uiManager.updatePreviewTransportControls(true, 0, totalTime);
+
+    // Start backing track
+    this.audioEngine.startBackingTrack();
 
     // Start scheduling and animation
     this.startScheduling();
@@ -154,7 +163,7 @@ export class PreviewPhase {
 
     const currentTime = this.audioEngine.getCurrentTime();
     const playbackTime = currentTime - this.gameState.playback.startTime;
-    const totalTime = this.gameState.config.segmentLength;
+    const totalTime = this.gameState.getSegmentLength();
 
     this.previewEvents.forEach((event) => {
       if (!event.scheduled) {
@@ -205,7 +214,7 @@ export class PreviewPhase {
   }
 
   updateCurrentTime() {
-    const totalTime = this.gameState.config.segmentLength;
+    const totalTime = this.gameState.getSegmentLength();
     this.gameState.updateCurrentTime(this.audioEngine.getCurrentTime());
     this.uiManager.updatePreviewTransportControls(
       this.gameState.playback.isPlaying,
@@ -217,7 +226,7 @@ export class PreviewPhase {
   draw() {
     const canvas = this.uiManager.elements.previewCanvas;
     if (canvas && this.previewEvents.length > 0) {
-      const totalTime = this.gameState.config.segmentLength;
+      const totalTime = this.gameState.getSegmentLength();
 
       // Use the final view renderer to show the single segment preview timeline
       this.canvasRenderer.drawFinalView(
@@ -238,7 +247,7 @@ export class PreviewPhase {
   }
 
   play() {
-    const totalTime = this.gameState.config.segmentLength;
+    const totalTime = this.gameState.getSegmentLength();
 
     this.gameState.setPlaybackState(
       true,
@@ -250,6 +259,9 @@ export class PreviewPhase {
     this.previewEvents.forEach((event) => {
       event.scheduled = false;
     });
+
+    // Resume backing track
+    this.audioEngine.resumeBackingTrack();
 
     this.startScheduling();
     this.startAnimation();
@@ -267,7 +279,10 @@ export class PreviewPhase {
       clearInterval(this.scheduleInterval);
     }
 
-    const totalTime = this.gameState.config.segmentLength;
+    // Pause backing track
+    this.audioEngine.pauseBackingTrack();
+
+    const totalTime = this.gameState.getSegmentLength();
     this.uiManager.updatePreviewTransportControls(
       false,
       this.gameState.playback.currentTime,
@@ -276,7 +291,7 @@ export class PreviewPhase {
   }
 
   restart() {
-    const totalTime = this.gameState.config.segmentLength;
+    const totalTime = this.gameState.getSegmentLength();
 
     this.gameState.setPlaybackState(
       this.gameState.playback.isPlaying,
@@ -288,6 +303,11 @@ export class PreviewPhase {
       event.scheduled = false;
     });
 
+    // Restart backing track
+    if (this.gameState.playback.isPlaying) {
+      this.audioEngine.startBackingTrack();
+    }
+
     this.uiManager.updatePreviewTransportControls(
       this.gameState.playback.isPlaying,
       0,
@@ -296,7 +316,7 @@ export class PreviewPhase {
   }
 
   seekTo(time) {
-    const totalTime = this.gameState.config.segmentLength;
+    const totalTime = this.gameState.getSegmentLength();
 
     this.gameState.setPlaybackState(
       this.gameState.playback.isPlaying,
@@ -307,6 +327,9 @@ export class PreviewPhase {
     this.previewEvents.forEach((event) => {
       event.scheduled = false;
     });
+
+    // Sync backing track
+    this.audioEngine.seekBackingTrack(time);
 
     this.uiManager.updatePreviewTransportControls(
       this.gameState.playback.isPlaying,
@@ -368,6 +391,7 @@ export class PreviewPhase {
     }
 
     this.pause();
+    this.audioEngine.stopBackingTrack();
 
     // Load the selected sounds from the previous song for the next round
     if (this.previousSong && this.previousSong.selectedSounds) {
@@ -412,6 +436,9 @@ export class PreviewPhase {
     if (this.phaseTimerInterval) {
       clearInterval(this.phaseTimerInterval);
     }
+
+    // Stop backing track
+    this.audioEngine.stopBackingTrack();
 
     // Reset playback state
     this.gameState.setPlaybackState(false, 0, 0);
