@@ -83,6 +83,9 @@ export class PerformancePhase {
     }
 
     startLoop() {
+        // Refresh UI in case selected sounds have changed (e.g., in subsequent rounds)
+        this.refreshUI();
+
         this.gameState.setPlaybackState(true, 0, this.audioEngine.getCurrentTime());
         this.uiManager.updateTransportControls('performance', true, 0, this.gameState.config.segmentLength);
 
@@ -92,6 +95,17 @@ export class PerformancePhase {
         // Start scheduling and animation
         this.startScheduling();
         this.startAnimation();
+    }
+
+    refreshUI() {
+        // Update sound icons with current selected sounds
+        this.uiManager.updateSoundIcons(this.gameState.selectedSounds);
+
+        // Clear timeline
+        const canvas = this.uiManager.getCanvas('timelineCanvas');
+        if (canvas) {
+            this.canvasRenderer.drawTimeline(canvas, [], 0, this.gameState.config.segmentLength);
+        }
     }
 
     startScheduling() {

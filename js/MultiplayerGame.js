@@ -1,6 +1,17 @@
 /**
- * MultiplayerGame - Multiplayer version of the music game
- * Integrates with the server for collaborative music creation
+ * MultiplayerGame - Gartic Phone-style collaborative music game
+ *
+ * Game Flow:
+ * 1. Lobby creation/joining
+ * 2. Sound selection (each player picks 3 from 5 sounds)
+ * 3. Multiple rounds of music creation:
+ *    - Performance: Record 8-second segments
+ *    - Editing: Adjust pitch and timing
+ *    - Waiting: Wait for all players to finish
+ *    - Preview: Listen to previous player's work (rounds 2+)
+ * 4. Final showcase: Play all completed collaborative songs
+ *
+ * Each song passes through all players, creating N-segment collaborative pieces
  */
 
 // Core systems
@@ -423,9 +434,11 @@ export class MultiplayerGame {
         }
     }
 
+    /**
+     * Handle phase changes from server
+     * Routes to appropriate phase based on game state
+     */
     handlePhaseChange(gameState) {
-        console.log('Phase changed to:', gameState.state);
-
         switch (gameState.state) {
             case 'performance':
                 this.startPerformancePhase();
@@ -564,28 +577,30 @@ export class MultiplayerGame {
         });
     }
 
+    /**
+     * Submit completed song segment to server
+     * Converts events to server format and includes sound selection data
+     */
     submitSongToServer() {
-        // Convert events to song format with filenames
+        // Convert events to server format (filenames + timing/pitch data)
         const songData = this.gameState.events.map(event => {
             const selectedSound = this.gameState.selectedSounds[event.soundIndex];
             return {
-                audio: selectedSound.audio, // filename like "sounds/21.wav"
-                icon: selectedSound.icon,   // filename like "sounds/21__icon.png"
+                audio: selectedSound.audio,
+                icon: selectedSound.icon,
                 time: event.startTimeSec,
                 pitch: event.pitchSemitones || 0
             };
         });
 
-        // Include selected sounds for first round (so next player knows what sounds to use)
+        // Include selected sounds (for subsequent rounds to use same sounds)
         const selectedSounds = this.gameState.selectedSounds.map(sound => ({
             audio: sound.audio,
             icon: sound.icon,
-            audioBuffer: null // Don't send the buffer, just the filenames
+            audioBuffer: null // Server only needs filenames
         }));
 
-        // Submit song data to server
         this.multiplayerManager.submitSong(songData, selectedSounds);
-        console.log('Song submitted to server:', songData);
     }
 
     restartGame() {

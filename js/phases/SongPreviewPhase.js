@@ -1,6 +1,10 @@
 /**
- * SongPreviewPhase - Handles the song preview phase
- * Shows the previous player's contribution and allows listening before continuing
+ * SongPreviewPhase - Preview previous player's work before adding to it
+ *
+ * - Loads and displays the song segments created so far
+ * - Plays back the full timeline (all previous segments)
+ * - Loads the original sound selection for the next performance phase
+ * - Transitions to performance when player is ready
  */
 export class SongPreviewPhase {
     constructor(gameState, uiManager, audioEngine, canvasRenderer, inputController, multiplayerManager) {
@@ -85,7 +89,7 @@ export class SongPreviewPhase {
             }
         }
 
-        console.log(`Loaded ${this.previewEvents.length} events for preview`);
+        // Preview ready - converted segments to playable events
     }
 
     setupUI() {
@@ -191,8 +195,8 @@ export class SongPreviewPhase {
         if (canvas && this.previewEvents.length > 0) {
             const totalTime = this.previousSong ? this.previousSong.segments.length * this.gameState.config.segmentLength : this.gameState.config.segmentLength;
 
-            // Use the timeline renderer to show the preview
-            this.canvasRenderer.drawTimeline(
+            // Use the final view renderer to show the full preview timeline
+            this.canvasRenderer.drawFinalView(
                 canvas,
                 this.previewEvents,
                 this.gameState.playback.currentTime,
@@ -271,19 +275,37 @@ export class SongPreviewPhase {
         this.uiManager.updatePreviewTransportControls(this.gameState.playback.isPlaying, time, totalTime);
     }
 
-    continueToPerformance() {
+    async continueToPerformance() {
         this.pause();
 
         // Load the selected sounds from the previous song for the next performance
         if (this.previousSong && this.previousSong.selectedSounds) {
-            // Convert selected sounds format back to game state format
-            this.gameState.selectedSounds = this.previousSong.selectedSounds;
+            try {
+                // Load audio buffers for the selected sounds
+                const loadedSounds = await Promise.all(
+                    this.previousSong.selectedSounds.map(async (sound, index) => {
+                        const audioBuffer = await this.audioEngine.loadAudioBuffer(sound.audio);
+                        return {
+                            audio: sound.audio,
+                            icon: sound.icon,
+                            audioBuffer: audioBuffer,
+                            originalIndex: index
+                        };
+                    })
+                );
+
+                // Set the properly loaded sounds in game state
+                this.gameState.selectedSounds = loadedSounds;
+            } catch (error) {
+                console.error('Failed to load selected sounds:', error);
+                // Fallback to the sounds without buffers
+                this.gameState.selectedSounds = this.previousSong.selectedSounds;
+            }
         }
 
         // Notify server that this player is ready to continue
         this.multiplayerManager.continueToPerformance();
 
-        console.log('Continuing to performance phase');
         if (this.onPhaseComplete) {
             this.onPhaseComplete();
         }

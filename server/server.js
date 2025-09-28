@@ -19,17 +19,31 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..')));
 
+/**
+ * GARTIC PHONE-STYLE MUSIC GAME SERVER
+ *
+ * Game Flow:
+ * 1. Players create/join lobbies
+ * 2. Each player selects 3 sounds from 5 random options
+ * 3. Multiple rounds where players work on each other's songs:
+ *    - Round 0: Each player creates their own song (8 seconds)
+ *    - Round 1+: Songs rotate, players add to previous player's song
+ * 4. Final showcase: Play all completed collaborative songs
+ *
+ * For N players: N songs, each with N segments (N × 8 seconds total)
+ */
+
 // Game state management
-const lobbies = new Map();
+const lobbies = new Map(); // lobbyCode -> Lobby instance
 const playerSockets = new Map(); // socketId -> playerId mapping
 
-// Game configuration
+// Game timing configuration (in seconds)
 const GAME_CONFIG = {
-  selectionTime: 10,
-  performanceTime: 90,
-  editingTime: 60,
-  phaseCountdownTime: 3,
-  segmentLength: 8
+  selectionTime: 10,      // Time to select 3 sounds
+  performanceTime: 90,    // Time to record music (1.5 minutes)
+  editingTime: 60,        // Time to edit pitch/timing (1 minute)
+  phaseCountdownTime: 3,  // Countdown before each phase
+  segmentLength: 8        // Length of each song segment
 };
 
 // Utility functions
@@ -41,7 +55,16 @@ function generatePlayerId() {
   return Math.random().toString(36).substring(2, 15);
 }
 
-// Lobby management
+/**
+ * Lobby Class - Manages a single game session
+ *
+ * States: waiting -> selection -> performance -> editing -> waiting-for-players -> song-preview -> final-showcase
+ *
+ * Song Structure:
+ * - Each song has multiple segments (one per round)
+ * - Each segment contains sound events from one player
+ * - Songs rotate between players each round (Gartic Phone style)
+ */
 class Lobby {
   constructor(code, hostSocketId) {
     this.code = code;
@@ -102,29 +125,31 @@ class Lobby {
     return this.players.size > 0 && Array.from(this.players.values()).every(p => p.isReady);
   }
 
+  /**
+   * Start the game - initializes songs and begins selection phase
+   * Each player gets their own song to start with
+   */
   startGame() {
     if (this.players.size < 2) {
       return false; // Need at least 2 players
     }
 
-    this.maxRounds = this.players.size;
+    this.maxRounds = this.players.size; // Each song passes through all players
     this.currentRound = 0;
 
-    // Initialize songs - one per player with segments structure
+    // Initialize one song per player
     this.players.forEach(player => {
       const songId = `song_${player.id}`;
       this.songs.set(songId, {
         id: songId,
         originalCreator: player.id,
-        segments: [], // Array of segments, each containing sound events
-        contributors: [player.id], // Track who has worked on this song
-        selectedSounds: null // Will store the sound selection from first player
+        segments: [], // Will contain one segment per round
+        contributors: [player.id],
+        selectedSounds: null // Set by first player in round 0
       });
     });
 
-    // Select 5 random sounds for this lobby (from soundlist.json)
-    this.selectRandomSounds();
-
+    this.selectRandomSounds(); // Pick 5 sounds for this lobby
     this.startSelectionPhase();
     return true;
   }
@@ -152,20 +177,22 @@ class Lobby {
     }
   }
 
+  /**
+   * Start selection phase - players choose 3 sounds from 5 options
+   * Each player initially works on their own song
+   */
   startSelectionPhase() {
     this.state = 'selection';
     this.phaseStartTime = Date.now();
 
-    // Initialize song assignments - each player starts with their own song
+    // Assign each player to their own song initially
     this.currentSongAssignments.clear();
     this.players.forEach(player => {
       const songId = `song_${player.id}`;
       this.currentSongAssignments.set(player.id, songId);
-      console.log(`Assigned player ${player.id} to song ${songId}`);
     });
-    console.log(`Total song assignments:`, this.currentSongAssignments.size);
 
-    // Reset player ready states
+    // Reset ready states
     this.players.forEach(player => {
       player.isReady = false;
     });
@@ -231,16 +258,18 @@ class Lobby {
     this.startWaitingForPlayers();
   }
 
+  /**
+   * Start waiting phase - players submit their completed segments
+   */
   startWaitingForPlayers() {
     this.state = 'waiting-for-players';
     this.phaseStartTime = Date.now();
-
-    // Clear round submissions
-    this.roundSubmissions.clear();
-
-    console.log(`Lobby ${this.code}: Waiting for all players to submit round ${this.currentRound + 1}`);
   }
 
+  /**
+   * Check if all players have submitted their songs for the current round
+   * If so, either move to next round or end the game
+   */
   checkAllPlayersSubmitted() {
     const allSubmitted = Array.from(this.players.keys()).every(playerId =>
       this.roundSubmissions.get(playerId) === true
@@ -250,49 +279,50 @@ class Lobby {
       this.currentRound++;
 
       if (this.currentRound < this.maxRounds) {
-        // Move to next round - rotate song assignments and show preview
+        // More rounds to go - rotate songs and continue
+        this.roundSubmissions.clear(); // Reset for new round
         this.rotateSongAssignments();
         this.startSongPreview();
       } else {
-        // All rounds complete, go to final showcase
+        // All rounds complete - show final results
         this.startFinalShowcase();
       }
     }
   }
 
+  /**
+   * Start song preview phase - players listen to previous work before adding to it
+   */
   startSongPreview() {
     this.state = 'song-preview';
     this.phaseStartTime = Date.now();
-
-    console.log(`Lobby ${this.code}: Starting song preview for round ${this.currentRound + 1}`);
   }
 
+  /**
+   * Start final showcase - display all completed collaborative songs
+   */
   startFinalShowcase() {
     this.state = 'final-showcase';
     this.phaseStartTime = Date.now();
-
-    console.log(`Lobby ${this.code}: Starting final showcase`);
   }
 
+  /**
+   * Rotate song assignments - Gartic Phone style
+   * Each player gets the song from the previous player in the rotation
+   */
   rotateSongAssignments() {
-    // Implement Gartic Phone-style rotation
     const playerIds = Array.from(this.players.keys());
     const newAssignments = new Map();
 
-    console.log(`Rotating song assignments for round ${this.currentRound + 1}`);
-    console.log(`Player IDs:`, playerIds);
-    console.log(`Current assignments before rotation:`, Array.from(this.currentSongAssignments.entries()));
-
     playerIds.forEach((playerId, index) => {
-      // Each player gets the song from the previous player in the rotation
+      // Get song from previous player (with wraparound)
       const prevIndex = (index - 1 + playerIds.length) % playerIds.length;
       const prevPlayerId = playerIds[prevIndex];
       const songId = this.currentSongAssignments.get(prevPlayerId);
 
       newAssignments.set(playerId, songId);
-      console.log(`Player ${playerId} gets song ${songId} from player ${prevPlayerId}`);
 
-      // Add this player as a contributor to the song
+      // Track that this player will contribute to this song
       const song = this.songs.get(songId);
       if (song && !song.contributors.includes(playerId)) {
         song.contributors.push(playerId);
@@ -300,7 +330,6 @@ class Lobby {
     });
 
     this.currentSongAssignments = newAssignments;
-    console.log(`New assignments after rotation:`, Array.from(this.currentSongAssignments.entries()));
   }
 
   startFinalPhase() {
@@ -308,39 +337,50 @@ class Lobby {
     this.phaseStartTime = Date.now();
   }
 
+  /**
+   * Submit a song segment from a player
+   * Adds the segment to the assigned song and checks if round is complete
+   */
   submitSong(playerId, songData) {
-    // Get the song this player is currently working on
+    // Prevent duplicate submissions
+    if (this.roundSubmissions.get(playerId) === true) {
+      return false;
+    }
+
+    // Get assigned song
     const songId = this.currentSongAssignments.get(playerId);
     const song = this.songs.get(songId);
 
     if (!song) {
       console.error(`No song found for player ${playerId}`);
-      console.error(`Current song assignments:`, Array.from(this.currentSongAssignments.entries()));
-      console.error(`Available songs:`, Array.from(this.songs.keys()));
       return false;
     }
 
-    // Add this segment to the song
+    // Prevent songs from getting too many segments
+    if (song.segments.length >= this.maxRounds) {
+      console.warn(`Song ${songId} already complete, ignoring submission`);
+      return false;
+    }
+
+    // Add segment to song
     const segment = {
       roundNumber: this.currentRound,
       playerId: playerId,
-      songData: songData.songData, // Array of {audio, icon, time, pitch} objects
+      songData: songData.songData,
       submittedAt: Date.now()
     };
 
     song.segments.push(segment);
 
-    // Store selected sounds from first round
+    // Store selected sounds from first round (for later rounds to use)
     if (this.currentRound === 0 && songData.selectedSounds) {
       song.selectedSounds = songData.selectedSounds;
     }
 
-    // Mark this player as submitted for this round
+    // Mark player as submitted
     this.roundSubmissions.set(playerId, true);
 
-    console.log(`Player ${playerId} submitted segment for song ${songId}, round ${this.currentRound + 1}`);
-
-    // Check if all players have submitted
+    // Check if round is complete
     this.checkAllPlayersSubmitted();
 
     return true;
@@ -396,10 +436,19 @@ class Lobby {
   }
 }
 
-// Socket.IO event handlers
+/**
+ * SOCKET.IO EVENT HANDLERS
+ *
+ * Main events:
+ * - createLobby: Host creates a new game lobby
+ * - joinLobby: Player joins existing lobby
+ * - playerReady: Player indicates ready to start
+ * - submitSong: Player submits completed song segment
+ * - getPreviousSong: Get song data for preview phase
+ * - continueToPerformance: Ready to move from preview to performance
+ * - getFinalSongs: Get all completed songs for showcase
+ */
 io.on('connection', (socket) => {
-  console.log(`Player connected: ${socket.id}`);
-
   // Create lobby
   socket.on('createLobby', (data, callback) => {
     const { playerName } = data;

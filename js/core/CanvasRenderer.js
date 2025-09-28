@@ -129,7 +129,7 @@ export class CanvasRenderer {
     }
 
     // Final view rendering (combined timeline)
-    drawFinalView(canvas, events, currentTime, segmentLength) {
+    drawFinalView(canvas, events, currentTime, totalTime) {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
@@ -143,12 +143,12 @@ export class CanvasRenderer {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
         ctx.fillRect(0, 0, width, height);
 
-        // Draw time grid
-        this.drawTimeGrid(ctx, width, height, segmentLength);
+        // Draw time grid for the full timeline
+        this.drawTimeGrid(ctx, width, height, totalTime);
 
         // Draw events
         events.forEach(event => {
-            const x = (event.startTimeSec / segmentLength) * width;
+            const x = (event.startTimeSec / totalTime) * width;
             const centerY = height / 2;
             const y = centerY - (event.pitchSemitones * 5); // Visual offset for pitch
 
@@ -166,7 +166,7 @@ export class CanvasRenderer {
         });
 
         // Draw playhead
-        this.drawPlayhead(ctx, currentTime, segmentLength, width, height);
+        this.drawPlayhead(ctx, currentTime, totalTime, width, height);
     }
 
     // Helper methods

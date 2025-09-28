@@ -1,6 +1,10 @@
 /**
- * FinalShowcasePhase - Handles the final showcase phase
- * Shows all completed collaborative songs one by one
+ * FinalShowcasePhase - Display all completed collaborative songs
+ *
+ * - Loads all final songs from server
+ * - Allows navigation between different songs
+ * - Plays full-length collaborative pieces (N × 8 seconds each)
+ * - Shows song contributors and creation timeline
  */
 export class FinalShowcasePhase {
     constructor(gameState, uiManager, audioEngine, canvasRenderer, inputController, multiplayerManager) {
@@ -46,7 +50,6 @@ export class FinalShowcasePhase {
             const response = await this.multiplayerManager.getFinalSongs();
             if (response.success) {
                 this.finalSongs = response.songs;
-                console.log(`Loaded ${this.finalSongs.length} final songs for showcase`);
             } else {
                 console.error('Failed to load final songs:', response.error);
             }
@@ -140,7 +143,7 @@ export class FinalShowcasePhase {
             }
         }
 
-        console.log(`Converted song ${song.id} to ${this.currentSongEvents.length} events`);
+        // Song converted to playable events
     }
 
     startScheduling() {
