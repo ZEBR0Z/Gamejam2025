@@ -73,7 +73,8 @@ export class EditingPhase {
         const transportHandlers = {
             'edit-play-pause-btn': () => this.togglePlayback(),
             'edit-restart-btn': () => this.restart(),
-            'edit-progress-bar': (value) => this.seekTo(value)
+            'edit-progress-bar': (value) => this.seekTo(value),
+            'editing-continue-btn': () => this.complete()
         };
 
         this.inputController.setupTransportEvents(transportHandlers);
