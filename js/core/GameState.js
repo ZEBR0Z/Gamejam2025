@@ -23,6 +23,7 @@ export class GameState {
       selectionTime: 15,
       performanceTime: 90, // 1.5 minutes
       editingTime: 60,
+      replacementTime: 15, // 15 seconds for sound replacement
       phaseCountdownTime: 3,
     };
 
@@ -38,6 +39,7 @@ export class GameState {
       selectionTimeLeft: this.config.selectionTime,
       performanceTimeLeft: this.config.performanceTime,
       editingTimeLeft: this.config.editingTime,
+      replacementTimeLeft: this.config.replacementTime,
       phaseCountdown: 0,
     };
 
@@ -146,6 +148,7 @@ export class GameState {
     this.timers.selectionTimeLeft = this.config.selectionTime;
     this.timers.performanceTimeLeft = this.config.performanceTime;
     this.timers.editingTimeLeft = this.config.editingTime;
+    this.timers.replacementTimeLeft = this.config.replacementTime;
     this.timers.phaseCountdown = this.config.phaseCountdownTime;
   }
 

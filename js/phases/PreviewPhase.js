@@ -369,18 +369,20 @@ export class PreviewPhase {
 
     this.pause();
 
-    // Load the selected sounds from the previous song for the next performance
+    // Load the selected sounds from the previous song for the next round
     if (this.previousSong && this.previousSong.selectedSounds) {
       // Set the selected sounds in game state (no need to load audio buffers)
-      this.gameState.selectedSounds = this.previousSong.selectedSounds.map((sound, index) => ({
-        audio: sound.audio,
-        icon: sound.icon,
-        originalIndex: index,
-      }));
+      this.gameState.selectedSounds = this.previousSong.selectedSounds.map(
+        (sound, index) => ({
+          audio: sound.audio,
+          icon: sound.icon,
+          originalIndex: index,
+        }),
+      );
 
       // Preload icons for next phase
       if (this.gameState.onIconPreload) {
-        this.previousSong.selectedSounds.forEach(sound => {
+        this.previousSong.selectedSounds.forEach((sound) => {
           if (sound.icon) {
             this.gameState.onIconPreload(sound.icon);
           }

@@ -15,7 +15,7 @@ export class CanvasRenderer {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);
@@ -30,7 +30,7 @@ export class CanvasRenderer {
     }
 
     // Extract filename from URL
-    const filename = iconUrl.split('/').pop().split('.')[0];
+    const filename = iconUrl.split("/").pop().split(".")[0];
 
     // Generate hue from filename hash (0-360)
     const hash = this.hashString(filename);
@@ -79,10 +79,20 @@ export class CanvasRenderer {
   }
 
   // Draw a note with icon (synchronous - loads icon if available, otherwise shows fallback)
-  drawNoteWithIcon(ctx, x, y, radius, event, selectedSounds = null, fallbackNumber = null) {
+  drawNoteWithIcon(
+    ctx,
+    x,
+    y,
+    radius,
+    event,
+    selectedSounds = null,
+    fallbackNumber = null,
+  ) {
     // Get icon URL and determine color
     const iconUrl = this.getEventIcon(event, selectedSounds);
-    const backgroundColor = iconUrl ? this.getColorForIcon(iconUrl) : (this.soundColors[event.soundIndex] || "#999");
+    const backgroundColor = iconUrl
+      ? this.getColorForIcon(iconUrl)
+      : this.soundColors[event.soundIndex] || "#999";
 
     // Draw background circle
     ctx.fillStyle = backgroundColor;
@@ -114,7 +124,7 @@ export class CanvasRenderer {
           x - iconSize / 2,
           y - iconSize / 2,
           iconSize,
-          iconSize
+          iconSize,
         );
 
         ctx.restore();
@@ -139,7 +149,13 @@ export class CanvasRenderer {
   }
 
   // Timeline rendering (Performance phase)
-  drawTimeline(canvas, events, currentTime, segmentLength, selectedSounds = null) {
+  drawTimeline(
+    canvas,
+    events,
+    currentTime,
+    segmentLength,
+    selectedSounds = null,
+  ) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -186,7 +202,7 @@ export class CanvasRenderer {
         8,
         event,
         selectedSounds,
-        event.soundIndex + 1
+        event.soundIndex + 1,
       );
     });
 
@@ -241,7 +257,7 @@ export class CanvasRenderer {
         12,
         event,
         selectedSounds,
-        event.soundIndex + 1
+        event.soundIndex + 1,
       );
 
       // Store position for interaction (extend the event object)
@@ -288,7 +304,7 @@ export class CanvasRenderer {
         10,
         event,
         null, // No selectedSounds needed as events have direct icon property
-        event.soundIndex + 1
+        event.soundIndex + 1,
       );
     });
 

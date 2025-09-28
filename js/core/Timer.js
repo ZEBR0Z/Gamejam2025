@@ -132,6 +132,16 @@ export class Timer {
     );
   }
 
+  // Replacement timer
+  startReplacementTimer(callback) {
+    this.startCountdown(
+      "replacementTimeLeft",
+      this.gameState.config.replacementTime,
+      callback,
+      "replacementCountdown",
+    );
+  }
+
   // Auto-select remaining sounds (helper for selection timer)
   autoSelectRemaining() {
     const unselected = this.gameState.availableSounds

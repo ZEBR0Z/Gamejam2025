@@ -14,7 +14,8 @@ export class PhaseManager {
       ["performance", ["editing"]],
       ["editing", ["waiting-for-players"]],
       ["waiting-for-players", ["preview", "showcase"]],
-      ["preview", ["performance"]],
+      ["preview", ["sound-replacement"]],
+      ["sound-replacement", ["performance"]],
       ["showcase", ["menu"]], // Only exit to menu allowed
     ]);
 

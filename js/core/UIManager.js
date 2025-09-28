@@ -47,6 +47,7 @@ export class UIManager {
       editing: document.getElementById("editing"),
       "waiting-for-players": document.getElementById("waiting-for-players"),
       preview: document.getElementById("preview"),
+      "sound-replacement": document.getElementById("sound-replacement"),
       showcase: document.getElementById("showcase"),
       final: document.getElementById("final"),
     };
@@ -71,6 +72,23 @@ export class UIManager {
     this.elements.selectedCount = document.getElementById("selected-count");
     this.elements.soundGrid = document.getElementById("sound-grid");
     this.elements.continueBtn = document.getElementById("continue-btn");
+
+    // Replacement elements
+    this.elements.replacementCountdown = document.getElementById(
+      "replacement-countdown",
+    );
+    this.elements.replacementGrid = document.getElementById("replacement-grid");
+    this.elements.replacementContinueBtn = document.getElementById(
+      "replacement-continue-btn",
+    );
+    this.elements.replacementTargetIcon = document.getElementById(
+      "replacement-target-icon",
+    );
+    this.elements.replacementTargetNumber = document.getElementById(
+      "replacement-target-number",
+    );
+    this.elements.replacementStatus =
+      document.getElementById("replacement-status");
 
     // Performance transport controls
     this.elements.playPauseBtn = document.getElementById("play-pause-btn");
@@ -439,6 +457,80 @@ export class UIManager {
     }
     if (this.elements.showcaseTimeDisplay) {
       this.elements.showcaseTimeDisplay.textContent = `${currentTime.toFixed(1)} / ${totalTime.toFixed(1)}`;
+    }
+  }
+
+  // Sound replacement methods
+  clearReplacementGrid() {
+    const replacementGrid = this.getElement("replacementGrid");
+    if (replacementGrid) {
+      replacementGrid.innerHTML = "";
+    }
+  }
+
+  createReplacementSoundOption(soundData, index) {
+    const soundOption = document.createElement("div");
+    soundOption.className = "sound-option replacement-option";
+    soundOption.dataset.replacementIndex = index;
+
+    // Add skeleton loader
+    const skeleton = document.createElement("div");
+    skeleton.className = "sound-skeleton";
+    soundOption.appendChild(skeleton);
+
+    // Load icon
+    const img = document.createElement("img");
+    img.onload = () => {
+      skeleton.remove();
+      soundOption.appendChild(img);
+    };
+    img.onerror = () => {
+      skeleton.remove();
+      soundOption.innerHTML = "🎵"; // Fallback
+      soundOption.style.display = "flex";
+      soundOption.style.alignItems = "center";
+      soundOption.style.justifyContent = "center";
+      soundOption.style.fontSize = "2rem";
+    };
+    img.src = soundData.icon;
+    img.alt = `Replacement Option ${index + 1}`;
+
+    return soundOption;
+  }
+
+  updateReplacementInfo(soundToReplace, soundIndex) {
+    const targetIcon = this.getElement("replacementTargetIcon");
+    const targetNumber = this.getElement("replacementTargetNumber");
+
+    if (targetIcon && soundToReplace) {
+      targetIcon.src = soundToReplace.icon;
+      targetIcon.alt = `Sound ${soundIndex + 1}`;
+    }
+
+    if (targetNumber) {
+      targetNumber.textContent = soundIndex + 1;
+    }
+  }
+
+  updateReplacementContinueButton(enabled) {
+    const continueBtn = this.getElement("replacementContinueBtn");
+    if (continueBtn) {
+      continueBtn.disabled = !enabled;
+    }
+  }
+
+  disableNonSelectedReplacements() {
+    const options = document.querySelectorAll(".replacement-option");
+    options.forEach((option) => {
+      if (!option.classList.contains("selected")) {
+        option.style.opacity = "0.5";
+        option.style.pointerEvents = "none";
+      }
+    });
+
+    const status = this.getElement("replacementStatus");
+    if (status) {
+      status.textContent = "Replacement selected!";
     }
   }
 }

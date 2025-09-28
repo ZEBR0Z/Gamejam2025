@@ -30,6 +30,7 @@ import { PerformancePhase } from "./phases/PerformancePhase.js";
 import { EditingPhase } from "./phases/EditingPhase.js";
 import { WaitingPhase } from "./phases/WaitingPhase.js";
 import { PreviewPhase } from "./phases/PreviewPhase.js";
+import { SoundReplacementPhase } from "./phases/SoundReplacementPhase.js";
 import { ShowcasePhase } from "./phases/ShowcasePhase.js";
 
 export class Game {
@@ -84,6 +85,12 @@ export class Game {
       this.inputController,
       this.multiplayerManager,
     );
+    this.soundReplacementPhase = new SoundReplacementPhase(
+      this.gameState,
+      this.uiManager,
+      this.audioEngine,
+      this.timer,
+    );
     this.showcasePhase = new ShowcasePhase(
       this.gameState,
       this.uiManager,
@@ -112,6 +119,10 @@ export class Game {
     this.phaseManager.registerPhase("editing", this.editingPhase);
     this.phaseManager.registerPhase("waiting-for-players", this.waitingPhase);
     this.phaseManager.registerPhase("preview", this.previewPhase);
+    this.phaseManager.registerPhase(
+      "sound-replacement",
+      this.soundReplacementPhase,
+    );
     this.phaseManager.registerPhase("showcase", this.showcasePhase);
 
     // Set up phase transition callback
@@ -508,14 +519,23 @@ export class Game {
         break;
       case "preview":
         this.phaseManager.transitionTo("preview", () => {
-          console.log("Song preview complete, moving to performance phase");
-          this.phaseManager.transitionTo("performance", () => {
-            console.log("Performance phase complete, moving to editing phase");
-            this.phaseManager.transitionTo("editing", () => {
+          console.log(
+            "Song preview complete, moving to sound replacement phase",
+          );
+          this.phaseManager.transitionTo("sound-replacement", () => {
+            console.log(
+              "Sound replacement complete, moving to performance phase",
+            );
+            this.phaseManager.transitionTo("performance", () => {
               console.log(
-                "Editing phase complete, submitting song and moving to waiting phase",
+                "Performance phase complete, moving to editing phase",
               );
-              this.submitSongToServer();
+              this.phaseManager.transitionTo("editing", () => {
+                console.log(
+                  "Editing phase complete, submitting song and moving to waiting phase",
+                );
+                this.submitSongToServer();
+              });
             });
           });
         });
