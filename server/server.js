@@ -51,6 +51,30 @@ const BACKING_TRACKS = [
   {
     path: "assets/backing_tracks/sad.mp3",
     duration: 14.785 // seconds - you should measure these accurately
+  },
+  {
+    path: "assets/backing_tracks/trap.mp3",
+    duration: 10.694
+  },
+  {
+    path: "assets/backing_tracks/raggae.mp3",
+    duration: 12.433
+  },
+  {
+    path: "assets/backing_tracks/guitar.mp3",
+    duration: 13.687
+  },
+  {
+    path: "assets/backing_tracks/electricbass&drum.mp3",
+    duration: 10.107
+  },
+  {
+    path: "assets/backing_tracks/dangerous.mp3",
+    duration: 9.585
+  },
+  {
+    path: "assets/backing_tracks/corporate.mp3",
+    duration: 16.000
   }
 ];
 
