@@ -149,7 +149,7 @@
         <h2>How to Play</h2>
         <div class="tutorial-steps">
           <div class="step">
-            <h3>1. Sound Selection (15 seconds)</h3>
+            <h3>1. Sound Selection (30 seconds)</h3>
             <p>
               Pick exactly 3 sounds from 5 random options. Hover to preview,
               click to select. Click again to unselect.
@@ -170,14 +170,14 @@
             </p>
           </div>
           <div class="step">
-            <h3>Listen to previous players creation (20 seconds)</h3>
+            <h3>Listen to previous players creation (30 seconds</h3>
             <p>
               Preview the previous players creation and try to think of creative
               ways to keep it going.
             </p>
           </div>
           <div class="step">
-            <h3>Swap a sound (15 seconds)</h3>
+            <h3>Swap a sound (30 seconds)</h3>
             <p>
               Choose one sound to swap, we don't want every track sounding the
               same!
@@ -215,155 +215,159 @@
 
     <!-- Performance Phase -->
     <div id="performance" class="screen oven">
-      <div class="phase-header">
-        <h2>Record That Heat</h2>
-        <div class="countdown" id="performance-countdown">--</div>
-      </div>
+      <div class="phase-container">
+        <div class="phase-header">
+          <h2>Record That Heat</h2>
+          <div class="countdown" id="performance-countdown">--</div>
+        </div>
 
-      <p class="performance-instructions">
-        Press 1, 2 or 3 to place notes. Right click a note to delete it.
-      </p>
+        <p class="performance-instructions">
+          Press 1, 2 or 3 to place notes. Right click a note to delete it.
+        </p>
 
-      <div class="chosen-sounds">
-        <div class="sound-key">
-          <span class="key">
-            <img src="assets/art/oneButton.png" alt="1" draggable="false" />
-          </span>
-          <div class="sound-icon">
-            <img src="assets/art/record.png" class="over-img" draggable="false" />
-            <img id="sound-1-icon" class="bg-image" alt="" />
+        <div class="chosen-sounds">
+          <div class="sound-key">
+            <span class="key">
+              <img src="assets/art/oneButton.png" alt="1" draggable="false" />
+            </span>
+            <div class="sound-icon">
+              <img src="assets/art/record.png" class="over-img" draggable="false" />
+              <img id="sound-1-icon" class="bg-image" alt="" />
+            </div>
+          </div>
+          <div class="sound-key">
+            <span class="key">
+              <img src="assets/art/twoButton.png" alt="2" draggable="false" />
+            </span>
+            <div class="sound-icon">
+              <img src="assets/art/blueRecord.png" class="over-img" draggable="false" />
+              <img id="sound-2-icon" class="bg-image" alt="" />
+            </div>
+          </div>
+          <div class="sound-key">
+            <span class="key">
+              <img src="assets/art/threeButton.png" alt="3" draggable="false" />
+            </span>
+            <div class="sound-icon">
+              <img src="assets/art/greenRecord.png" class="over-img" draggable="false" />
+              <img id="sound-3-icon" class="bg-image" alt="" />
+            </div>
           </div>
         </div>
-        <div class="sound-key">
-          <span class="key">
-            <img src="assets/art/twoButton.png" alt="2" draggable="false" />
-          </span>
-          <div class="sound-icon">
-            <img src="assets/art/blueRecord.png" class="over-img" draggable="false" />
-            <img id="sound-2-icon" class="bg-image" alt="" />
-          </div>
-        </div>
-        <div class="sound-key">
-          <span class="key">
-            <img src="assets/art/threeButton.png" alt="3" draggable="false" />
-          </span>
-          <div class="sound-icon">
-            <img src="assets/art/greenRecord.png" class="over-img" draggable="false" />
-            <img id="sound-3-icon" class="bg-image" alt="" />
-          </div>
-        </div>
-      </div>
 
-      <div class="timeline-container">
-        <canvas id="timeline-canvas" width="800" height="200"></canvas>
-      </div>
-
-      <div class="transport-controls">
-        <button
-          id="play-pause-btn"
-          class="control-button play-pause-btn"
-        ></button>
-        <button id="restart-btn" class="control-button rewind-btn"></button>
-        <div class="progress-container">
-          <input
-            type="range"
-            id="progress-bar"
-            min="0"
-            max="8"
-            step="0.1"
-            value="0"
-          />
-          <span id="time-display">0.0 / 8.0</span>
+        <div class="timeline-container">
+          <canvas id="timeline-canvas" width="800" height="200"></canvas>
         </div>
-        <button id="performance-continue-btn" class="primary-button nes-btn">
-          Proceed to Tuning Phase
-        </button>
+
+        <div class="transport-controls">
+          <button
+            id="play-pause-btn"
+            class="control-button play-pause-btn"
+          ></button>
+          <button id="restart-btn" class="control-button rewind-btn"></button>
+          <div class="progress-container">
+            <input
+              type="range"
+              id="progress-bar"
+              min="0"
+              max="8"
+              step="0.1"
+              value="0"
+            />
+            <span id="time-display">0.0 / 8.0</span>
+          </div>
+          <button id="performance-continue-btn" class="primary-button nes-btn">
+            Proceed to Tuning Phase
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- Editing Phase -->
     <div id="editing" class="screen oven">
-      <div class="phase-header">
-        <h2>Mix That Heat</h2>
-        <div class="countdown" id="editing-countdown">--</div>
-      </div>
+      <div class="phase-container">
+        <div class="phase-header">
+          <h2>Mix That Heat</h2>
+          <div class="countdown" id="editing-countdown">--</div>
+        </div>
 
-      <p class="editing-instructions">
-        Drag notes to pitch them! Press 1, 2, or 3 to change the type.
-      </p>
+        <p class="editing-instructions">
+          Drag notes to pitch them! Press 1, 2, or 3 to change the type.
+        </p>
 
-      <div class="editing-sounds">
-        <div class="sound-key editing-sound" id="editing-sound-0">
-          <span class="key">
-            <img src="assets/art/oneButton.png" alt="1" draggable="false" />
-          </span>
-          <div class="sound-icon">
-            <img src="assets/art/record.png" class="over-img" draggable="false" />
-            <img
-              src="assets/art/record.png"
-              id="editing-sound-1-icon"
-              class="sound-icon bg-image"
-              alt=""
-            />
+        <div class="editing-sounds">
+          <div class="sound-key editing-sound" id="editing-sound-0">
+            <span class="key">
+              <img src="assets/art/oneButton.png" alt="1" draggable="false" />
+            </span>
+            <div class="sound-icon">
+              <img src="assets/art/record.png" class="over-img" draggable="false" />
+              <img
+                src="assets/art/record.png"
+                id="editing-sound-1-icon"
+                class="sound-icon bg-image"
+                alt=""
+              />
+            </div>
+          </div>
+          <div class="sound-key editing-sound" id="editing-sound-1">
+            <span class="key">
+              <img src="assets/art/twoButton.png" alt="2" draggable="false" />
+            </span>
+            <div class="sound-icon">
+              <img src="assets/art/blueRecord.png" class="over-img" draggable="false" />
+              <img
+                src="assets/art/blueRecord.png"
+                id="editing-sound-2-icon"
+                class="sound-icon bg-image"
+                alt=""
+              />
+            </div>
+          </div>
+          <div class="sound-key editing-sound" id="editing-sound-2">
+            <span class="key">
+              <img src="assets/art/threeButton.png" alt="3" draggable="false" />
+            </span>
+            <div class="sound-icon">
+              <img src="assets/art/greenRecord.png" class="over-img" draggable="false" />
+              <img
+                src="assets/art/greenRecord.png"
+                id="editing-sound-3-icon"
+                class="sound-icon bg-image"
+                alt=""
+              />
+            </div>
           </div>
         </div>
-        <div class="sound-key editing-sound" id="editing-sound-1">
-          <span class="key">
-            <img src="assets/art/twoButton.png" alt="2" draggable="false" />
-          </span>
-          <div class="sound-icon">
-            <img src="assets/art/blueRecord.png" class="over-img" draggable="false" />
-            <img
-              src="assets/art/blueRecord.png"
-              id="editing-sound-2-icon"
-              class="sound-icon bg-image"
-              alt=""
-            />
-          </div>
-        </div>
-        <div class="sound-key editing-sound" id="editing-sound-2">
-          <span class="key">
-            <img src="assets/art/threeButton.png" alt="3" draggable="false" />
-          </span>
-          <div class="sound-icon">
-            <img src="assets/art/greenRecord.png" class="over-img" draggable="false" />
-            <img
-              src="assets/art/greenRecord.png"
-              id="editing-sound-3-icon"
-              class="sound-icon bg-image"
-              alt=""
-            />
-          </div>
-        </div>
-      </div>
 
-      <div class="editing-timeline-container">
-        <canvas id="editing-timeline-canvas" width="800" height="400"></canvas>
-      </div>
-
-      <div class="transport-controls">
-        <button
-          id="edit-play-pause-btn"
-          class="control-button play-pause-btn"
-        ></button>
-        <button
-          id="edit-restart-btn"
-          class="control-button rewind-btn"
-        ></button>
-        <div class="progress-container">
-          <input
-            type="range"
-            id="edit-progress-bar"
-            min="0"
-            max="8"
-            step="0.1"
-            value="0"
-          />
-          <span id="edit-time-display">0.0 / 8.0</span>
+        <div class="timeline-container">
+          <canvas id="editing-timeline-canvas" width="800" height="400"></canvas>
         </div>
-        <button id="editing-continue-btn" class="primary-button nes-btn">
-          Done
-        </button>
+
+        <div class="transport-controls">
+          <button
+            id="edit-play-pause-btn"
+            class="control-button play-pause-btn"
+          ></button>
+          <button
+            id="edit-restart-btn"
+            class="control-button rewind-btn"
+          ></button>
+          <div class="progress-container">
+            <input
+              type="range"
+              id="edit-progress-bar"
+              min="0"
+              max="8"
+              step="0.1"
+              value="0"
+            />
+            <span id="edit-time-display">0.0 / 8.0</span>
+          </div>
+          <button id="editing-continue-btn" class="primary-button nes-btn">
+            Done
+          </button>
+        </div>
       </div>
     </div>
 
@@ -392,7 +396,7 @@
       <div class="preview-container">
         <div class="phase-header">
           <h2>Listen to the Previous Part</h2>
-          <div class="countdown" id="preview-phase-timer">20</div>
+          <div class="countdown" id="preview-phase-timer">30</div>
         </div>
         <div class="preview-info">
           <p>

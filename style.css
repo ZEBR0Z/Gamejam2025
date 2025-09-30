@@ -394,6 +394,7 @@ textarea {
   display: flex;
   gap: 32px;
   margin-bottom: 32px;
+  justify-content: center;
 }
 
 .sound-key {
@@ -462,42 +463,26 @@ textarea {
   );
 }
 
+/* Phase Container (used by performance, editing, preview, showcase) */
+.phase-container,
+.preview-container,
+.showcase-container {
+  text-align: center;
+  max-width: 800px;
+  width: 100%;
+}
+
 /* Timeline and Canvas */
 .timeline-container,
-.final-timeline-container {
+.preview-timeline-container,
+.showcase-timeline-container {
   margin-bottom: 32px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   overflow: hidden;
+  max-width: 800px;
 }
 
-.editing-container {
-  margin-bottom: 32px;
-  max-height: 70vh;
-  overflow-y: auto;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  padding: 16px;
-}
-
-.editing-track {
-  margin-bottom: 32px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  overflow: hidden;
-}
-
-.editing-track:last-child {
-  margin-bottom: 0;
-}
-
-.editing-track h3 {
-  margin: 0;
-  padding: 8px 16px;
-  background: rgba(0, 0, 0, 0.3);
-  color: white;
-  font-size: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* New unified editing interface */
+/* Editing interface */
 .editing-sounds {
   display: flex;
   gap: 32px;
@@ -524,16 +509,6 @@ textarea {
   border: 2px solid #4caf50;
 }
 
-.editing-timeline-container {
-  margin-bottom: 32px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.2);
-}
-
 canvas {
   display: block;
   background: rgba(0, 0, 0, 0.3);
@@ -557,6 +532,7 @@ canvas {
   background: rgba(0, 0, 0, 0.3);
   padding: 16px;
   flex-wrap: wrap;
+  max-width: 800px;
 }
 
 .control-button {
@@ -865,13 +841,6 @@ canvas {
 }
 
 /* Song Preview Screen */
-.preview-container {
-  text-align: center;
-  max-width: 900px;
-  width: 100%;
-  padding: 32px;
-}
-
 .preview-info {
   margin-bottom: 32px;
 }
@@ -882,24 +851,11 @@ canvas {
   opacity: 0.9;
 }
 
-.preview-timeline-container {
-  margin-bottom: 32px;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 16px;
-}
-
 .preview-buttons {
   margin-top: 32px;
 }
 
 /* Final Showcase Screen */
-.showcase-container {
-  text-align: center;
-  max-width: 900px;
-  width: 100%;
-  padding: 32px;
-}
-
 .showcase-info {
   margin-bottom: 32px;
 }
@@ -920,12 +876,6 @@ canvas {
   margin-top: 8px;
   font-size: 14.4px;
   opacity: 0.8;
-}
-
-.showcase-timeline-container {
-  margin-bottom: 32px;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 16px;
 }
 
 .showcase-buttons {
