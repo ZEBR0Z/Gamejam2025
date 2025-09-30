@@ -415,7 +415,7 @@ export class UIManager {
     });
 
     // Update selection highlighting on sound key elements
-    const editingSounds = document.querySelectorAll(".editing-sound");
+    const editingSounds = document.querySelectorAll(".phase-sound-selectable");
     editingSounds.forEach((soundEl, index) => {
       if (index === selectedSoundIndex) {
         soundEl.classList.add("selected");

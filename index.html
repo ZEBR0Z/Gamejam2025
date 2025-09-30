@@ -221,17 +221,21 @@
           <div class="countdown" id="performance-countdown">--</div>
         </div>
 
-        <p class="performance-instructions">
+        <p class="phase-instructions">
           Press 1, 2 or 3 to place notes. Right click a note to delete it.
         </p>
 
-        <div class="chosen-sounds">
+        <div class="phase-sounds">
           <div class="sound-key">
             <span class="key">
               <img src="assets/art/oneButton.png" alt="1" draggable="false" />
             </span>
             <div class="sound-icon">
-              <img src="assets/art/record.png" class="over-img" draggable="false" />
+              <img
+                src="assets/art/record.png"
+                class="over-img"
+                draggable="false"
+              />
               <img id="sound-1-icon" class="bg-image" alt="" />
             </div>
           </div>
@@ -240,7 +244,11 @@
               <img src="assets/art/twoButton.png" alt="2" draggable="false" />
             </span>
             <div class="sound-icon">
-              <img src="assets/art/blueRecord.png" class="over-img" draggable="false" />
+              <img
+                src="assets/art/blueRecord.png"
+                class="over-img"
+                draggable="false"
+              />
               <img id="sound-2-icon" class="bg-image" alt="" />
             </div>
           </div>
@@ -249,7 +257,11 @@
               <img src="assets/art/threeButton.png" alt="3" draggable="false" />
             </span>
             <div class="sound-icon">
-              <img src="assets/art/greenRecord.png" class="over-img" draggable="false" />
+              <img
+                src="assets/art/greenRecord.png"
+                class="over-img"
+                draggable="false"
+              />
               <img id="sound-3-icon" class="bg-image" alt="" />
             </div>
           </div>
@@ -291,49 +303,61 @@
           <div class="countdown" id="editing-countdown">--</div>
         </div>
 
-        <p class="editing-instructions">
+        <p class="phase-instructions">
           Drag notes to pitch them! Press 1, 2, or 3 to change the type.
         </p>
 
-        <div class="editing-sounds">
-          <div class="sound-key editing-sound" id="editing-sound-0">
+        <div class="phase-sounds">
+          <div class="sound-key phase-sound-selectable" id="editing-sound-0">
             <span class="key">
               <img src="assets/art/oneButton.png" alt="1" draggable="false" />
             </span>
             <div class="sound-icon">
-              <img src="assets/art/record.png" class="over-img" draggable="false" />
+              <img
+                src="assets/art/record.png"
+                class="over-img"
+                draggable="false"
+              />
               <img
                 src="assets/art/record.png"
                 id="editing-sound-1-icon"
-                class="sound-icon bg-image"
+                class="bg-image"
                 alt=""
               />
             </div>
           </div>
-          <div class="sound-key editing-sound" id="editing-sound-1">
+          <div class="sound-key phase-sound-selectable" id="editing-sound-1">
             <span class="key">
               <img src="assets/art/twoButton.png" alt="2" draggable="false" />
             </span>
             <div class="sound-icon">
-              <img src="assets/art/blueRecord.png" class="over-img" draggable="false" />
+              <img
+                src="assets/art/blueRecord.png"
+                class="over-img"
+                draggable="false"
+              />
               <img
                 src="assets/art/blueRecord.png"
                 id="editing-sound-2-icon"
-                class="sound-icon bg-image"
+                class="bg-image"
                 alt=""
               />
             </div>
           </div>
-          <div class="sound-key editing-sound" id="editing-sound-2">
+          <div class="sound-key phase-sound-selectable" id="editing-sound-2">
             <span class="key">
               <img src="assets/art/threeButton.png" alt="3" draggable="false" />
             </span>
             <div class="sound-icon">
-              <img src="assets/art/greenRecord.png" class="over-img" draggable="false" />
+              <img
+                src="assets/art/greenRecord.png"
+                class="over-img"
+                draggable="false"
+              />
               <img
                 src="assets/art/greenRecord.png"
                 id="editing-sound-3-icon"
-                class="sound-icon bg-image"
+                class="bg-image"
                 alt=""
               />
             </div>
@@ -341,7 +365,11 @@
         </div>
 
         <div class="timeline-container">
-          <canvas id="editing-timeline-canvas" width="800" height="400"></canvas>
+          <canvas
+            id="editing-timeline-canvas"
+            width="800"
+            height="400"
+          ></canvas>
         </div>
 
         <div class="transport-controls">
@@ -398,7 +426,7 @@
           <h2>Listen to the Previous Part</h2>
           <div class="countdown" id="preview-phase-timer">30</div>
         </div>
-        <div class="preview-info">
+        <div class="phase-info">
           <p>
             This is what <span id="previous-player-name">Player</span> created.
           </p>
@@ -437,7 +465,7 @@
           </div>
         </div>
 
-        <div class="preview-buttons">
+        <div class="phase-buttons">
           <button
             id="continue-to-performance-btn"
             class="primary-button nes-btn"
@@ -495,7 +523,7 @@
     <div id="showcase" class="screen party">
       <div class="showcase-container">
         <h2>Yo, That's Heat!</h2>
-        <div class="showcase-info">
+        <div class="phase-info">
           <p>Listen and jam out to everyones finished songs!</p>
           <div class="song-navigation">
             <span
@@ -537,7 +565,7 @@
           </div>
         </div>
 
-        <div class="showcase-buttons">
+        <div class="phase-buttons">
           <button id="prev-song-btn" class="secondary-button nes-btn">
             ← Previous Song
           </button>

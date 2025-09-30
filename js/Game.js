@@ -168,7 +168,9 @@ export class Game {
       console.log("Game initialized successfully");
     } catch (error) {
       console.error("Failed to initialize Game:", error);
-      this.showError("Failed to initialize the game. Please refresh and try again.");
+      this.showError(
+        "Failed to initialize the game. Please refresh and try again.",
+      );
     }
   }
 

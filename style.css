@@ -390,7 +390,8 @@ textarea {
   font-size: 32px;
 }
 
-.chosen-sounds {
+/* Sound selection display (used in performance and editing phases) */
+.phase-sounds {
   display: flex;
   gap: 32px;
   margin-bottom: 32px;
@@ -451,11 +452,7 @@ textarea {
   background: #000;
   z-index: 0;
   backdrop-filter: brightness(0);
-  mask-image: radial-gradient(
-    circle at center,
-    transparent 13%,
-    black 13%
-  );
+  mask-image: radial-gradient(circle at center, transparent 13%, black 13%);
   -webkit-mask-image: radial-gradient(
     circle at center,
     transparent 13%,
@@ -483,14 +480,7 @@ textarea {
 }
 
 /* Editing interface */
-.editing-sounds {
-  display: flex;
-  gap: 32px;
-  margin-bottom: 32px;
-  justify-content: center;
-}
-
-.editing-sound {
+.phase-sound-selectable {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -500,11 +490,11 @@ textarea {
   transition: background-color 0.2s ease;
 }
 
-.editing-sound:hover {
+.phase-sound-selectable:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.editing-sound.selected {
+.phase-sound-selectable.selected {
   background: rgba(74, 175, 79, 0.3);
   border: 2px solid #4caf50;
 }
@@ -653,7 +643,7 @@ canvas {
     flex-wrap: wrap;
   }
 
-  .chosen-sounds {
+  .phase-sounds {
     gap: 16px;
   }
 }
@@ -840,30 +830,27 @@ canvas {
   }
 }
 
-/* Song Preview Screen */
-.preview-info {
+/* Phase info sections */
+.phase-info {
   margin-bottom: 32px;
 }
 
-.preview-info p {
+.phase-info p {
   font-size: 17.6px;
   margin-bottom: 8px;
   opacity: 0.9;
 }
 
-.preview-buttons {
-  margin-top: 32px;
-}
-
-/* Final Showcase Screen */
-.showcase-info {
-  margin-bottom: 32px;
-}
-
-.showcase-info p {
+/* Phase instruction text */
+.phase-instructions {
   font-size: 17.6px;
-  margin-bottom: 16px;
+  margin-bottom: 32px;
   opacity: 0.9;
+}
+
+/* Phase buttons */
+.phase-buttons {
+  margin-top: 32px;
 }
 
 .song-navigation {
@@ -876,18 +863,6 @@ canvas {
   margin-top: 8px;
   font-size: 14.4px;
   opacity: 0.8;
-}
-
-.showcase-buttons {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 32px;
-}
-
-.showcase-buttons button {
-  min-width: 120px;
 }
 
 .nes-btn {

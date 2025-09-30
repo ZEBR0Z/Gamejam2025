@@ -67,7 +67,9 @@ export class WaitingPhase {
 
   async fetchRandomFact() {
     try {
-      const response = await fetch("https://uselessfacts.jsph.pl/api/v2/facts/random");
+      const response = await fetch(
+        "https://uselessfacts.jsph.pl/api/v2/facts/random",
+      );
       if (!this.isActive) return;
 
       const data = await response.json();
@@ -88,7 +90,7 @@ export class WaitingPhase {
     for (let i = 0; i < text.length; i++) {
       if (!this.isActive) return;
       element.textContent += text[i];
-      await new Promise(resolve => setTimeout(resolve, speed));
+      await new Promise((resolve) => setTimeout(resolve, speed));
     }
   }
 
