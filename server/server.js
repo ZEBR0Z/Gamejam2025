@@ -37,41 +37,24 @@ app.use(express.static(path.join(__dirname, "..")));
 const lobbies = new Map(); // lobbyCode -> Lobby instance
 const playerSockets = new Map(); // socketId -> playerId mapping
 
-// Backing track configuration
-const BACKING_TRACKS = [
-  {
-    path: "assets/backing_tracks/klezmer.mp3",
-    duration: 12.722,
-  },
-  {
-    path: "assets/backing_tracks/sad.mp3",
-    duration: 14.785,
-  },
-  {
-    path: "assets/backing_tracks/trap.mp3",
-    duration: 10.736,
-  },
-  {
-    path: "assets/backing_tracks/raggae.mp3",
-    duration: 13.251,
-  },
-  {
-    path: "assets/backing_tracks/guitar.mp3",
-    duration: 13.684,
-  },
-  {
-    path: "assets/backing_tracks/electricbass&drum.mp3",
-    duration: 10.125,
-  },
-  {
-    path: "assets/backing_tracks/dangerous.mp3",
-    duration: 9.549,
-  },
-  {
-    path: "assets/backing_tracks/corporate.mp3",
-    duration: 15.999,
-  },
-];
+// Sound list will be loaded from audiomap.json
+let soundList = null;
+
+// Load sound list at startup
+function loadSoundList() {
+  try {
+    const audioMapPath = path.join(__dirname, "..", "audiomap.json");
+    const audioMap = JSON.parse(fs.readFileSync(audioMapPath, "utf8"));
+    soundList = audioMap.sounds;
+    console.log(`Loaded ${soundList.length} sounds`);
+  } catch (error) {
+    console.error("Failed to load audiomap.json:", error);
+    soundList = [];
+  }
+}
+
+// Initialize sound list on startup
+loadSoundList();
 
 // Utility functions
 function generateLobbyCode() {
@@ -102,7 +85,6 @@ class Lobby {
     this.songs = new Map(); // songId -> song object with segments array
     this.currentSongAssignments = new Map(); // playerId -> songId they're working on
     this.roundSubmissions = new Map(); // playerId -> boolean (submitted this round)
-    this.phaseStartTime = null;
     this.availableSounds = []; // 5 random sounds for this lobby
   }
 
@@ -157,17 +139,14 @@ class Lobby {
     this.maxRounds = this.players.size; // Each song passes through all players
     this.currentRound = 0;
 
-    // Initialize one song per player with random backing tracks
+    // Initialize one song per player
     this.players.forEach((player) => {
       const songId = `song_${player.id}`;
-      const backingTrack = this.selectRandomBackingTrack();
       this.songs.set(songId, {
         id: songId,
         originalCreator: player.id,
         segments: [], // Will contain one segment per round
         contributors: [player.id],
-        selectedSounds: null, // Set by first player in round 0
-        backingTrack: backingTrack, // Assigned backing track for this song
       });
     });
 
@@ -176,32 +155,20 @@ class Lobby {
     return true;
   }
 
-  selectRandomBackingTrack() {
-    const randomIndex = Math.floor(Math.random() * BACKING_TRACKS.length);
-    return BACKING_TRACKS[randomIndex];
-  }
-
   selectRandomSounds() {
-    try {
-      // Load soundlist.json
-      const soundListPath = path.join(__dirname, "..", "soundlist.json");
-      const soundList = JSON.parse(fs.readFileSync(soundListPath, "utf8"));
-
-      const selectedIndices = new Set();
-      while (selectedIndices.size < 5) {
-        selectedIndices.add(Math.floor(Math.random() * soundList.length));
-      }
-
-      this.availableSounds = Array.from(selectedIndices);
-    } catch (error) {
-      console.error("Failed to load soundlist.json:", error);
-      // Fallback to simulated data
-      const selectedIndices = new Set();
-      while (selectedIndices.size < 5) {
-        selectedIndices.add(Math.floor(Math.random() * 442));
-      }
-      this.availableSounds = Array.from(selectedIndices);
+    if (!soundList || soundList.length === 0) {
+      console.error("No sounds available in audiomap.json");
+      this.availableSounds = [];
+      return;
     }
+
+    const selectedIndices = new Set();
+    const maxSounds = Math.min(5, soundList.length);
+    while (selectedIndices.size < maxSounds) {
+      selectedIndices.add(Math.floor(Math.random() * soundList.length));
+    }
+
+    this.availableSounds = Array.from(selectedIndices);
   }
 
   /**
@@ -210,7 +177,6 @@ class Lobby {
    */
   startSelectionPhase() {
     this.state = "selection";
-    this.phaseStartTime = Date.now();
 
     // Assign each player to their own song initially
     this.currentSongAssignments.clear();
@@ -240,7 +206,6 @@ class Lobby {
 
   startPerformancePhase() {
     this.state = "performance";
-    this.phaseStartTime = Date.now();
 
     // Reset player ready states
     this.players.forEach((player) => {
@@ -253,7 +218,6 @@ class Lobby {
    */
   startWaitingForPlayers() {
     this.state = "waiting-for-players";
-    this.phaseStartTime = Date.now();
   }
 
   /**
@@ -285,9 +249,6 @@ class Lobby {
    */
   startSongPreview() {
     this.state = "preview";
-    this.phaseStartTime = Date.now();
-
-    // No server-side timer - clients handle their own timing
   }
 
   endSongPreviewPhase() {
@@ -300,7 +261,6 @@ class Lobby {
    */
   startFinalShowcase() {
     this.state = "showcase";
-    this.phaseStartTime = Date.now();
   }
 
   /**
@@ -359,14 +319,15 @@ class Lobby {
       roundNumber: this.currentRound,
       playerId: playerId,
       songData: songData.songData,
+      backingTrack: songData.backingTrack || null,
       submittedAt: Date.now(),
     };
 
     song.segments.push(segment);
 
-    // Store selected sounds from first round (for later rounds to use)
-    if (this.currentRound === 0 && songData.selectedSounds) {
-      song.selectedSounds = songData.selectedSounds;
+    // Store backing track at song level from first segment
+    if (this.currentRound === 0 && songData.backingTrack) {
+      song.backingTrack = songData.backingTrack;
     }
 
     // Mark player as submitted
@@ -391,19 +352,12 @@ class Lobby {
         hasSubmitted: this.roundSubmissions.get(p.id) || false,
       })),
       availableSounds: this.availableSounds,
-      phaseTimeLeft: this.getPhaseTimeLeft(),
       currentSongAssignment: null, // Will be set per player
     };
   }
 
-  getPhaseTimeLeft() {
-    // Server doesn't track phase timing - clients handle their own timers
-    // Only return time for server-managed phases (none currently)
-    return 0;
-  }
-
   cleanup() {
-    // Server cleanup - clients handle their own timers
+    // Cleanup when lobby is deleted
   }
 }
 
@@ -530,14 +484,14 @@ io.on("connection", (socket) => {
 
   // Submit song (final song data with filenames)
   socket.on("submitSong", (data) => {
-    const { songData, selectedSounds } = data; // Array of {audio, icon, time, pitch} objects + selected sounds
+    const { songData, backingTrack } = data; // Array of {audio, icon, time, pitch} objects + backing track info
     const lobby = findLobbyBySocket(socket.id);
     if (!lobby) return;
 
     const player = lobby.getPlayer(socket.id);
     if (!player) return;
 
-    const success = lobby.submitSong(player.id, { songData, selectedSounds });
+    const success = lobby.submitSong(player.id, { songData, backingTrack });
 
     if (success) {
       // Notify all players about the submission and updated game state
@@ -638,9 +592,8 @@ io.on("connection", (socket) => {
       song: {
         id: song.id,
         segments: song.segments,
-        selectedSounds: song.selectedSounds,
         contributors: song.contributors,
-        backingTrack: song.backingTrack,
+        backingTrack: song.backingTrack || null,
       },
       previousPlayerName: previousPlayer ? previousPlayer.name : "Unknown",
       gameState: lobby.getGameState(),
@@ -686,12 +639,11 @@ io.on("connection", (socket) => {
       id: song.id,
       originalCreator: song.originalCreator,
       segments: song.segments,
-      selectedSounds: song.selectedSounds,
       contributors: song.contributors.map((playerId) => {
         const player = lobby.players.get(playerId);
         return player ? player.name : playerId;
       }),
-      backingTrack: song.backingTrack,
+      backingTrack: song.backingTrack || null,
     }));
 
     callback({

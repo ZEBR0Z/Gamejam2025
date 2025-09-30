@@ -225,10 +225,10 @@ export class MultiplayerManager {
     console.log("Completed sound selection");
   }
 
-  submitSong(songData, selectedSounds = null) {
+  submitSong(songData, backingTrack = null) {
     if (!this.isConnected || !this.lobbyCode) return;
 
-    this.socket.emit("submitSong", { songData, selectedSounds });
+    this.socket.emit("submitSong", { songData, backingTrack });
     console.log("Submitted song with", songData.length, "sound events");
   }
 

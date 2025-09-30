@@ -42,16 +42,39 @@ export class PerformancePhase {
   async loadCurrentSongBackingTrack() {
     try {
       const response = await this.multiplayerManager.getCurrentSong();
-      if (response.success && response.song && response.song.backingTrack) {
-        const backingTrack = response.song.backingTrack;
-        this.gameState.setBackingTrack(backingTrack);
-        await this.audioEngine.loadBackingTrack(backingTrack.path);
-        console.log(
-          "Loaded backing track:",
-          backingTrack.path,
-          "duration:",
-          backingTrack.duration,
-        );
+      if (response.success && response.song) {
+        // Check if song already has a backing track (from previous segments)
+        let backingTrack = null;
+        if (response.song.segments && response.song.segments.length > 0) {
+          // Extract backing track info from first segment if it exists
+          const firstSegment = response.song.segments[0];
+          if (firstSegment.backingTrack) {
+            backingTrack = firstSegment.backingTrack;
+          }
+        }
+
+        // If no backing track exists, select a random one (this is round 0)
+        if (!backingTrack) {
+          const backingTracks = this.gameState.backingTracks;
+          if (backingTracks && backingTracks.length > 0) {
+            const randomIndex = Math.floor(
+              Math.random() * backingTracks.length,
+            );
+            backingTrack = backingTracks[randomIndex];
+          }
+        }
+
+        if (backingTrack) {
+          this.currentBackingTrack = backingTrack;
+          this.gameState.setBackingTrack(backingTrack);
+          await this.audioEngine.loadBackingTrack(backingTrack.audio);
+          console.log(
+            "Loaded backing track:",
+            backingTrack.audio,
+            "duration:",
+            backingTrack.duration,
+          );
+        }
       }
     } catch (error) {
       console.error("Failed to load backing track:", error);

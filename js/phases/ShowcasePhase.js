@@ -108,7 +108,7 @@ export class ShowcasePhase {
 
     if (song.backingTrack) {
       this.gameState.setBackingTrack(song.backingTrack);
-      await this.audioEngine.loadBackingTrack(song.backingTrack.path);
+      await this.audioEngine.loadBackingTrack(song.backingTrack.audio);
     }
     const totalTime = song.segments.length * this.gameState.getSegmentLength();
 

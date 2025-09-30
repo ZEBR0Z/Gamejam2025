@@ -796,7 +796,7 @@ export class Game {
    * Converts client's rich event objects into server format:
    * - Events contain soundIndex (local array position) -> convert to audio file paths
    * - Includes timing (startTimeSec) and pitch adjustments (pitchSemitones)
-   * - Also sends selected sounds palette for next player to use
+   * - Next player will derive selected sounds from the song segments
    *
    * Then transitions to waiting phase until all players submit their segments
    */
@@ -812,13 +812,13 @@ export class Game {
       };
     });
 
-    // Send selected sounds palette for next player
-    const selectedSounds = this.gameState.selectedSounds.map((sound) => ({
-      audio: sound.audio,
-      icon: sound.icon,
-    }));
+    // Include backing track info so it persists with the song
+    const backingTrack = {
+      audio: this.gameState.backingTrack.path,
+      duration: this.gameState.backingTrack.duration,
+    };
 
-    this.multiplayerManager.submitSong(songData, selectedSounds);
+    this.multiplayerManager.submitSong(songData, backingTrack);
 
     // Enter waiting phase, which will recursively handle next phase change
     this.phaseManager.transitionTo("waiting-for-players", (gameState) => {

@@ -5,6 +5,7 @@ export class GameState {
   constructor() {
     this.currentState = "menu";
     this.soundList = [];
+    this.backingTracks = [];
     this.selectedSounds = [];
     this.availableSounds = [];
     this.events = [];
@@ -44,11 +45,15 @@ export class GameState {
 
   async loadSoundList() {
     try {
-      const response = await fetch("./soundlist.json");
-      this.soundList = await response.json();
-      console.log(`Loaded ${this.soundList.length} sounds`);
+      const response = await fetch("./audiomap.json");
+      const audioMap = await response.json();
+      this.soundList = audioMap.sounds;
+      this.backingTracks = audioMap.backing_tracks;
+      console.log(
+        `Loaded ${this.soundList.length} sounds and ${this.backingTracks.length} backing tracks`,
+      );
     } catch (error) {
-      console.error("Failed to load sound list:", error);
+      console.error("Failed to load audio map:", error);
       throw error;
     }
   }
@@ -146,12 +151,14 @@ export class GameState {
   }
 
   /**
-   * @param {Object} backingTrackInfo - Backing track info with path and duration
+   * @param {Object} backingTrackInfo - Backing track info with audio/path and duration
    * @description Sets backing track and overrides segment length with track duration
    */
   setBackingTrack(backingTrackInfo) {
     if (backingTrackInfo) {
-      this.backingTrack.path = backingTrackInfo.path;
+      // Support both 'audio' (new) and 'path' (legacy) fields
+      this.backingTrack.path =
+        backingTrackInfo.audio || backingTrackInfo.path;
       this.backingTrack.duration = backingTrackInfo.duration;
       this.config.segmentLength = backingTrackInfo.duration;
     }

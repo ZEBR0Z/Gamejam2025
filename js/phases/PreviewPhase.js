@@ -54,7 +54,7 @@ export class PreviewPhase {
         if (this.previousSong.backingTrack) {
           this.gameState.setBackingTrack(this.previousSong.backingTrack);
           await this.audioEngine.loadBackingTrack(
-            this.previousSong.backingTrack.path,
+            this.previousSong.backingTrack.audio,
           );
         }
 
@@ -82,6 +82,28 @@ export class PreviewPhase {
 
     this.previewEvents = [];
     let eventId = 0;
+
+    // Derive selected sounds from the first 3 unique sounds in all segments
+    const uniqueSounds = new Map();
+    for (const segment of this.previousSong.segments) {
+      for (const soundEvent of segment.songData) {
+        if (!uniqueSounds.has(soundEvent.audio)) {
+          uniqueSounds.set(soundEvent.audio, {
+            audio: soundEvent.audio,
+            icon: soundEvent.icon,
+            originalIndex: uniqueSounds.size,
+          });
+        }
+        if (uniqueSounds.size >= 3) break;
+      }
+      if (uniqueSounds.size >= 3) break;
+    }
+
+    // Set selected sounds in game state for next phases
+    this.gameState.clearSelectedSounds();
+    Array.from(uniqueSounds.values()).forEach((sound) => {
+      this.gameState.addSelectedSound(sound, sound.originalIndex);
+    });
 
     // Only process the most recent segment (from the previous player)
     const mostRecentSegment =
