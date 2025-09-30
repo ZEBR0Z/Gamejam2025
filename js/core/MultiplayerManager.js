@@ -26,7 +26,7 @@ export class MultiplayerManager {
    * @param {string} serverUrl - Server URL to connect to
    * @returns {Promise<boolean>} True if connection successful, false otherwise
    */
-  async connect(serverUrl = "https://ruelalarcon.dev/ythserver") {
+  async connect(serverUrl) {
     try {
       console.log("MultiplayerManager.connect called with:", serverUrl);
       if (!window.io) {
@@ -38,11 +38,7 @@ export class MultiplayerManager {
       }
 
       console.log("Creating Socket.IO connection...");
-      const baseUrl = serverUrl.replace("/ythserver", "");
-      console.log("Base URL:", baseUrl);
-      this.socket = window.io(baseUrl, {
-        path: "/ythserver/socket.io",
-      });
+      this.socket = window.io(serverUrl);
       console.log("Socket.IO connection object created:", this.socket);
 
       this.socket.on("connect", () => {

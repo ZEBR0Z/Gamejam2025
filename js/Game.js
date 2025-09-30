@@ -113,7 +113,7 @@ export class Game {
     );
 
     this.isMultiplayer = true;
-    this.serverUrl = "https://ruelalarcon.dev/ythserver";
+    this.serverUrl = "http://localhost:8000";
 
     // Track user interaction for audio autoplay policy compliance
     // Modern browsers require user gesture before playing audio
