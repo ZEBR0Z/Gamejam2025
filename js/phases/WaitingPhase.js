@@ -12,10 +12,12 @@ export class WaitingPhase {
 
     // Audio management properties
     this.backgroundMusic = null;
+    this.isActive = false;
   }
 
   async start(onComplete) {
     this.onPhaseComplete = onComplete;
+    this.isActive = true;
 
     console.log("Starting waiting phase");
     this.uiManager.showScreen("waiting-for-players");
@@ -29,8 +31,10 @@ export class WaitingPhase {
     // Fetch and display random fact
     await this.fetchRandomFact();
 
-    // Load and start background music
-    await this.loadBackgroundMusic();
+    // Load and start background music (only if still active)
+    if (this.isActive) {
+      await this.loadBackgroundMusic();
+    }
 
     // Set up multiplayer event handlers
     this.setupEventHandlers();
@@ -64,7 +68,11 @@ export class WaitingPhase {
   async fetchRandomFact() {
     try {
       const response = await fetch("https://uselessfacts.jsph.pl/api/v2/facts/random");
+      if (!this.isActive) return;
+
       const data = await response.json();
+      if (!this.isActive) return;
+
       const waitingMessage = document.getElementById("waiting-message");
       if (waitingMessage && data.text) {
         await this.typeText(waitingMessage, data.text);
@@ -78,6 +86,7 @@ export class WaitingPhase {
   async typeText(element, text, speed = 30) {
     element.textContent = "";
     for (let i = 0; i < text.length; i++) {
+      if (!this.isActive) return;
       element.textContent += text[i];
       await new Promise(resolve => setTimeout(resolve, speed));
     }
@@ -98,8 +107,11 @@ export class WaitingPhase {
         this.backgroundMusic.load();
       });
 
-      this.backgroundMusic.play();
-      console.log("Waiting phase background music loaded and playing");
+      // Only play if phase is still active
+      if (this.isActive) {
+        this.backgroundMusic.play();
+        console.log("Waiting phase background music loaded and playing");
+      }
     } catch (error) {
       console.error("Failed to load waiting phase background music:", error);
       this.backgroundMusic = null;
@@ -107,6 +119,9 @@ export class WaitingPhase {
   }
 
   cleanup() {
+    // Mark phase as inactive to stop any ongoing async operations
+    this.isActive = false;
+
     // Stop background music
     if (this.backgroundMusic) {
       this.backgroundMusic.pause();

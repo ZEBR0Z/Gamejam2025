@@ -453,7 +453,7 @@ io.on("connection", (socket) => {
   // Join lobby
   socket.on("joinLobby", (data, callback) => {
     const { lobbyCode, playerName } = data;
-    const lobby = lobbies.get(lobbyCode);
+    const lobby = lobbies.get(lobbyCode.toUpperCase());
 
     if (!lobby) {
       callback({ success: false, error: "Lobby not found" });
