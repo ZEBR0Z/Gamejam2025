@@ -41,11 +41,6 @@ app.use(subPath, express.static(path.join(__dirname, "..")));
 const lobbies = new Map(); // lobbyCode -> Lobby instance
 const playerSockets = new Map(); // socketId -> playerId mapping
 
-// Game configuration
-const GAME_CONFIG = {
-  segmentLength: 8, // Length of each song segment (will be overridden by backing track length)
-};
-
 // Backing track configuration
 const BACKING_TRACKS = [
   {
@@ -58,27 +53,27 @@ const BACKING_TRACKS = [
   },
   {
     path: "assets/backing_tracks/trap.mp3",
-    duration: 10.694,
+    duration: 10.736,
   },
   {
     path: "assets/backing_tracks/raggae.mp3",
-    duration: 12.433,
+    duration: 13.251,
   },
   {
     path: "assets/backing_tracks/guitar.mp3",
-    duration: 13.687,
+    duration: 13.684,
   },
   {
     path: "assets/backing_tracks/electricbass&drum.mp3",
-    duration: 10.107,
+    duration: 10.125,
   },
   {
     path: "assets/backing_tracks/dangerous.mp3",
-    duration: 9.585,
+    duration: 9.549,
   },
   {
     path: "assets/backing_tracks/corporate.mp3",
-    duration: 16.0,
+    duration: 15.999,
   },
 ];
 
