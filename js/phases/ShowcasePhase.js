@@ -316,7 +316,7 @@ export class ShowcasePhase {
   advanceToNextSong() {
     if (this.currentSongIndex < this.finalSongs.length - 1) {
       // Move to next song
-      this.pause();
+      this.stopCurrentSong();
       setTimeout(() => {
         this.showSong(this.currentSongIndex + 1);
       }, 500); // Brief pause between songs
@@ -405,6 +405,26 @@ export class ShowcasePhase {
       totalTime,
       this.isSequentialMode,
     );
+  }
+
+  stopCurrentSong() {
+    // Stop playback completely
+    this.gameState.setPlaybackState(false);
+
+    // Clear scheduling
+    if (this.scheduleInterval) {
+      clearInterval(this.scheduleInterval);
+      this.scheduleInterval = null;
+    }
+
+    // Cancel animation
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+
+    // Stop backing track
+    this.audioEngine.stopBackingTrack();
   }
 
   restart() {

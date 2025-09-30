@@ -11,7 +11,7 @@
     <!-- Main Menu -->
     <div id="main-menu" class="screen active">
       <div class="menu-container">
-        <img src="./assets/art/logo.png" id="logo" />
+        <img src="./assets/art/logo.png" id="logo" draggable="false" />
         <p class="subtitle">!! Create heat beatz with friends !!</p>
         <div class="menu-buttons">
           <button id="tutorial-btn" class="menu-button nes-btn">
@@ -227,28 +227,28 @@
       <div class="chosen-sounds">
         <div class="sound-key">
           <span class="key">
-            <img src="assets/art/oneButton.png" alt="1" />
+            <img src="assets/art/oneButton.png" alt="1" draggable="false" />
           </span>
           <div class="sound-icon">
-            <img src="assets/art/record.png" class="over-img" />
+            <img src="assets/art/record.png" class="over-img" draggable="false" />
             <img id="sound-1-icon" class="bg-image" alt="" />
           </div>
         </div>
         <div class="sound-key">
           <span class="key">
-            <img src="assets/art/twoButton.png" alt="2" />
+            <img src="assets/art/twoButton.png" alt="2" draggable="false" />
           </span>
           <div class="sound-icon">
-            <img src="assets/art/blueRecord.png" class="over-img" />
+            <img src="assets/art/blueRecord.png" class="over-img" draggable="false" />
             <img id="sound-2-icon" class="bg-image" alt="" />
           </div>
         </div>
         <div class="sound-key">
           <span class="key">
-            <img src="assets/art/threeButton.png" alt="3" />
+            <img src="assets/art/threeButton.png" alt="3" draggable="false" />
           </span>
           <div class="sound-icon">
-            <img src="assets/art/greenRecord.png" class="over-img" />
+            <img src="assets/art/greenRecord.png" class="over-img" draggable="false" />
             <img id="sound-3-icon" class="bg-image" alt="" />
           </div>
         </div>
@@ -296,10 +296,10 @@
       <div class="editing-sounds">
         <div class="sound-key editing-sound" id="editing-sound-0">
           <span class="key">
-            <img src="assets/art/oneButton.png" alt="1" />
+            <img src="assets/art/oneButton.png" alt="1" draggable="false" />
           </span>
           <div class="sound-icon">
-            <img src="assets/art/record.png" class="over-img" />
+            <img src="assets/art/record.png" class="over-img" draggable="false" />
             <img
               src="assets/art/record.png"
               id="editing-sound-1-icon"
@@ -310,10 +310,10 @@
         </div>
         <div class="sound-key editing-sound" id="editing-sound-1">
           <span class="key">
-            <img src="assets/art/twoButton.png" alt="2" />
+            <img src="assets/art/twoButton.png" alt="2" draggable="false" />
           </span>
           <div class="sound-icon">
-            <img src="assets/art/blueRecord.png" class="over-img" />
+            <img src="assets/art/blueRecord.png" class="over-img" draggable="false" />
             <img
               src="assets/art/blueRecord.png"
               id="editing-sound-2-icon"
@@ -324,10 +324,10 @@
         </div>
         <div class="sound-key editing-sound" id="editing-sound-2">
           <span class="key">
-            <img src="assets/art/threeButton.png" alt="3" />
+            <img src="assets/art/threeButton.png" alt="3" draggable="false" />
           </span>
           <div class="sound-icon">
-            <img src="assets/art/greenRecord.png" class="over-img" />
+            <img src="assets/art/greenRecord.png" class="over-img" draggable="false" />
             <img
               src="assets/art/greenRecord.png"
               id="editing-sound-3-icon"
@@ -457,7 +457,9 @@
               <img
                 id="replacement-target-icon"
                 class="sound-icon"
+                style="animation: none"
                 alt="Current Sound"
+                draggable="false"
               />
               <span>Sound <span id="replacement-target-number">1</span></span>
             </div>

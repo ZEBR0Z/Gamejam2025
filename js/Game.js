@@ -399,9 +399,7 @@ export class Game {
       createButton.textContent = "Creating...";
     }
 
-    console.log("playerName element:", this.uiManager.elements.playerName);
     const playerName = this.uiManager.elements.playerName?.value.trim();
-    console.log("playerName value:", playerName);
 
     try {
       // Connect to server
@@ -415,6 +413,7 @@ export class Game {
         if (createButton) {
           createButton.disabled = false;
           createButton.textContent = "Create Lobby";
+          createButton.classList.remove("is-disabled");
         }
         return;
       }
@@ -434,6 +433,7 @@ export class Game {
         if (createButton) {
           createButton.disabled = false;
           createButton.textContent = "Create Lobby";
+          createButton.classList.remove("is-disabled");
         }
       }
     } catch (error) {
@@ -444,6 +444,7 @@ export class Game {
         createButton.disabled = false;
         createButton.classList.remove("is-disabled");
         createButton.textContent = "Create Lobby";
+        createButton.classList.remove("is-disabled");
       }
     }
   }
@@ -469,6 +470,7 @@ export class Game {
         if (joinButton) {
           joinButton.disabled = false;
           joinButton.textContent = "Join Lobby";
+          joinButton.classList.remove("is-disabled");
         }
         return;
       }
@@ -487,6 +489,7 @@ export class Game {
         if (joinButton) {
           joinButton.disabled = false;
           joinButton.textContent = "Join Lobby";
+          joinButton.classList.remove("is-disabled");
         }
       }
     } catch (error) {
@@ -495,8 +498,8 @@ export class Game {
       // Re-enable button on error
       if (joinButton) {
         joinButton.disabled = false;
-        joinButton.classList.remove("is-disabled");
         joinButton.textContent = "Join Lobby";
+        joinButton.classList.remove("is-disabled");
       }
     }
   }
