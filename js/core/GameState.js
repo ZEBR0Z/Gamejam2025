@@ -18,18 +18,17 @@ export class GameState {
 
     // Timing configuration
     this.config = {
-      bpm: 120,
-      segmentLength: 8, // seconds - will be overridden by backing track duration
-      selectionTime: 15,
-      performanceTime: 90, // 1.5 minutes
+      segmentLength: 8, // Default value - overridden by backing track duration
+      selectionTime: 30,
+      performanceTime: 90,
       editingTime: 60,
-      replacementTime: 15, // 15 seconds for sound replacement
+      replacementTime: 30,
     };
 
     // Backing track state
     this.backingTrack = {
       path: null,
-      duration: 8, // default fallback
+      duration: 8, // Default fallback
       isPlaying: false,
       currentTime: 0,
       audioElement: null,

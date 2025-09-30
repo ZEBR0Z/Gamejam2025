@@ -390,7 +390,10 @@
     <!-- Song Preview -->
     <div id="preview" class="screen oven">
       <div class="preview-container">
-        <h2>Listen to the Previous Part</h2>
+        <div class="phase-header">
+          <h2>Listen to the Previous Part</h2>
+          <div class="countdown" id="preview-phase-timer">20</div>
+        </div>
         <div class="preview-info">
           <p>
             This is what <span id="previous-player-name">Player</span> created.
@@ -401,9 +404,6 @@
               >Round <span id="preview-current-round">2</span> of
               <span id="preview-total-rounds">3</span></span
             >
-          </div>
-          <div class="phase-timer">
-            <span>Preview Time: <span id="preview-phase-timer">20</span></span>
           </div>
         </div>
 
@@ -447,7 +447,10 @@
     <!-- Sound Replacement -->
     <div id="sound-replacement" class="screen oven">
       <div class="replacement-container">
-        <h2>Evolve Your Sound Palette</h2>
+        <div class="phase-header">
+          <h2>Evolve Your Sound Palette</h2>
+          <div class="countdown" id="replacement-countdown">10</div>
+        </div>
         <div class="replacement-info">
           <p>Replace one sound from the previous players 3 chosen sounds!</p>
           <div class="replacement-target">
@@ -463,7 +466,6 @@
               <span>Sound <span id="replacement-target-number">1</span></span>
             </div>
           </div>
-          <div class="countdown" id="replacement-countdown">10</div>
         </div>
 
         <div class="replacement-grid" id="replacement-grid">

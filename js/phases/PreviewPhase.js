@@ -370,19 +370,6 @@ export class PreviewPhase {
   updatePhaseTimer(timeLeft) {
     if (this.uiManager.elements.previewPhaseTimer) {
       this.uiManager.elements.previewPhaseTimer.textContent = timeLeft;
-
-      // Change color as time gets low
-      const timerElement =
-        this.uiManager.elements.previewPhaseTimer.parentElement;
-      if (timeLeft <= 5) {
-        timerElement.style.background = "rgba(255, 0, 0, 0.3)";
-        timerElement.style.color = "#ff6b6b";
-        timerElement.style.borderColor = "rgba(255, 0, 0, 0.5)";
-      } else if (timeLeft <= 10) {
-        timerElement.style.background = "rgba(255, 165, 0, 0.3)";
-        timerElement.style.color = "#ffa500";
-        timerElement.style.borderColor = "rgba(255, 165, 0, 0.5)";
-      }
     }
   }
 

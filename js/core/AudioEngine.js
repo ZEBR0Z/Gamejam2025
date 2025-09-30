@@ -184,7 +184,7 @@ export class AudioEngine {
 
       this.backingTrackAudio = new Audio(trackPath);
       this.backingTrackAudio.loop = true;
-      this.backingTrackAudio.volume = 0.6; // Slightly lower volume so user sounds are prominent
+      this.backingTrackAudio.volume = 0.8; // Slightly lower volume so user sounds are prominent
 
       // Wait for the audio to be loadable
       await new Promise((resolve, reject) => {

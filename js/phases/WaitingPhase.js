@@ -28,13 +28,13 @@ export class WaitingPhase {
       this.uiManager.updateWaitingScreen(gameState);
     }
 
-    // Fetch and display random fact
-    await this.fetchRandomFact();
-
     // Load and start background music (only if still active)
     if (this.isActive) {
       await this.loadBackgroundMusic();
     }
+
+    // Fetch and display random fact
+    await this.fetchRandomFact();
 
     // Set up multiplayer event handlers
     this.setupEventHandlers();
