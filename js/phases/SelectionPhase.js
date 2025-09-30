@@ -3,12 +3,12 @@
  * Players choose 3 sounds from 5 random options within 10 seconds
  */
 export class SelectionPhase {
-  constructor(gameState, uiManager, audioEngine, timer) {
+  constructor(gameState, uiManager, audioEngine) {
     this.gameState = gameState;
     this.uiManager = uiManager;
     this.audioEngine = audioEngine;
-    this.timer = timer;
     this.onPhaseComplete = null;
+    this.countdownInterval = null;
   }
 
   async start(onComplete) {
@@ -19,7 +19,6 @@ export class SelectionPhase {
 
     // Reset selection state
     this.gameState.clearSelectedSounds();
-    this.gameState.resetTimers();
     this.updateUI();
 
     // Pick 5 random sounds
@@ -29,7 +28,7 @@ export class SelectionPhase {
     await this.populateSoundGrid();
 
     // Start countdown timer
-    this.timer.startSelectionTimer(() => this.complete());
+    this.startCountdown();
 
     // Setup event handlers
     this.setupEventHandlers();
@@ -129,6 +128,41 @@ export class SelectionPhase {
     return Promise.all(selectPromises);
   }
 
+  startCountdown() {
+    let timeLeft = this.gameState.config.selectionTime;
+    const countdownElement = this.uiManager.elements.selectionCountdown;
+
+    const updateCountdown = () => {
+      if (countdownElement) {
+        countdownElement.textContent = timeLeft;
+      }
+
+      timeLeft--;
+
+      if (timeLeft < 0) {
+        this.stopCountdown();
+        // Check if selection is complete
+        if (this.gameState.selectedSounds.length === 3) {
+          this.complete();
+        } else {
+          // Auto-select remaining sounds
+          this.autoSelectRemaining();
+          setTimeout(() => this.complete(), 500);
+        }
+      }
+    };
+
+    updateCountdown();
+    this.countdownInterval = setInterval(updateCountdown, 1000);
+  }
+
+  stopCountdown() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
+  }
+
   updateUI() {
     this.uiManager.updateSelectedCount(this.gameState.selectedSounds.length);
     this.uiManager.updateContinueButton(
@@ -157,7 +191,7 @@ export class SelectionPhase {
 
   finishPhase() {
     this.stopPreview();
-    this.timer.stopTimer("selectionTimeLeft");
+    this.stopCountdown();
 
     console.log("Selection phase complete");
     if (this.onPhaseComplete) {
@@ -173,6 +207,6 @@ export class SelectionPhase {
     }
 
     this.stopPreview();
-    this.timer.stopTimer("selectionTimeLeft");
+    this.stopCountdown();
   }
 }

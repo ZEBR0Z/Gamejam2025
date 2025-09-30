@@ -20,7 +20,6 @@ import { GameState } from "./core/GameState.js";
 import { UIManager } from "./core/UIManager.js";
 import { CanvasRenderer } from "./core/CanvasRenderer.js";
 import { InputController } from "./core/InputController.js";
-import { Timer } from "./core/Timer.js";
 import { MultiplayerManager } from "./core/MultiplayerManager.js";
 import { PhaseManager } from "./core/PhaseManager.js";
 
@@ -45,7 +44,6 @@ export class Game {
       this.uiManager,
       this.audioEngine,
     );
-    this.timer = new Timer(this.gameState, this.uiManager);
     this.multiplayerManager = new MultiplayerManager();
     this.phaseManager = new PhaseManager();
 
@@ -54,13 +52,11 @@ export class Game {
       this.gameState,
       this.uiManager,
       this.audioEngine,
-      this.timer,
     );
     this.performancePhase = new PerformancePhase(
       this.gameState,
       this.uiManager,
       this.audioEngine,
-      this.timer,
       this.canvasRenderer,
       this.inputController,
       this.multiplayerManager,
@@ -69,7 +65,6 @@ export class Game {
       this.gameState,
       this.uiManager,
       this.audioEngine,
-      this.timer,
       this.canvasRenderer,
       this.inputController,
       this.multiplayerManager,
@@ -92,7 +87,6 @@ export class Game {
       this.gameState,
       this.uiManager,
       this.audioEngine,
-      this.timer,
     );
     this.showcasePhase = new ShowcasePhase(
       this.gameState,
@@ -774,7 +768,6 @@ export class Game {
     this.cleanupCurrentPhase();
     this.multiplayerManager.disconnect();
     this.gameState.resetForNewGame();
-    this.timer.resetAllTimers();
     this.uiManager.showScreen("main-menu");
 
     // Restart menu music (if user has interacted)
@@ -808,7 +801,6 @@ export class Game {
   // Global cleanup method
   cleanup() {
     this.cleanupCurrentPhase();
-    this.timer.stopAllTimers();
     this.audioEngine.stopPreview();
     this.audioEngine.stopEditPreview();
     this.audioEngine.stopMenuMusic();

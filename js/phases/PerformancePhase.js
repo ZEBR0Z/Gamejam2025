@@ -7,7 +7,6 @@ export class PerformancePhase {
     gameState,
     uiManager,
     audioEngine,
-    timer,
     canvasRenderer,
     inputController,
     multiplayerManager,
@@ -15,7 +14,6 @@ export class PerformancePhase {
     this.gameState = gameState;
     this.uiManager = uiManager;
     this.audioEngine = audioEngine;
-    this.timer = timer;
     this.canvasRenderer = canvasRenderer;
     this.inputController = inputController;
     this.multiplayerManager = multiplayerManager;
@@ -23,6 +21,7 @@ export class PerformancePhase {
     this.onPhaseComplete = null;
     this.scheduleInterval = null;
     this.animationFrameId = null;
+    this.countdownInterval = null;
   }
 
   async start(onComplete) {
@@ -34,8 +33,6 @@ export class PerformancePhase {
     // Reset performance state
     this.gameState.clearEvents();
     this.gameState.setPlaybackState(false, 0, 0);
-    this.gameState.timers.performanceTimeLeft =
-      this.gameState.config.performanceTime;
 
     // Load backing track for current song
     await this.loadCurrentSongBackingTrack();
@@ -144,11 +141,41 @@ export class PerformancePhase {
     this.audioEngine.startBackingTrack();
 
     // Start performance countdown
-    this.timer.startPerformanceTimer(() => this.complete());
+    this.startCountdown();
 
     // Start scheduling and animation
     this.startScheduling();
     this.startAnimation();
+  }
+
+  startCountdown() {
+    let timeLeft = this.gameState.config.performanceTime;
+    const countdownElement = this.uiManager.elements.performanceCountdown;
+
+    const updateCountdown = () => {
+      if (countdownElement) {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        countdownElement.textContent = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+      }
+
+      timeLeft--;
+
+      if (timeLeft < 0) {
+        this.stopCountdown();
+        this.complete();
+      }
+    };
+
+    updateCountdown();
+    this.countdownInterval = setInterval(updateCountdown, 1000);
+  }
+
+  stopCountdown() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
   }
 
   refreshUI() {
@@ -400,7 +427,7 @@ export class PerformancePhase {
   complete() {
     this.pause();
     this.audioEngine.stopBackingTrack();
-    this.timer.stopTimer("performanceTimeLeft");
+    this.stopCountdown();
 
     console.log("Performance phase complete");
     if (this.onPhaseComplete) {
@@ -427,6 +454,6 @@ export class PerformancePhase {
     // Stop backing track
     this.audioEngine.stopBackingTrack();
 
-    this.timer.stopTimer("performanceTimeLeft");
+    this.stopCountdown();
   }
 }

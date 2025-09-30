@@ -4,16 +4,16 @@
  * This adds evolution to the sound palette across rounds
  */
 export class SoundReplacementPhase {
-  constructor(gameState, uiManager, audioEngine, timer) {
+  constructor(gameState, uiManager, audioEngine) {
     this.gameState = gameState;
     this.uiManager = uiManager;
     this.audioEngine = audioEngine;
-    this.timer = timer;
     this.onPhaseComplete = null;
     this.replacementOptions = []; // 3 random sounds to choose from
     this.selectedReplacementIndex = -1;
     this.replacementSoundIndex = -1; // Which existing sound will be replaced
     this.continueHandler = null;
+    this.countdownInterval = null;
   }
 
   async start(onComplete) {
@@ -36,11 +36,39 @@ export class SoundReplacementPhase {
     await this.populateReplacementGrid();
     this.updateUI();
 
-    // Start countdown timer (10 seconds)
-    this.timer.startReplacementTimer(() => this.complete());
+    // Start countdown timer (30 seconds)
+    this.startCountdown();
 
     // Setup event handlers
     this.setupEventHandlers();
+  }
+
+  startCountdown() {
+    let timeLeft = this.gameState.config.replacementTime;
+    const countdownElement = this.uiManager.elements.replacementCountdown;
+
+    const updateCountdown = () => {
+      if (countdownElement) {
+        countdownElement.textContent = timeLeft;
+      }
+
+      timeLeft--;
+
+      if (timeLeft < 0) {
+        this.stopCountdown();
+        this.complete();
+      }
+    };
+
+    updateCountdown();
+    this.countdownInterval = setInterval(updateCountdown, 1000);
+  }
+
+  stopCountdown() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
   }
 
   selectReplacementOptions() {
@@ -198,7 +226,7 @@ export class SoundReplacementPhase {
 
   finishPhase() {
     this.stopPreview();
-    this.timer.stopTimer("replacementTimeLeft");
+    this.stopCountdown();
 
     // Apply the sound replacement
     if (
@@ -238,6 +266,6 @@ export class SoundReplacementPhase {
     }
 
     this.stopPreview();
-    this.timer.stopTimer("replacementTimeLeft");
+    this.stopCountdown();
   }
 }

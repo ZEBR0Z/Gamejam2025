@@ -29,9 +29,6 @@ export class GameState {
     this.backingTrack = {
       path: null,
       duration: 8, // Default fallback
-      isPlaying: false,
-      currentTime: 0,
-      audioElement: null,
     };
 
     // Playback state
@@ -39,15 +36,6 @@ export class GameState {
       currentTime: 0,
       isPlaying: false,
       startTime: 0,
-    };
-
-    // Phase timers
-    this.timers = {
-      selectionTimeLeft: this.config.selectionTime,
-      performanceTimeLeft: this.config.performanceTime,
-      editingTimeLeft: this.config.editingTime,
-      replacementTimeLeft: this.config.replacementTime,
-      phaseCountdown: 0,
     };
 
     // Icon preloading callback (set by Game)
@@ -174,36 +162,12 @@ export class GameState {
     return this.backingTrack.duration || this.config.segmentLength;
   }
 
-  setBackingTrackPlayback(isPlaying, currentTime = null) {
-    this.backingTrack.isPlaying = isPlaying;
-    if (currentTime !== null) {
-      this.backingTrack.currentTime = currentTime;
-    }
-  }
-
-  // Timer management
-  resetTimers() {
-    this.timers.selectionTimeLeft = this.config.selectionTime;
-    this.timers.performanceTimeLeft = this.config.performanceTime;
-    this.timers.editingTimeLeft = this.config.editingTime;
-    this.timers.replacementTimeLeft = this.config.replacementTime;
-  }
-
-  decrementTimer(timerName) {
-    if (this.timers[timerName] > 0) {
-      this.timers[timerName]--;
-      return this.timers[timerName];
-    }
-    return 0;
-  }
-
   // Reset methods
   resetGameData() {
     this.clearEvents();
     this.clearSelectedSounds();
     this.availableSounds = [];
     this.setPlaybackState(false, 0, 0);
-    this.resetTimers();
   }
 
   resetForNewGame() {

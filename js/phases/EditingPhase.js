@@ -7,7 +7,6 @@ export class EditingPhase {
     gameState,
     uiManager,
     audioEngine,
-    timer,
     canvasRenderer,
     inputController,
     multiplayerManager,
@@ -15,7 +14,6 @@ export class EditingPhase {
     this.gameState = gameState;
     this.uiManager = uiManager;
     this.audioEngine = audioEngine;
-    this.timer = timer;
     this.canvasRenderer = canvasRenderer;
     this.inputController = inputController;
     this.multiplayerManager = multiplayerManager;
@@ -23,6 +21,7 @@ export class EditingPhase {
     this.onPhaseComplete = null;
     this.scheduleInterval = null;
     this.animationFrameId = null;
+    this.countdownInterval = null;
     this.selectedSoundIndex = 0; // Currently selected sound for editing (0, 1, or 2)
   }
 
@@ -34,7 +33,6 @@ export class EditingPhase {
 
     // Reset editing state
     this.gameState.setPlaybackState(false, 0, 0);
-    this.gameState.timers.editingTimeLeft = this.gameState.config.editingTime;
 
     // Load backing track for current song (backing track should already be set from preview/performance)
     // But load it again in case we're starting editing without going through those phases
@@ -152,7 +150,37 @@ export class EditingPhase {
     this.startAnimation();
 
     // Start editing countdown
-    this.timer.startEditingTimer(() => this.complete());
+    this.startCountdown();
+  }
+
+  startCountdown() {
+    let timeLeft = this.gameState.config.editingTime;
+    const countdownElement = this.uiManager.elements.editingCountdown;
+
+    const updateCountdown = () => {
+      if (countdownElement) {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        countdownElement.textContent = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+      }
+
+      timeLeft--;
+
+      if (timeLeft < 0) {
+        this.stopCountdown();
+        this.complete();
+      }
+    };
+
+    updateCountdown();
+    this.countdownInterval = setInterval(updateCountdown, 1000);
+  }
+
+  stopCountdown() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
   }
 
   async loadCurrentSongBackingTrack() {
@@ -442,7 +470,7 @@ export class EditingPhase {
     this.pause();
     this.audioEngine.stopEditPreview();
     this.audioEngine.stopBackingTrack();
-    this.timer.stopTimer("editingTimeLeft");
+    this.stopCountdown();
 
     console.log("Editing phase complete");
     if (this.onPhaseComplete) {
@@ -478,6 +506,6 @@ export class EditingPhase {
 
     this.audioEngine.stopEditPreview();
     this.audioEngine.stopBackingTrack();
-    this.timer.stopTimer("editingTimeLeft");
+    this.stopCountdown();
   }
 }
