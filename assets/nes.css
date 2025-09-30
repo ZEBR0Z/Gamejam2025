@@ -791,7 +791,7 @@ input[type="radio"] {
 }
 @media all and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
   .nes-balloon {
-    border-image-repeat: space;
+    border-image-repeat: stretch;
   }
 }
 @supports (-moz-appearance: meterbar) {
@@ -820,7 +820,7 @@ input[type="radio"] {
 }
 @media all and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
   .nes-balloon.is-dark {
-    border-image-repeat: space;
+    border-image-repeat: stretch;
   }
 }
 @supports (-moz-appearance: meterbar) {
@@ -944,7 +944,7 @@ input[type="radio"] {
 }
 @media all and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
   .nes-btn {
-    border-image-repeat: space;
+    border-image-repeat: stretch;
   }
 }
 @supports (-moz-appearance: meterbar) {
@@ -1161,7 +1161,7 @@ input[type="radio"] {
 }
 @media all and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
   .nes-container.is-rounded {
-    border-image-repeat: space;
+    border-image-repeat: stretch;
   }
 }
 @supports (-moz-appearance: meterbar) {
@@ -1187,7 +1187,7 @@ input[type="radio"] {
 }
 @media all and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
   .nes-container.is-rounded.is-dark {
-    border-image-repeat: space;
+    border-image-repeat: stretch;
   }
 }
 @supports (-moz-appearance: meterbar) {
@@ -1231,7 +1231,7 @@ input[type="radio"] {
 }
 @media all and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
   .nes-dialog.is-rounded {
-    border-image-repeat: space;
+    border-image-repeat: stretch;
   }
 }
 @supports (-moz-appearance: meterbar) {
@@ -1248,7 +1248,7 @@ input[type="radio"] {
 }
 @media all and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
   .nes-dialog.is-rounded.is-dark {
-    border-image-repeat: space;
+    border-image-repeat: stretch;
   }
 }
 @supports (-moz-appearance: meterbar) {
@@ -1412,7 +1412,7 @@ input[type="radio"] {
 }
 @media all and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
   .nes-progress {
-    border-image-repeat: space;
+    border-image-repeat: stretch;
   }
 }
 @supports (-moz-appearance: meterbar) {
@@ -1442,7 +1442,7 @@ input[type="radio"] {
 }
 @media all and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
   .nes-progress.is-rounded {
-    border-image-repeat: space;
+    border-image-repeat: stretch;
   }
 }
 @supports (-moz-appearance: meterbar) {
@@ -1641,7 +1641,7 @@ input[type="radio"] {
 }
 @media all and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
   .nes-table.is-bordered {
-    border-image-repeat: space;
+    border-image-repeat: stretch;
   }
 }
 @supports (-moz-appearance: meterbar) {
@@ -1670,7 +1670,7 @@ input[type="radio"] {
 }
 @media all and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
   .nes-table.is-dark.is-bordered {
-    border-image-repeat: space;
+    border-image-repeat: stretch;
   }
 }
 @supports (-moz-appearance: meterbar) {
@@ -1734,7 +1734,7 @@ input[type="radio"] {
 @media all and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
   .nes-input,
   .nes-textarea {
-    border-image-repeat: space;
+    border-image-repeat: stretch;
   }
 }
 @supports (-moz-appearance: meterbar) {
@@ -2682,7 +2682,7 @@ input[type="radio"] {
 }
 @media all and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
   .nes-select select {
-    border-image-repeat: space;
+    border-image-repeat: stretch;
   }
 }
 @supports (-moz-appearance: meterbar) {

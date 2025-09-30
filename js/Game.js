@@ -168,7 +168,7 @@ export class Game {
       console.log("Game initialized successfully");
     } catch (error) {
       console.error("Failed to initialize Game:", error);
-      alert("Failed to initialize the game. Please refresh and try again.");
+      this.showError("Failed to initialize the game. Please refresh and try again.");
     }
   }
 
@@ -408,7 +408,7 @@ export class Game {
       console.log("Connection result:", connected);
       if (!connected) {
         console.log("Failed to connect to server");
-        alert("Failed to connect to server. Please try again.");
+        this.showError("Failed to connect to server. Please try again.");
         // Re-enable button on error
         if (createButton) {
           createButton.disabled = false;
@@ -428,7 +428,7 @@ export class Game {
         // Button will be hidden when we switch screens, so no need to re-enable
       } else {
         console.log("Failed to create lobby:", response.error);
-        alert(response.error || "Failed to create lobby");
+        this.showError(response.error || "Failed to create lobby");
         // Re-enable button on error
         if (createButton) {
           createButton.disabled = false;
@@ -438,7 +438,7 @@ export class Game {
       }
     } catch (error) {
       console.error("Error creating lobby:", error);
-      alert("Failed to create lobby. Please try again.");
+      this.showError("Failed to create lobby. Please try again.");
       // Re-enable button on error
       if (createButton) {
         createButton.disabled = false;
@@ -465,7 +465,7 @@ export class Game {
       // Connect to server
       const connected = await this.multiplayerManager.connect(this.serverUrl);
       if (!connected) {
-        alert("Failed to connect to server. Please try again.");
+        this.showError("Failed to connect to server. Please try again.");
         // Re-enable button on error
         if (joinButton) {
           joinButton.disabled = false;
@@ -484,7 +484,7 @@ export class Game {
         this.showLobbyWaiting(response.gameState);
         // Button will be hidden when we switch screens, so no need to re-enable
       } else {
-        alert(response.error || "Failed to join lobby");
+        this.showError(response.error || "Failed to join lobby");
         // Re-enable button on error
         if (joinButton) {
           joinButton.disabled = false;
@@ -494,7 +494,7 @@ export class Game {
       }
     } catch (error) {
       console.error("Error joining lobby:", error);
-      alert("Failed to join lobby. Please try again.");
+      this.showError("Failed to join lobby. Please try again.");
       // Re-enable button on error
       if (joinButton) {
         joinButton.disabled = false;
@@ -649,7 +649,7 @@ export class Game {
       this.startSelectionPhase();
     } catch (error) {
       console.error("Failed to start multiplayer game:", error);
-      alert("Failed to start the game. Please try again.");
+      this.showError("Failed to start the game. Please try again.");
     }
   }
 
@@ -789,6 +789,18 @@ export class Game {
     // Simple notification system
     console.log("Notification:", message);
     // Could implement a toast notification system here
+  }
+
+  showError(message) {
+    const dialog = document.getElementById("error-dialog");
+    const messageElement = document.getElementById("error-message");
+    if (dialog && messageElement) {
+      messageElement.textContent = message;
+      dialog.showModal();
+    } else {
+      // Fallback to alert if dialog not found
+      alert(message);
+    }
   }
 
   // Global cleanup method

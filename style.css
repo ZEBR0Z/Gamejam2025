@@ -56,6 +56,35 @@ body {
   height: 100vh;
 }
 
+dialog {
+  min-width: 350px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  font-family: readableFont;
+  font-size: 21px;
+  color: #000;
+  text-shadow: none;
+}
+
+dialog .title {
+  color: #ef4444;
+  font-family: heatFont;
+}
+
+dialog form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+dialog button {
+  width: 200px;
+}
+
 .logo {
   align-items: center;
   justify-content: center;
