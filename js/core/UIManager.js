@@ -46,17 +46,17 @@ export class UIManager {
 
   initializeScreens() {
     this.screens = {
-      "main-menu": document.getElementById("main-menu"),
-      "create-lobby": document.getElementById("create-lobby"),
-      "join-lobby": document.getElementById("join-lobby"),
-      "lobby-waiting": document.getElementById("lobby-waiting"),
+      main_menu: document.getElementById("main-menu"),
+      create_lobby: document.getElementById("create-lobby"),
+      join_lobby: document.getElementById("join-lobby"),
+      lobby_waiting: document.getElementById("lobby-waiting"),
       tutorial: document.getElementById("tutorial"),
       selection: document.getElementById("selection"),
       performance: document.getElementById("performance"),
       editing: document.getElementById("editing"),
-      "waiting-for-players": document.getElementById("waiting-for-players"),
+      waiting_for_players: document.getElementById("waiting-for-players"),
       preview: document.getElementById("preview"),
-      "sound-replacement": document.getElementById("sound-replacement"),
+      sound_replacement: document.getElementById("sound-replacement"),
       showcase: document.getElementById("showcase"),
       final: document.getElementById("final"),
     };
@@ -211,7 +211,7 @@ export class UIManager {
     if (this.screens[screenName]) {
       this.screens[screenName].classList.add("active");
 
-      if (screenName === "main-menu") {
+      if (screenName === "main_menu") {
         this.resetMainMenuButtons();
       }
     } else {

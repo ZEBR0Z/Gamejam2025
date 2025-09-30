@@ -20,7 +20,7 @@ export class SoundReplacementPhase {
     this.onPhaseComplete = onComplete;
 
     console.log("Starting sound replacement phase");
-    this.uiManager.showScreen("sound-replacement");
+    this.uiManager.showScreen("sound_replacement");
 
     this.selectedReplacementIndex = -1;
     this.replacementOptions = [];

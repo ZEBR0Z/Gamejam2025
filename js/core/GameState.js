@@ -157,8 +157,7 @@ export class GameState {
   setBackingTrack(backingTrackInfo) {
     if (backingTrackInfo) {
       // Support both 'audio' (new) and 'path' (legacy) fields
-      this.backingTrack.path =
-        backingTrackInfo.audio || backingTrackInfo.path;
+      this.backingTrack.path = backingTrackInfo.audio || backingTrackInfo.path;
       this.backingTrack.duration = backingTrackInfo.duration;
       this.config.segmentLength = backingTrackInfo.duration;
     }

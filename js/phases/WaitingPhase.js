@@ -18,7 +18,7 @@ export class WaitingPhase {
     this.isActive = true;
 
     console.log("Starting waiting phase");
-    this.uiManager.showScreen("waiting-for-players");
+    this.uiManager.showScreen("waiting_for_players");
 
     const gameState = this.multiplayerManager.getGameState();
     if (gameState) {

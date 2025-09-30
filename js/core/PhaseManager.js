@@ -11,10 +11,10 @@ export class PhaseManager {
     this.validTransitions = new Map([
       ["selection", ["performance"]],
       ["performance", ["editing"]],
-      ["editing", ["waiting-for-players"]],
-      ["waiting-for-players", ["preview", "showcase"]],
-      ["preview", ["sound-replacement"]],
-      ["sound-replacement", ["performance"]],
+      ["editing", ["waiting_for_players"]],
+      ["waiting_for_players", ["preview", "showcase"]],
+      ["preview", ["sound_replacement"]],
+      ["sound_replacement", ["performance"]],
       ["showcase", ["menu"]],
     ]);
 

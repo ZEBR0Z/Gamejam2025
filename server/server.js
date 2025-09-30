@@ -61,7 +61,7 @@ function generatePlayerId() {
 /**
  * Lobby - Manages a single game session
  *
- * States: waiting -> selection -> performance -> editing -> waiting-for-players -> preview -> showcase
+ * States: waiting -> selection -> performance -> editing -> waiting_for_players -> preview -> showcase
  *
  * Song Structure:
  * - Each song has multiple segments (one per round)
@@ -205,7 +205,7 @@ class Lobby {
   }
 
   startWaitingForPlayers() {
-    this.state = "waiting-for-players";
+    this.state = "waiting_for_players";
   }
 
   /**
@@ -456,7 +456,7 @@ io.on("connection", (socket) => {
         gameState: lobby.getGameState(),
       });
 
-      if (lobby.state === "waiting-for-players") {
+      if (lobby.state === "waiting_for_players") {
         io.to(lobby.code).emit("waitingUpdate", {
           gameState: lobby.getGameState(),
         });

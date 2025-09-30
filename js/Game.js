@@ -136,10 +136,10 @@ export class Game {
     this.phaseManager.registerPhase("selection", this.selectionPhase);
     this.phaseManager.registerPhase("performance", this.performancePhase);
     this.phaseManager.registerPhase("editing", this.editingPhase);
-    this.phaseManager.registerPhase("waiting-for-players", this.waitingPhase);
+    this.phaseManager.registerPhase("waiting_for_players", this.waitingPhase);
     this.phaseManager.registerPhase("preview", this.previewPhase);
     this.phaseManager.registerPhase(
-      "sound-replacement",
+      "sound_replacement",
       this.soundReplacementPhase,
     );
     this.phaseManager.registerPhase("showcase", this.showcasePhase);
@@ -193,10 +193,10 @@ export class Game {
    * Done once during initialization to avoid repeated querySelector calls
    */
   initializeMultiplayerScreens() {
-    this.uiManager.screens.createLobby =
+    this.uiManager.screens.create_lobby =
       document.getElementById("create-lobby");
-    this.uiManager.screens.joinLobby = document.getElementById("join-lobby");
-    this.uiManager.screens.lobbyWaiting =
+    this.uiManager.screens.join_lobby = document.getElementById("join-lobby");
+    this.uiManager.screens.lobby_waiting =
       document.getElementById("lobby-waiting");
 
     this.uiManager.elements.playerName = document.getElementById("player-name");
@@ -226,8 +226,8 @@ export class Game {
       "tutorial-btn": () => this.showTutorial(),
       "create-lobby-btn": () => this.showCreateLobby(),
       "join-lobby-btn": () => this.showJoinLobby(),
-      "skip-tutorial-btn": () => this.uiManager.showScreen("main-menu"),
-      "start-tutorial-btn": () => this.uiManager.showScreen("main-menu"),
+      "skip-tutorial-btn": () => this.uiManager.showScreen("main_menu"),
+      "start-tutorial-btn": () => this.uiManager.showScreen("main_menu"),
     };
 
     this.inputController.setupPersistentButtonEvents(menuHandlers);
@@ -277,9 +277,9 @@ export class Game {
 
     // Button handlers for lobby actions
     const lobbyHandlers = {
-      "back-to-menu-btn": () => this.uiManager.showScreen("main-menu"),
+      "back-to-menu-btn": () => this.uiManager.showScreen("main_menu"),
       "back-to-menu-from-join-btn": () =>
-        this.uiManager.showScreen("main-menu"),
+        this.uiManager.showScreen("main_menu"),
       "create-lobby-confirm-btn": () => {
         console.log("Create lobby button clicked!");
         this.createLobby();
@@ -349,7 +349,7 @@ export class Game {
    * Button is disabled until player name is entered
    */
   showCreateLobby() {
-    this.uiManager.showScreen("create-lobby");
+    this.uiManager.showScreen("create_lobby");
     const playerNameInput = this.uiManager.elements.playerName;
     const createButton = document.getElementById("create-lobby-confirm-btn");
 
@@ -383,7 +383,7 @@ export class Game {
    * Button is disabled until both player name and 6-character lobby code are entered
    */
   showJoinLobby() {
-    this.uiManager.showScreen("join-lobby");
+    this.uiManager.showScreen("join_lobby");
     const playerNameInput = this.uiManager.elements.joinPlayerName;
     const lobbyCodeInput = this.uiManager.elements.lobbyCodeInput;
     const joinButton = document.getElementById("join-lobby-confirm-btn");
@@ -524,7 +524,7 @@ export class Game {
 
   showLobbyWaiting(gameState) {
     console.log("showLobbyWaiting called with gameState:", gameState);
-    this.uiManager.showScreen("lobby-waiting");
+    this.uiManager.showScreen("lobby_waiting");
     this.updateLobbyUI(gameState);
 
     // Set lobby code displays
@@ -650,7 +650,7 @@ export class Game {
 
   leaveLobby() {
     this.multiplayerManager.disconnect();
-    this.uiManager.showScreen("main-menu");
+    this.uiManager.showScreen("main_menu");
 
     if (this.hasUserInteracted && !this.audioEngine.isMenuMusicPlaying()) {
       this.audioEngine.startMenuMusic();
@@ -726,9 +726,9 @@ export class Game {
         });
         break;
 
-      case "waiting-for-players":
+      case "waiting_for_players":
         // Already waiting, just update UI. Server will send next phase when ready
-        this.phaseManager.transitionTo("waiting-for-players", (gameState) => {
+        this.phaseManager.transitionTo("waiting_for_players", (gameState) => {
           this.handlePhaseChange(gameState);
         });
         break;
@@ -736,12 +736,12 @@ export class Game {
       case "preview":
         // SERVER SIGNAL: New round starting, all players submitted previous round
         // Songs have been rotated, now preview the song before adding to it
-        // Chain: preview -> sound-replacement -> performance -> editing -> submit -> waiting
+        // Chain: preview -> sound_replacement -> performance -> editing -> submit -> waiting
         this.phaseManager.transitionTo("preview", () => {
           console.log(
             "Song preview complete, moving to sound replacement phase",
           );
-          this.phaseManager.transitionTo("sound-replacement", () => {
+          this.phaseManager.transitionTo("sound_replacement", () => {
             console.log(
               "Sound replacement complete, moving to performance phase",
             );
@@ -821,7 +821,7 @@ export class Game {
     this.multiplayerManager.submitSong(songData, backingTrack);
 
     // Enter waiting phase, which will recursively handle next phase change
-    this.phaseManager.transitionTo("waiting-for-players", (gameState) => {
+    this.phaseManager.transitionTo("waiting_for_players", (gameState) => {
       this.handlePhaseChange(gameState);
     });
   }
@@ -842,7 +842,7 @@ export class Game {
     this.cleanupCurrentPhase();
     this.multiplayerManager.disconnect();
     this.gameState.resetForNewGame();
-    this.uiManager.showScreen("main-menu");
+    this.uiManager.showScreen("main_menu");
 
     if (this.hasUserInteracted && !this.audioEngine.isMenuMusicPlaying()) {
       this.audioEngine.startMenuMusic();
