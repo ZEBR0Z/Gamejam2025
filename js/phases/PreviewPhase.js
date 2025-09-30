@@ -58,7 +58,9 @@ export class PreviewPhase {
         // Set backing track info and load it
         if (this.previousSong.backingTrack) {
           this.gameState.setBackingTrack(this.previousSong.backingTrack);
-          await this.audioEngine.loadBackingTrack(this.previousSong.backingTrack.path);
+          await this.audioEngine.loadBackingTrack(
+            this.previousSong.backingTrack.path,
+          );
         }
 
         // Update UI with previous player info
@@ -165,6 +167,12 @@ export class PreviewPhase {
     const playbackTime = currentTime - this.gameState.playback.startTime;
     const totalTime = this.gameState.getSegmentLength();
 
+    // Restart if past the end
+    if (playbackTime >= totalTime) {
+      this.restart();
+      return;
+    }
+
     this.previewEvents.forEach((event) => {
       if (!event.scheduled) {
         const eventTime = event.startTimeSec;
@@ -176,14 +184,6 @@ export class PreviewPhase {
           const scheduleTime = currentTime + (eventTime - playbackTime);
           this.playEvent(event, scheduleTime);
           event.scheduled = true;
-
-          // Reset scheduled flag when playback loops or restarts
-          setTimeout(
-            () => {
-              event.scheduled = false;
-            },
-            (totalTime - eventTime + 0.1) * 1000,
-          );
         }
       }
     });

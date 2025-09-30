@@ -4,24 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>YO, THAT'S HEAT</title>
-    <link rel="stylesheet" href="./server/node_modules/nes.css/css/nes.min.css">
-    <link rel="stylesheet" href="./assets/nes.css">
+    <link rel="stylesheet" href="./assets/nes.css" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <!-- Main Menu -->
     <div id="main-menu" class="screen active">
       <div class="menu-container">
-        <img src="./assets/art/logo.png" id="logo">
-        <p class="subtitle">
-          !! Create heat beatz with friends !!
-        </p>
+        <img src="./assets/art/logo.png" id="logo" />
+        <p class="subtitle">!! Create heat beatz with friends !!</p>
         <div class="menu-buttons">
-          <button id="tutorial-btn" class="menu-button nes-btn">Tutorial</button>
+          <button id="tutorial-btn" class="menu-button nes-btn">
+            Tutorial
+          </button>
           <button id="create-lobby-btn" class="menu-button nes-btn is-primary">
             Create Lobby
           </button>
-          <button id="join-lobby-btn" class="menu-button nes-btn">Join Lobby</button>
+          <button id="join-lobby-btn" class="menu-button nes-btn">
+            Join Lobby
+          </button>
         </div>
       </div>
     </div>
@@ -41,10 +42,18 @@
           />
         </div>
         <div class="lobby-buttons">
-          <button id="create-lobby-confirm-btn" class="primary-button nes-btn is-success">
+          <button
+            id="create-lobby-confirm-btn"
+            class="primary-button nes-btn is-success"
+          >
             Create Lobby
           </button>
-          <button id="back-to-menu-btn" class="secondary-button nes-btn is-error">Back</button>
+          <button
+            id="back-to-menu-btn"
+            class="secondary-button nes-btn is-error"
+          >
+            Back
+          </button>
         </div>
       </div>
     </div>
@@ -75,10 +84,16 @@
           />
         </div>
         <div class="lobby-buttons">
-          <button id="join-lobby-confirm-btn" class="primary-button nes-btn is-success">
+          <button
+            id="join-lobby-confirm-btn"
+            class="primary-button nes-btn is-success"
+          >
             Join Lobby
           </button>
-          <button id="back-to-menu-from-join-btn" class="secondary-button nes-btn is-error">
+          <button
+            id="back-to-menu-from-join-btn"
+            class="secondary-button nes-btn is-error"
+          >
             Back
           </button>
         </div>
@@ -102,15 +117,18 @@
         </div>
 
         <div class="lobby-info">
-          <p style="font-family: readableFont; font-size:x-large;">
-            Share this code with friends: <strong id=shareable-code></strong>
+          <p style="font-family: readableFont; font-size: x-large">
+            Share this code with friends: <strong id="shareable-code"></strong>
           </p>
           <p>Minimum 2 players required to start</p>
         </div>
 
         <div class="lobby-buttons">
           <button id="ready-btn" class="primary-button nes-btn">Ready</button>
-          <button id="leave-lobby-btn" class="secondary-button nes-btn is-error">
+          <button
+            id="leave-lobby-btn"
+            class="secondary-button nes-btn is-error"
+          >
             Leave Lobby
           </button>
         </div>
@@ -139,26 +157,29 @@
           <div class="step">
             <h3>2. Performance Phase (1.5 minutes)</h3>
             <p>
-              Press keys 1, 2, 3 to place down your chosen sounds and record them with the backing track.
+              Press keys 1, 2, 3 to place down your chosen sounds and record
+              them with the backing track.
             </p>
           </div>
           <div class="step">
             <h3>3. Editing Phase (1 minute)</h3>
             <p>
-              Press the 1, 2, 3 buttons to change to your desired sound. Drag notes up/down to change their pitch. Create your perfect
-              melody!
+              Press the 1, 2, 3 buttons to change to your desired sound. Drag
+              notes up/down to change their pitch. Create your perfect melody!
             </p>
           </div>
           <div class="step">
             <h3>Listen to previous players creation (20 seconds)</h3>
             <p>
-              Preview the previous players creation and try to think of creative ways to keep it going.
+              Preview the previous players creation and try to think of creative
+              ways to keep it going.
             </p>
           </div>
           <div class="step">
             <h3>Swap a sound (15 seconds)</h3>
             <p>
-              Choose one sound to swap, we don't want every track sounding the same!
+              Choose one sound to swap, we don't want every track sounding the
+              same!
             </p>
           </div>
           <div class="step">
@@ -199,36 +220,36 @@
       </div>
 
       <p>
-        Press 1,  2  or  3  to place your desired sound on the track. 
-        Right click on the note to delete. 
-     </p>
-      
+        Press 1, 2 or 3 to place your desired sound on the track. Right click on
+        the note to delete.
+      </p>
+
       <div class="chosen-sounds">
         <div class="sound-key">
           <span class="key">
-            <img src="assets/art/oneButton.png" alt="1">
+            <img src="assets/art/oneButton.png" alt="1" />
           </span>
           <div class="sound-icon">
-            <img src="assets/art/record.png" class="over-img">
-            <img id="sound-1-icon" class="bg-image" alt="Sound 1" />
+            <img src="assets/art/record.png" class="over-img" />
+            <img id="sound-1-icon" class="bg-image" alt="" />
           </div>
         </div>
         <div class="sound-key">
           <span class="key">
-            <img src="assets/art/twoButton.png" alt="2">
+            <img src="assets/art/twoButton.png" alt="2" />
           </span>
           <div class="sound-icon">
-            <img src="assets/art/blueRecord.png" class="over-img">
-            <img id="sound-2-icon" class="bg-image" alt="Sound 2" />
+            <img src="assets/art/blueRecord.png" class="over-img" />
+            <img id="sound-2-icon" class="bg-image" alt="" />
           </div>
         </div>
         <div class="sound-key">
           <span class="key">
-            <img src="assets/art/threeButton.png" alt="3">
+            <img src="assets/art/threeButton.png" alt="3" />
           </span>
           <div class="sound-icon">
-            <img src="assets/art/greenRecord.png" class="over-img">
-            <img id="sound-3-icon" class="bg-image" alt="Sound 3" />
+            <img src="assets/art/greenRecord.png" class="over-img" />
+            <img id="sound-3-icon" class="bg-image" alt="" />
           </div>
         </div>
       </div>
@@ -238,7 +259,10 @@
       </div>
 
       <div class="transport-controls">
-        <button id="play-pause-btn" class="control-button play-pause-btn"></button>
+        <button
+          id="play-pause-btn"
+          class="control-button play-pause-btn"
+        ></button>
         <button id="restart-btn" class="control-button rewind-btn"></button>
         <div class="progress-container">
           <input
@@ -265,36 +289,51 @@
       </div>
 
       <p>
-        Press 1,  2  or  3  to select your desired sound type. 
-        Drag the note up or down to change the pitch. 
+        Press 1, 2 or 3 to select your desired sound type. Drag the note up or
+        down to change the pitch.
       </p>
 
       <div class="editing-sounds">
         <div class="sound-key editing-sound" id="editing-sound-0">
           <span class="key">
-            <img src="assets/art/oneButton.png" alt="1">
+            <img src="assets/art/oneButton.png" alt="1" />
           </span>
           <div class="sound-icon">
-            <img src="assets/art/record.png" class="over-img">
-            <img src="assets/art/record.png" id="editing-sound-1-icon" class="sound-icon bg-image" alt="Sound 1" />
+            <img src="assets/art/record.png" class="over-img" />
+            <img
+              src="assets/art/record.png"
+              id="editing-sound-1-icon"
+              class="sound-icon bg-image"
+              alt=""
+            />
           </div>
         </div>
         <div class="sound-key editing-sound" id="editing-sound-1">
           <span class="key">
-            <img src="assets/art/twoButton.png" alt="2">
+            <img src="assets/art/twoButton.png" alt="2" />
           </span>
           <div class="sound-icon">
-            <img src="assets/art/blueRecord.png" class="over-img">
-            <img src="assets/art/blueRecord.png" id="editing-sound-2-icon" class="sound-icon bg-image" alt="Sound 2" />
+            <img src="assets/art/blueRecord.png" class="over-img" />
+            <img
+              src="assets/art/blueRecord.png"
+              id="editing-sound-2-icon"
+              class="sound-icon bg-image"
+              alt=""
+            />
           </div>
         </div>
         <div class="sound-key editing-sound" id="editing-sound-2">
           <span class="key">
-            <img src="assets/art/threeButton.png" alt="3">
+            <img src="assets/art/threeButton.png" alt="3" />
           </span>
           <div class="sound-icon">
-            <img src="assets/art/greenRecord.png" class="over-img">
-            <img src="assets/art/greenRecord.png" id="editing-sound-3-icon" class="sound-icon bg-image" alt="Sound 3" />
+            <img src="assets/art/greenRecord.png" class="over-img" />
+            <img
+              src="assets/art/greenRecord.png"
+              id="editing-sound-3-icon"
+              class="sound-icon bg-image"
+              alt=""
+            />
           </div>
         </div>
       </div>
@@ -304,8 +343,14 @@
       </div>
 
       <div class="transport-controls">
-        <button id="edit-play-pause-btn" class="control-button play-pause-btn"></button>
-        <button id="edit-restart-btn" class="control-button rewind-btn"></button>
+        <button
+          id="edit-play-pause-btn"
+          class="control-button play-pause-btn"
+        ></button>
+        <button
+          id="edit-restart-btn"
+          class="control-button rewind-btn"
+        ></button>
         <div class="progress-container">
           <input
             type="range"
@@ -317,7 +362,9 @@
           />
           <span id="edit-time-display">0.0 / 8.0</span>
         </div>
-        <button id="editing-continue-btn" class="primary-button nes-btn">Done!</button>
+        <button id="editing-continue-btn" class="primary-button nes-btn">
+          Done!
+        </button>
       </div>
     </div>
 
@@ -357,7 +404,7 @@
             >
           </div>
           <div class="phase-timer">
-            <span>Preview Time:  <span id="preview-phase-timer">20</span></span>
+            <span>Preview Time: <span id="preview-phase-timer">20</span></span>
           </div>
         </div>
 
@@ -366,8 +413,14 @@
         </div>
 
         <div class="transport-controls">
-          <button id="preview-play-pause-btn" class="control-button play-pause-btn"></button>
-          <button id="preview-restart-btn" class="control-button rewind-btn"></button>
+          <button
+            id="preview-play-pause-btn"
+            class="control-button play-pause-btn"
+          ></button>
+          <button
+            id="preview-restart-btn"
+            class="control-button rewind-btn"
+          ></button>
           <div class="progress-container">
             <input
               type="range"
@@ -382,7 +435,10 @@
         </div>
 
         <div class="preview-buttons">
-          <button id="continue-to-performance-btn" class="primary-button nes-btn">
+          <button
+            id="continue-to-performance-btn"
+            class="primary-button nes-btn"
+          >
             Continue to Add Your Part
           </button>
         </div>
@@ -394,9 +450,7 @@
       <div class="replacement-container">
         <h2>Evolve Your Sound Palette</h2>
         <div class="replacement-info">
-          <p>
-            Replace one sound from the previous players 3 chosen sounds!
-          </p>
+          <p>Replace one sound from the previous players 3 chosen sounds!</p>
           <div class="replacement-target">
             <span>Replacing: </span>
             <div class="current-sound">
@@ -419,7 +473,11 @@
           <div class="replacement-selected">
             <span id="replacement-status">Choose a replacement sound</span>
           </div>
-          <button id="replacement-continue-btn" class="primary-button nes-btn is-disabled" disabled>
+          <button
+            id="replacement-continue-btn"
+            class="primary-button nes-btn is-disabled"
+            disabled
+          >
             Continue
           </button>
         </div>
@@ -451,8 +509,14 @@
         </div>
 
         <div class="transport-controls">
-          <button id="showcase-play-pause-btn" class="control-button play-pause-btn"></button>
-          <button id="showcase-restart-btn" class="control-button rewind-btn"></button>
+          <button
+            id="showcase-play-pause-btn"
+            class="control-button play-pause-btn"
+          ></button>
+          <button
+            id="showcase-restart-btn"
+            class="control-button rewind-btn"
+          ></button>
           <div class="progress-container">
             <input
               type="range"
@@ -473,7 +537,12 @@
           <button id="next-song-btn" class="secondary-button nes-btn">
             Next Song →
           </button>
-          <button id="showcase-exit-btn" class="primary-button nes-btn is-error">Exit</button>
+          <button
+            id="showcase-exit-btn"
+            class="primary-button nes-btn is-error"
+          >
+            Exit
+          </button>
         </div>
       </div>
     </div>

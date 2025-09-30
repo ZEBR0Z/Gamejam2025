@@ -114,14 +114,16 @@ export class WaitingPhase {
 
   async loadBackgroundMusic() {
     try {
-      this.backgroundMusic = new Audio('assets/sfx/gameshow_presentation.mp3');
+      this.backgroundMusic = new Audio("assets/sfx/gameshow_presentation.mp3");
       this.backgroundMusic.loop = true;
       this.backgroundMusic.volume = 0;
 
       // Wait for the audio to be loadable
       await new Promise((resolve, reject) => {
-        this.backgroundMusic.addEventListener('canplaythrough', resolve, { once: true });
-        this.backgroundMusic.addEventListener('error', reject, { once: true });
+        this.backgroundMusic.addEventListener("canplaythrough", resolve, {
+          once: true,
+        });
+        this.backgroundMusic.addEventListener("error", reject, { once: true });
         this.backgroundMusic.load();
       });
 
@@ -137,17 +139,20 @@ export class WaitingPhase {
     if (this.backgroundMusic) {
       this.fadeOut();
       // Give fade out time to complete, then cleanup
-      setTimeout(() => {
-        if (this.backgroundMusic) {
-          this.backgroundMusic.pause();
-          this.backgroundMusic.currentTime = 0;
-          this.backgroundMusic = null;
-        }
-        if (this.fadeInterval) {
-          clearInterval(this.fadeInterval);
-          this.fadeInterval = null;
-        }
-      }, this.fadeSteps * this.fadeStepDuration + 100);
+      setTimeout(
+        () => {
+          if (this.backgroundMusic) {
+            this.backgroundMusic.pause();
+            this.backgroundMusic.currentTime = 0;
+            this.backgroundMusic = null;
+          }
+          if (this.fadeInterval) {
+            clearInterval(this.fadeInterval);
+            this.fadeInterval = null;
+          }
+        },
+        this.fadeSteps * this.fadeStepDuration + 100,
+      );
     }
 
     // Clean up event handlers

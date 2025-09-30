@@ -157,9 +157,14 @@ export class EditingPhase {
 
   async loadCurrentSongBackingTrack() {
     // Backing track should already be loaded from previous phases, but ensure it's loaded
-    if (this.gameState.backingTrack.path && !this.audioEngine.isBackingTrackLoaded) {
+    if (
+      this.gameState.backingTrack.path &&
+      !this.audioEngine.isBackingTrackLoaded
+    ) {
       try {
-        await this.audioEngine.loadBackingTrack(this.gameState.backingTrack.path);
+        await this.audioEngine.loadBackingTrack(
+          this.gameState.backingTrack.path,
+        );
       } catch (error) {
         console.error("Failed to load backing track in editing phase:", error);
       }

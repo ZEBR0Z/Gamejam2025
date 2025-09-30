@@ -225,9 +225,13 @@ export class Game {
     };
 
     // Listen for various interaction events
-    document.addEventListener('click', handleFirstInteraction, { once: true });
-    document.addEventListener('keydown', handleFirstInteraction, { once: true });
-    document.addEventListener('touchstart', handleFirstInteraction, { once: true });
+    document.addEventListener("click", handleFirstInteraction, { once: true });
+    document.addEventListener("keydown", handleFirstInteraction, {
+      once: true,
+    });
+    document.addEventListener("touchstart", handleFirstInteraction, {
+      once: true,
+    });
   }
 
   handleFirstUserInteraction() {
@@ -256,7 +260,10 @@ export class Game {
       "ready-btn": () => this.setReady(),
     };
 
-    console.log("Setting up persistent button events with handlers:", Object.keys(lobbyHandlers));
+    console.log(
+      "Setting up persistent button events with handlers:",
+      Object.keys(lobbyHandlers),
+    );
     this.inputController.setupPersistentButtonEvents(lobbyHandlers);
 
     // Input field handlers
@@ -312,17 +319,73 @@ export class Game {
   showCreateLobby() {
     this.uiManager.showScreen("create-lobby");
     const playerNameInput = this.uiManager.elements.playerName;
+    const createButton = document.getElementById("create-lobby-confirm-btn");
+
+    // Disable button initially
+    if (createButton) {
+      createButton.disabled = true;
+      createButton.classList.add("is-disabled");
+    }
+
+    // Enable button when name is entered
     if (playerNameInput) {
       playerNameInput.focus();
+
+      const validateInput = () => {
+        const hasName = playerNameInput.value.trim().length > 0;
+        if (createButton) {
+          createButton.disabled = !hasName;
+          if (hasName) {
+            createButton.classList.remove("is-disabled");
+          } else {
+            createButton.classList.add("is-disabled");
+          }
+        }
+      };
+
+      playerNameInput.addEventListener("input", validateInput);
+      validateInput(); // Check initial state
     }
   }
 
   showJoinLobby() {
     this.uiManager.showScreen("join-lobby");
     const playerNameInput = this.uiManager.elements.joinPlayerName;
+    const lobbyCodeInput = this.uiManager.elements.lobbyCodeInput;
+    const joinButton = document.getElementById("join-lobby-confirm-btn");
+
+    // Disable button initially
+    if (joinButton) {
+      joinButton.disabled = true;
+      joinButton.classList.add("is-disabled");
+    }
+
+    // Enable button when name and valid lobby code are entered
+    const validateInput = () => {
+      const hasName = playerNameInput?.value.trim().length > 0;
+      const hasValidCode = lobbyCodeInput?.value.trim().length === 6;
+      const isValid = hasName && hasValidCode;
+
+      if (joinButton) {
+        joinButton.disabled = !isValid;
+        if (isValid) {
+          joinButton.classList.remove("is-disabled");
+        } else {
+          joinButton.classList.add("is-disabled");
+        }
+      }
+    };
+
     if (playerNameInput) {
       playerNameInput.focus();
+      playerNameInput.addEventListener("input", validateInput);
     }
+
+    if (lobbyCodeInput) {
+      lobbyCodeInput.addEventListener("input", validateInput);
+    }
+
+    validateInput(); // Check initial state
   }
 
   async createLobby() {
@@ -332,22 +395,13 @@ export class Game {
     const createButton = document.getElementById("create-lobby-confirm-btn");
     if (createButton) {
       createButton.disabled = true;
+      createButton.classList.add("is-disabled");
       createButton.textContent = "Creating...";
     }
 
     console.log("playerName element:", this.uiManager.elements.playerName);
     const playerName = this.uiManager.elements.playerName?.value.trim();
     console.log("playerName value:", playerName);
-    if (!playerName) {
-      console.log("No player name provided");
-      alert("Please enter your name");
-      // Re-enable button on error
-      if (createButton) {
-        createButton.disabled = false;
-        createButton.textContent = "Create Lobby";
-      }
-      return;
-    }
 
     try {
       // Connect to server
@@ -388,6 +442,7 @@ export class Game {
       // Re-enable button on error
       if (createButton) {
         createButton.disabled = false;
+        createButton.classList.remove("is-disabled");
         createButton.textContent = "Create Lobby";
       }
     }
@@ -398,31 +453,12 @@ export class Game {
     const joinButton = document.getElementById("join-lobby-confirm-btn");
     if (joinButton) {
       joinButton.disabled = true;
+      joinButton.classList.add("is-disabled");
       joinButton.textContent = "Joining...";
     }
 
     const playerName = this.uiManager.elements.joinPlayerName?.value.trim();
     const lobbyCode = this.uiManager.elements.lobbyCodeInput?.value.trim();
-
-    if (!playerName) {
-      alert("Please enter your name");
-      // Re-enable button on error
-      if (joinButton) {
-        joinButton.disabled = false;
-        joinButton.textContent = "Join Lobby";
-      }
-      return;
-    }
-
-    if (!lobbyCode || lobbyCode.length !== 6) {
-      alert("Please enter a valid 6-character lobby code");
-      // Re-enable button on error
-      if (joinButton) {
-        joinButton.disabled = false;
-        joinButton.textContent = "Join Lobby";
-      }
-      return;
-    }
 
     try {
       // Connect to server
@@ -459,6 +495,7 @@ export class Game {
       // Re-enable button on error
       if (joinButton) {
         joinButton.disabled = false;
+        joinButton.classList.remove("is-disabled");
         joinButton.textContent = "Join Lobby";
       }
     }

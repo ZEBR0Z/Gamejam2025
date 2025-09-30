@@ -36,12 +36,10 @@ export class MultiplayerManager {
 
       console.log("Creating Socket.IO connection...");
       // Connect to the base URL, not the subpath
-      const baseUrl = serverUrl.replace('/ythserver', '');
+      const baseUrl = serverUrl.replace("/ythserver", "");
       console.log("Base URL:", baseUrl);
       this.socket = window.io(baseUrl, {
         path: "/ythserver/socket.io",
-        transports: ["polling"], // Force HTTP polling instead of WebSockets
-        upgrade: false // Disable automatic upgrade to WebSockets
       });
       console.log("Socket.IO connection object created:", this.socket);
 

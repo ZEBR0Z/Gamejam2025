@@ -6,7 +6,7 @@ const path = require("path");
 const fs = require("fs");
 
 // Handle subpath deployment
-const subPath = '/ythserver';
+const subPath = "/ythserver";
 
 const app = express();
 const server = http.createServer(app);
@@ -15,7 +15,7 @@ const io = socketIo(server, {
     origin: "*",
     methods: ["GET", "POST"],
   },
-  path: `${subPath}/socket.io`
+  path: `${subPath}/socket.io`,
 });
 
 // Middleware
@@ -50,36 +50,36 @@ const GAME_CONFIG = {
 const BACKING_TRACKS = [
   {
     path: "assets/backing_tracks/klezmer.mp3",
-    duration: 12.722 // seconds - you should measure these accurately
+    duration: 12.722, // seconds - you should measure these accurately
   },
   {
     path: "assets/backing_tracks/sad.mp3",
-    duration: 14.785 // seconds - you should measure these accurately
+    duration: 14.785, // seconds - you should measure these accurately
   },
   {
     path: "assets/backing_tracks/trap.mp3",
-    duration: 10.694
+    duration: 10.694,
   },
   {
     path: "assets/backing_tracks/raggae.mp3",
-    duration: 12.433
+    duration: 12.433,
   },
   {
     path: "assets/backing_tracks/guitar.mp3",
-    duration: 13.687
+    duration: 13.687,
   },
   {
     path: "assets/backing_tracks/electricbass&drum.mp3",
-    duration: 10.107
+    duration: 10.107,
   },
   {
     path: "assets/backing_tracks/dangerous.mp3",
-    duration: 9.585
+    duration: 9.585,
   },
   {
     path: "assets/backing_tracks/corporate.mp3",
-    duration: 16.000
-  }
+    duration: 16.0,
+  },
 ];
 
 // Utility functions
@@ -696,7 +696,7 @@ io.on("connection", (socket) => {
       originalCreator: song.originalCreator,
       segments: song.segments,
       selectedSounds: song.selectedSounds,
-      contributors: song.contributors.map(playerId => {
+      contributors: song.contributors.map((playerId) => {
         const player = lobby.players.get(playerId);
         return player ? player.name : playerId;
       }),
@@ -766,7 +766,13 @@ app.get(`${subPath}/api/lobby/:code`, (req, res) => {
 
 // Serve Socket.io client script at subpath
 app.get(`${subPath}/socket.io/socket.io.js`, (req, res) => {
-  const socketIoPath = path.join(__dirname, "node_modules", "socket.io", "client-dist", "socket.io.js");
+  const socketIoPath = path.join(
+    __dirname,
+    "node_modules",
+    "socket.io",
+    "client-dist",
+    "socket.io.js",
+  );
   res.sendFile(socketIoPath);
 });
 

@@ -76,9 +76,11 @@ export class ShowcasePhase {
   setupEventHandlers() {
     // Transport controls - only enabled in navigation mode
     const transportHandlers = {
-      "showcase-play-pause-btn": () => !this.isSequentialMode && this.togglePlayback(),
+      "showcase-play-pause-btn": () =>
+        !this.isSequentialMode && this.togglePlayback(),
       "showcase-restart-btn": () => !this.isSequentialMode && this.restart(),
-      "showcase-progress-bar": (value) => !this.isSequentialMode && this.seekTo(value),
+      "showcase-progress-bar": (value) =>
+        !this.isSequentialMode && this.seekTo(value),
     };
 
     this.inputController.setupTransportEvents(transportHandlers);
@@ -116,12 +118,16 @@ export class ShowcasePhase {
       this.gameState.setBackingTrack(song.backingTrack);
       await this.audioEngine.loadBackingTrack(song.backingTrack.path);
     }
-    const totalTime =
-      song.segments.length * this.gameState.getSegmentLength();
+    const totalTime = song.segments.length * this.gameState.getSegmentLength();
 
     // Reset playback and start
     this.gameState.setPlaybackState(true, 0, this.audioEngine.getCurrentTime());
-    this.uiManager.updateShowcaseTransportControls(true, 0, totalTime, this.isSequentialMode);
+    this.uiManager.updateShowcaseTransportControls(
+      true,
+      0,
+      totalTime,
+      this.isSequentialMode,
+    );
 
     // Start backing track and playback
     this.audioEngine.startBackingTrack();
@@ -186,7 +192,9 @@ export class ShowcasePhase {
       : this.gameState.getSegmentLength();
 
     // In sequential mode, don't loop - just play once
-    const effectivePlaybackTime = this.isSequentialMode ? playbackTime : playbackTime % totalTime;
+    const effectivePlaybackTime = this.isSequentialMode
+      ? playbackTime
+      : playbackTime % totalTime;
 
     this.currentSongEvents.forEach((event) => {
       if (!event.scheduled) {
@@ -207,7 +215,8 @@ export class ShowcasePhase {
           }
         }
 
-        const scheduleTime = currentTime + (nextEventTime - effectivePlaybackTime);
+        const scheduleTime =
+          currentTime + (nextEventTime - effectivePlaybackTime);
 
         if (scheduleTime <= currentTime + this.audioEngine.lookaheadTime) {
           this.playEvent(event, scheduleTime);
@@ -217,12 +226,9 @@ export class ShowcasePhase {
             ? (nextEventTime - effectivePlaybackTime + 0.1) * 1000
             : (totalTime - eventTime + 0.1) * 1000;
 
-          setTimeout(
-            () => {
-              event.scheduled = false;
-            },
-            resetDelay,
-          );
+          setTimeout(() => {
+            event.scheduled = false;
+          }, resetDelay);
         }
       }
     });
@@ -330,7 +336,8 @@ export class ShowcasePhase {
         this.isSequentialMode,
       );
 
-      const totalTime = song.segments.length * this.gameState.getSegmentLength();
+      const totalTime =
+        song.segments.length * this.gameState.getSegmentLength();
       this.uiManager.updateShowcaseTransportControls(
         false,
         this.gameState.playback.currentTime,
@@ -467,12 +474,14 @@ export class ShowcasePhase {
   }
 
   nextSong() {
-    if (this.currentSongIndex < this.finalSongs.length - 1 && !this.isSequentialMode) {
+    if (
+      this.currentSongIndex < this.finalSongs.length - 1 &&
+      !this.isSequentialMode
+    ) {
       this.pause();
       this.showSong(this.currentSongIndex + 1);
     }
   }
-
 
   exitToMenu() {
     this.cleanup();

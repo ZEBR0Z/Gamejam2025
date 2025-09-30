@@ -57,7 +57,12 @@ export class PerformancePhase {
         const backingTrack = response.song.backingTrack;
         this.gameState.setBackingTrack(backingTrack);
         await this.audioEngine.loadBackingTrack(backingTrack.path);
-        console.log("Loaded backing track:", backingTrack.path, "duration:", backingTrack.duration);
+        console.log(
+          "Loaded backing track:",
+          backingTrack.path,
+          "duration:",
+          backingTrack.duration,
+        );
       }
     } catch (error) {
       console.error("Failed to load backing track:", error);

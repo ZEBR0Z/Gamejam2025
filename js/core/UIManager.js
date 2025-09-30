@@ -223,8 +223,29 @@ export class UIManager {
 
     if (this.screens[screenName]) {
       this.screens[screenName].classList.add("active");
+
+      // Reset button states when returning to main menu
+      if (screenName === "main-menu") {
+        this.resetMainMenuButtons();
+      }
     } else {
       console.error(`Screen not found: ${screenName}`);
+    }
+  }
+
+  resetMainMenuButtons() {
+    const createButton = document.getElementById("create-lobby-confirm-btn");
+    if (createButton) {
+      createButton.disabled = false;
+      createButton.classList.remove("is-disabled");
+      createButton.textContent = "Create Lobby";
+    }
+
+    const joinButton = document.getElementById("join-lobby-confirm-btn");
+    if (joinButton) {
+      joinButton.disabled = false;
+      joinButton.classList.remove("is-disabled");
+      joinButton.textContent = "Join Lobby";
     }
   }
 
@@ -499,7 +520,12 @@ export class UIManager {
   }
 
   // Final showcase screen methods
-  updateShowcaseScreen(currentSongIndex, totalSongs, songCreators, isSequentialMode = false) {
+  updateShowcaseScreen(
+    currentSongIndex,
+    totalSongs,
+    songCreators,
+    isSequentialMode = false,
+  ) {
     if (this.elements.currentSongNumber) {
       this.elements.currentSongNumber.textContent = currentSongIndex + 1;
     }
@@ -512,16 +538,23 @@ export class UIManager {
 
     // Update navigation buttons - disable in sequential mode
     if (this.elements.prevSongBtn) {
-      this.elements.prevSongBtn.disabled = isSequentialMode || currentSongIndex === 0;
+      this.elements.prevSongBtn.disabled =
+        isSequentialMode || currentSongIndex === 0;
       this.elements.prevSongBtn.style.opacity = isSequentialMode ? "0.3" : "1";
     }
     if (this.elements.nextSongBtn) {
-      this.elements.nextSongBtn.disabled = isSequentialMode || currentSongIndex === totalSongs - 1;
+      this.elements.nextSongBtn.disabled =
+        isSequentialMode || currentSongIndex === totalSongs - 1;
       this.elements.nextSongBtn.style.opacity = isSequentialMode ? "0.3" : "1";
     }
   }
 
-  updateShowcaseTransportControls(isPlaying, currentTime, totalTime, isSequentialMode = false) {
+  updateShowcaseTransportControls(
+    isPlaying,
+    currentTime,
+    totalTime,
+    isSequentialMode = false,
+  ) {
     if (this.elements.showcasePlayPauseBtn) {
       if (isPlaying) {
         this.elements.showcasePlayPauseBtn.classList.add("playing");
@@ -529,17 +562,23 @@ export class UIManager {
         this.elements.showcasePlayPauseBtn.classList.remove("playing");
       }
       this.elements.showcasePlayPauseBtn.disabled = isSequentialMode;
-      this.elements.showcasePlayPauseBtn.style.opacity = isSequentialMode ? "0.3" : "1";
+      this.elements.showcasePlayPauseBtn.style.opacity = isSequentialMode
+        ? "0.3"
+        : "1";
     }
     if (this.elements.showcaseProgressBar) {
       this.elements.showcaseProgressBar.value = currentTime;
       this.elements.showcaseProgressBar.max = totalTime;
       this.elements.showcaseProgressBar.disabled = isSequentialMode;
-      this.elements.showcaseProgressBar.style.opacity = isSequentialMode ? "0.3" : "1";
+      this.elements.showcaseProgressBar.style.opacity = isSequentialMode
+        ? "0.3"
+        : "1";
     }
     if (this.elements.showcaseRestartBtn) {
       this.elements.showcaseRestartBtn.disabled = isSequentialMode;
-      this.elements.showcaseRestartBtn.style.opacity = isSequentialMode ? "0.3" : "1";
+      this.elements.showcaseRestartBtn.style.opacity = isSequentialMode
+        ? "0.3"
+        : "1";
     }
     if (this.elements.showcaseTimeDisplay) {
       this.elements.showcaseTimeDisplay.textContent = `${currentTime.toFixed(1)} / ${totalTime.toFixed(1)}`;

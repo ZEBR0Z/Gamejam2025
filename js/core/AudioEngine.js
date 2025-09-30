@@ -188,8 +188,12 @@ export class AudioEngine {
 
       // Wait for the audio to be loadable
       await new Promise((resolve, reject) => {
-        this.backingTrackAudio.addEventListener('canplaythrough', resolve, { once: true });
-        this.backingTrackAudio.addEventListener('error', reject, { once: true });
+        this.backingTrackAudio.addEventListener("canplaythrough", resolve, {
+          once: true,
+        });
+        this.backingTrackAudio.addEventListener("error", reject, {
+          once: true,
+        });
         this.backingTrackAudio.load();
       });
 
@@ -251,14 +255,16 @@ export class AudioEngine {
     try {
       this.stopMenuMusic();
 
-      this.menuMusicAudio = new Audio('assets/sfx/menu.mp3');
+      this.menuMusicAudio = new Audio("assets/sfx/menu.mp3");
       this.menuMusicAudio.loop = true;
       this.menuMusicAudio.volume = 0.3; // Lower volume for background music
 
       // Wait for the audio to be loadable
       await new Promise((resolve, reject) => {
-        this.menuMusicAudio.addEventListener('canplaythrough', resolve, { once: true });
-        this.menuMusicAudio.addEventListener('error', reject, { once: true });
+        this.menuMusicAudio.addEventListener("canplaythrough", resolve, {
+          once: true,
+        });
+        this.menuMusicAudio.addEventListener("error", reject, { once: true });
         this.menuMusicAudio.load();
       });
 
