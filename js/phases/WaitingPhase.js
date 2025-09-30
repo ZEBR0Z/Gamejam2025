@@ -31,6 +31,9 @@ export class WaitingPhase {
       this.uiManager.updateWaitingScreen(gameState);
     }
 
+    // Fetch and display random fact
+    await this.fetchRandomFact();
+
     // Load and start background music
     await this.loadBackgroundMusic();
     if (this.backgroundMusic) {
@@ -110,6 +113,28 @@ export class WaitingPhase {
         this.backgroundMusic.volume = this.currentVolume;
       }
     }, this.fadeStepDuration);
+  }
+
+  async fetchRandomFact() {
+    try {
+      const response = await fetch("https://uselessfacts.jsph.pl/api/v2/facts/random");
+      const data = await response.json();
+      const waitingMessage = document.getElementById("waiting-message");
+      if (waitingMessage && data.text) {
+        await this.typeText(waitingMessage, data.text);
+      }
+    } catch (error) {
+      console.error("Failed to fetch random fact:", error);
+      // Keep default message on error
+    }
+  }
+
+  async typeText(element, text, speed = 30) {
+    element.textContent = "";
+    for (let i = 0; i < text.length; i++) {
+      element.textContent += text[i];
+      await new Promise(resolve => setTimeout(resolve, speed));
+    }
   }
 
   async loadBackgroundMusic() {
