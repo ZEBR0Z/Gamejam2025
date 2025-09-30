@@ -17,20 +17,14 @@ export class SelectionPhase {
     console.log("Starting selection phase");
     this.uiManager.showScreen("selection");
 
-    // Reset selection state
     this.gameState.clearSelectedSounds();
     this.updateUI();
 
-    // Pick 5 random sounds
     this.gameState.selectRandomSounds(5);
 
-    // Populate sound grid
     await this.populateSoundGrid();
 
-    // Start countdown timer
     this.startCountdown();
-
-    // Setup event handlers
     this.setupEventHandlers();
   }
 
@@ -41,7 +35,6 @@ export class SelectionPhase {
       const soundData = this.gameState.availableSounds[i];
       const soundOption = this.uiManager.createSoundOption(soundData, i);
 
-      // Add event listeners
       soundOption.addEventListener("mouseenter", () => this.previewSound(i));
       soundOption.addEventListener("mouseleave", () => this.stopPreview());
       soundOption.addEventListener("click", () => this.selectSound(i));
@@ -141,7 +134,6 @@ export class SelectionPhase {
 
       if (timeLeft < 0) {
         this.stopCountdown();
-        // Check if selection is complete
         if (this.gameState.selectedSounds.length === 3) {
           this.complete();
         } else {
@@ -179,7 +171,6 @@ export class SelectionPhase {
   }
 
   complete() {
-    // Ensure we have 3 sounds selected
     if (this.gameState.selectedSounds.length < 3) {
       this.autoSelectRemaining().then(() => {
         setTimeout(() => this.finishPhase(), 500);
@@ -200,7 +191,6 @@ export class SelectionPhase {
   }
 
   cleanup() {
-    // Clean up event listeners
     const continueBtn = this.uiManager.getElement("continueBtn");
     if (continueBtn && this.continueHandler) {
       continueBtn.removeEventListener("click", this.continueHandler);

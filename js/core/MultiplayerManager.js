@@ -11,7 +11,6 @@ export class MultiplayerManager {
     this.gameState = null;
     this.currentSong = null;
 
-    // Event callbacks
     this.onGameStateUpdate = null;
     this.onPhaseChange = null;
     this.onPlayerJoined = null;
@@ -22,10 +21,14 @@ export class MultiplayerManager {
     this.onWaitingUpdate = null;
   }
 
+  /**
+   * Connects to the multiplayer server via Socket.IO
+   * @param {string} serverUrl - Server URL to connect to
+   * @returns {Promise<boolean>} True if connection successful, false otherwise
+   */
   async connect(serverUrl = "https://ruelalarcon.dev/ythserver") {
     try {
       console.log("MultiplayerManager.connect called with:", serverUrl);
-      // Load Socket.IO client
       if (!window.io) {
         console.log("Loading Socket.IO client script...");
         await this.loadSocketIO(serverUrl);
@@ -35,7 +38,6 @@ export class MultiplayerManager {
       }
 
       console.log("Creating Socket.IO connection...");
-      // Connect to the base URL, not the subpath
       const baseUrl = serverUrl.replace("/ythserver", "");
       console.log("Base URL:", baseUrl);
       this.socket = window.io(baseUrl, {
@@ -58,7 +60,6 @@ export class MultiplayerManager {
 
       console.log("Setting up connection promise...");
       return new Promise((resolve, reject) => {
-        // Set a timeout to avoid hanging forever
         const timeout = setTimeout(() => {
           console.log("Connection timeout after 10 seconds");
           reject(new Error("Connection timeout"));
@@ -143,7 +144,6 @@ export class MultiplayerManager {
 
     this.socket.on("soundSelected", (data) => {
       console.log("Sound selected:", data.soundIndex);
-      // Update local state if needed
     });
 
     this.socket.on("songSubmitted", (data) => {
@@ -163,6 +163,11 @@ export class MultiplayerManager {
     });
   }
 
+  /**
+   * Creates a new game lobby
+   * @param {string} playerName - Name of the player creating the lobby
+   * @returns {Promise<Object>} Response object with lobby details
+   */
   async createLobby(playerName) {
     if (!this.isConnected) {
       console.log("Not connected to server");
@@ -184,6 +189,12 @@ export class MultiplayerManager {
     });
   }
 
+  /**
+   * Joins an existing game lobby
+   * @param {string} lobbyCode - Lobby code to join
+   * @param {string} playerName - Name of the player joining
+   * @returns {Promise<Object>} Response object with lobby details
+   */
   async joinLobby(lobbyCode, playerName) {
     if (!this.isConnected) return null;
 
@@ -225,6 +236,10 @@ export class MultiplayerManager {
     console.log("Submitted song with", songData.length, "sound events");
   }
 
+  /**
+   * Gets the current song data for this player's turn
+   * @returns {Promise<Object>} Response object with song data
+   */
   async getCurrentSong() {
     if (!this.isConnected || !this.lobbyCode) return null;
 
@@ -239,6 +254,10 @@ export class MultiplayerManager {
     });
   }
 
+  /**
+   * Gets the previous player's song data for preview
+   * @returns {Promise<Object>} Response object with previous song data
+   */
   async getPreviousSong() {
     if (!this.isConnected || !this.lobbyCode) return null;
 
@@ -256,6 +275,10 @@ export class MultiplayerManager {
     console.log("Continuing to performance phase");
   }
 
+  /**
+   * Gets all final completed songs for showcase phase
+   * @returns {Promise<Object>} Response object with all final songs
+   */
   async getFinalSongs() {
     if (!this.isConnected || !this.lobbyCode) return null;
 
@@ -278,7 +301,6 @@ export class MultiplayerManager {
     this.currentSong = null;
   }
 
-  // Getters
   getPlayerId() {
     return this.playerId;
   }

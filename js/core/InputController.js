@@ -8,7 +8,6 @@ export class InputController {
     this.uiManager = uiManager;
     this.audioEngine = audioEngine;
 
-    // Dragging state
     this.dragState = {
       isDragging: false,
       draggedNote: null,
@@ -25,11 +24,8 @@ export class InputController {
   }
 
   setupEventListeners() {
-    // Keyboard events
     document.addEventListener("keydown", (e) => this.handleKeyDown(e));
     document.addEventListener("keyup", (e) => this.handleKeyUp(e));
-
-    // Global mouse events for smooth dragging
     document.addEventListener("mousemove", (e) =>
       this.handleGlobalMouseMove(e),
     );
@@ -38,32 +34,32 @@ export class InputController {
     console.log("InputController event listeners setup complete");
   }
 
-  // Register event handlers for different phases
+  /**
+   * Registers an event handler for a specific phase
+   * @param {string} eventType - Type of event to handle
+   * @param {string} phase - Game phase for this handler
+   * @param {Function} handler - Handler function to execute
+   */
   registerHandler(eventType, phase, handler) {
     const key = `${eventType}_${phase}`;
     this.eventHandlers.set(key, handler);
   }
 
-  // Remove event handlers
   unregisterHandler(eventType, phase) {
     const key = `${eventType}_${phase}`;
     this.eventHandlers.delete(key);
   }
 
-  // Get appropriate handler for current state
   getHandler(eventType) {
     const key = `${eventType}_${this.gameState.getState()}`;
     return this.eventHandlers.get(key);
   }
 
-  // Keyboard handling
   handleKeyDown(e) {
     const currentState = this.gameState.getState();
 
-    // Allow keyboard input during performance and editing phases
     if (currentState !== "performance" && currentState !== "editing") return;
 
-    // For performance phase, only allow when playing
     if (currentState === "performance" && !this.gameState.playback.isPlaying)
       return;
 
@@ -77,10 +73,8 @@ export class InputController {
     if (soundIndex >= 0 && soundIndex < this.gameState.selectedSounds.length) {
       e.preventDefault();
 
-      // Visual feedback
       this.uiManager.showKeyPress(soundIndex);
 
-      // Handle the keypress
       const handler = this.getHandler("keyPress");
       if (handler) {
         handler(soundIndex);
@@ -101,19 +95,20 @@ export class InputController {
     }
   }
 
-  // Canvas mouse events
+  /**
+   * Sets up event listeners for canvas interactions
+   * @param {HTMLCanvasElement} canvas - Canvas element to attach events to
+   * @param {string} canvasType - Type of canvas ('timeline' or 'editing')
+   * @param {number} canvasIndex - Optional index for editing canvases
+   */
   setupCanvasEvents(canvas, canvasType, canvasIndex = null) {
     if (!canvas) return;
 
-    // Timeline canvas (performance phase)
     if (canvasType === "timeline") {
       canvas.addEventListener("contextmenu", (e) =>
         this.handleTimelineRightClick(e),
       );
-    }
-
-    // Editing canvas
-    else if (canvasType === "editing") {
+    } else if (canvasType === "editing") {
       canvas.addEventListener("mousedown", (e) =>
         this.handleEditingMouseDown(e, canvasIndex),
       );
@@ -127,7 +122,6 @@ export class InputController {
     }
   }
 
-  // Timeline right-click handling (delete events)
   handleTimelineRightClick(e) {
     e.preventDefault();
 
@@ -146,16 +140,14 @@ export class InputController {
     }
   }
 
-  // Editing mouse handling
   handleEditingMouseDown(e, canvasIndex) {
     const currentState = this.gameState.getState();
     if (currentState !== "editing") return;
 
-    // Use unified editing timeline canvas instead of individual canvases
     const canvas =
       canvasIndex !== null && canvasIndex !== undefined
-        ? this.uiManager.getEditingCanvas(canvasIndex) // Legacy individual canvas
-        : this.uiManager.getCanvas("editingTimelineCanvas"); // New unified canvas
+        ? this.uiManager.getEditingCanvas(canvasIndex)
+        : this.uiManager.getCanvas("editingTimelineCanvas");
     if (!canvas) return;
 
     e.preventDefault();
@@ -165,17 +157,14 @@ export class InputController {
 
     const handler = this.getHandler("editingMouseDown");
     if (handler) {
-      // For unified timeline, don't pass canvasIndex
       const result =
         canvasIndex !== null && canvasIndex !== undefined
-          ? handler(mouseX, mouseY, canvasIndex) // Legacy individual canvas
-          : handler(mouseX, mouseY); // New unified canvas
+          ? handler(mouseX, mouseY, canvasIndex)
+          : handler(mouseX, mouseY);
 
-      // Update drag state
       if (result && result.draggedNote) {
         this.dragState.isDragging = true;
         this.dragState.draggedNote = result.draggedNote;
-        // Use null for unified timeline, preserve actual index for legacy individual canvases
         this.dragState.draggedCanvasIndex =
           canvasIndex !== null && canvasIndex !== undefined
             ? canvasIndex
@@ -183,7 +172,6 @@ export class InputController {
         this.dragState.dragStartY = mouseY;
         this.dragState.dragStartPitch = result.draggedNote.pitchSemitones;
 
-        // Change cursor
         canvas.style.cursor = "grabbing";
       }
     }
@@ -192,11 +180,10 @@ export class InputController {
   handleEditingMouseMove(e, canvasIndex) {
     if (!this.dragState.isDragging || !this.dragState.draggedNote) return;
 
-    // Use unified editing timeline canvas instead of individual canvases
     const canvas =
       this.dragState.draggedCanvasIndex !== null
-        ? this.uiManager.getEditingCanvas(this.dragState.draggedCanvasIndex) // Legacy individual canvas
-        : this.uiManager.getCanvas("editingTimelineCanvas"); // New unified canvas
+        ? this.uiManager.getEditingCanvas(this.dragState.draggedCanvasIndex)
+        : this.uiManager.getCanvas("editingTimelineCanvas");
     if (!canvas) return;
 
     e.preventDefault();
@@ -217,11 +204,10 @@ export class InputController {
   handleEditingMouseUp(e) {
     if (!this.dragState.isDragging) return;
 
-    // Reset cursor
     const canvas =
       this.dragState.draggedCanvasIndex !== null
-        ? this.uiManager.getEditingCanvas(this.dragState.draggedCanvasIndex) // Legacy individual canvas
-        : this.uiManager.getCanvas("editingTimelineCanvas"); // New unified canvas
+        ? this.uiManager.getEditingCanvas(this.dragState.draggedCanvasIndex)
+        : this.uiManager.getCanvas("editingTimelineCanvas");
     if (canvas) {
       canvas.style.cursor = "grab";
     }
@@ -231,7 +217,6 @@ export class InputController {
       handler(this.dragState.draggedNote);
     }
 
-    // Reset drag state
     this.dragState.isDragging = false;
     this.dragState.draggedNote = null;
     this.dragState.draggedCanvasIndex = null;
@@ -239,7 +224,6 @@ export class InputController {
     this.dragState.dragStartPitch = 0;
   }
 
-  // Global mouse events (for smooth dragging outside canvas)
   handleGlobalMouseMove(e) {
     if (this.dragState.isDragging && this.gameState.getState() === "editing") {
       this.handleEditingMouseMove(e, this.dragState.draggedCanvasIndex);
@@ -252,13 +236,15 @@ export class InputController {
     }
   }
 
-  // Button event setup for persistent UI (like main menu)
+  /**
+   * Sets up button event listeners that persist across phases
+   * @param {Object} buttonHandlers - Map of button IDs to handler functions
+   */
   setupPersistentButtonEvents(buttonHandlers) {
     console.log(
       "setupPersistentButtonEvents called with:",
       Object.keys(buttonHandlers),
     );
-    // Store persistent handler references separately
     if (!this.persistentButtonHandlers) {
       this.persistentButtonHandlers = new Map();
     }
@@ -273,7 +259,6 @@ export class InputController {
         button.addEventListener("click", handler);
         console.log(`Added click listener to ${buttonId}`);
 
-        // Store the handler reference for cleanup
         this.persistentButtonHandlers.set(buttonId, {
           element: button,
           handler: handler,
@@ -282,12 +267,13 @@ export class InputController {
     });
   }
 
-  // Button event setup for phase-specific events
+  /**
+   * Sets up button event listeners for the current phase
+   * @param {Object} buttonHandlers - Map of button IDs to handler functions
+   */
   setupButtonEvents(buttonHandlers) {
-    // Clean up any existing phase-specific button events first
     this.cleanupButtonEvents();
 
-    // Store handler references for cleanup
     this.currentButtonHandlers = new Map();
 
     Object.entries(buttonHandlers).forEach(([buttonId, handler]) => {
@@ -295,7 +281,6 @@ export class InputController {
       if (button) {
         button.addEventListener("click", handler);
 
-        // Store the handler reference for cleanup
         this.currentButtonHandlers.set(buttonId, {
           element: button,
           handler: handler,
@@ -304,7 +289,6 @@ export class InputController {
     });
   }
 
-  // Clean up phase-specific button event listeners
   cleanupButtonEvents() {
     if (this.currentButtonHandlers) {
       this.currentButtonHandlers.forEach(({ element, handler }) => {
@@ -314,7 +298,6 @@ export class InputController {
     }
   }
 
-  // Clean up persistent button event listeners (called on full cleanup)
   cleanupPersistentButtonEvents() {
     if (this.persistentButtonHandlers) {
       this.persistentButtonHandlers.forEach(({ element, handler }) => {
@@ -324,12 +307,13 @@ export class InputController {
     }
   }
 
-  // Transport control setup
+  /**
+   * Sets up transport control event listeners (play/pause, progress bars)
+   * @param {Object} transportHandlers - Map of control IDs to handler functions
+   */
   setupTransportEvents(transportHandlers) {
-    // Clean up any existing transport events first
     this.cleanupTransportEvents();
 
-    // Store handler references for cleanup
     this.currentTransportHandlers = new Map();
 
     Object.entries(transportHandlers).forEach(([controlId, handler]) => {
@@ -344,7 +328,6 @@ export class InputController {
           control.addEventListener("click", eventHandler);
         }
 
-        // Store the handler reference for cleanup
         this.currentTransportHandlers.set(controlId, {
           element: control,
           eventType: control.type === "range" ? "input" : "click",
@@ -354,7 +337,6 @@ export class InputController {
     });
   }
 
-  // Clean up transport event listeners
   cleanupTransportEvents() {
     if (this.currentTransportHandlers) {
       this.currentTransportHandlers.forEach(
@@ -366,20 +348,16 @@ export class InputController {
     }
   }
 
-  // Clean up event listeners
   cleanup() {
-    // Remove global event listeners
     document.removeEventListener("keydown", this.handleKeyDown);
     document.removeEventListener("keyup", this.handleKeyUp);
     document.removeEventListener("mousemove", this.handleGlobalMouseMove);
     document.removeEventListener("mouseup", this.handleGlobalMouseUp);
 
-    // Clean up transport and button events
     this.cleanupTransportEvents();
     this.cleanupButtonEvents();
     this.cleanupPersistentButtonEvents();
 
-    // Clear handlers
     this.eventHandlers.clear();
 
     console.log("InputController cleaned up");

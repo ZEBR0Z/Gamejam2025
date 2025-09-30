@@ -41,10 +41,8 @@ export class ShowcasePhase {
     console.log("Starting final showcase phase");
     this.uiManager.showScreen("showcase");
 
-    // Load all final songs from server
     await this.loadFinalSongs();
 
-    // Setup UI and start showcasing
     this.setupUI();
     this.setupEventHandlers();
 
@@ -67,14 +65,12 @@ export class ShowcasePhase {
   }
 
   setupUI() {
-    // Update showcase info
     if (this.finalSongs.length > 0) {
       this.uiManager.updateShowcaseScreen(0, this.finalSongs.length, []);
     }
   }
 
   setupEventHandlers() {
-    // Transport controls - only enabled in navigation mode
     const transportHandlers = {
       "showcase-play-pause-btn": () =>
         !this.isSequentialMode && this.togglePlayback(),
@@ -85,7 +81,6 @@ export class ShowcasePhase {
 
     this.inputController.setupTransportEvents(transportHandlers);
 
-    // Navigation and exit buttons
     const buttonHandlers = {
       "prev-song-btn": () => !this.isSequentialMode && this.previousSong(),
       "next-song-btn": () => !this.isSequentialMode && this.nextSong(),
@@ -101,10 +96,8 @@ export class ShowcasePhase {
     this.currentSongIndex = songIndex;
     const song = this.finalSongs[songIndex];
 
-    // Convert song segments to events for playback
     await this.convertSongToEvents(song);
 
-    // Update UI
     const creators = song.contributors || [];
     this.uiManager.updateShowcaseScreen(
       songIndex,
@@ -113,7 +106,6 @@ export class ShowcasePhase {
       this.isSequentialMode,
     );
 
-    // Set backing track for this song and calculate total time
     if (song.backingTrack) {
       this.gameState.setBackingTrack(song.backingTrack);
       await this.audioEngine.loadBackingTrack(song.backingTrack.path);
@@ -164,8 +156,6 @@ export class ShowcasePhase {
         });
       }
     }
-
-    // Song converted to playable events
   }
 
   startScheduling() {
@@ -315,11 +305,12 @@ export class ShowcasePhase {
 
   advanceToNextSong() {
     if (this.currentSongIndex < this.finalSongs.length - 1) {
-      // Move to next song
       this.stopCurrentSong();
+
+      // Show next song after a brief pause
       setTimeout(() => {
         this.showSong(this.currentSongIndex + 1);
-      }, 500); // Brief pause between songs
+      }, 500);
     } else {
       // Finished all songs - enable navigation mode
       this.isSequentialMode = false;
@@ -367,12 +358,10 @@ export class ShowcasePhase {
       this.audioEngine.getCurrentTime() - this.gameState.playback.currentTime,
     );
 
-    // Reset event scheduling
     this.currentSongEvents.forEach((event) => {
       event.scheduled = false;
     });
 
-    // Resume backing track
     this.audioEngine.resumeBackingTrack();
 
     this.startScheduling();
@@ -392,7 +381,6 @@ export class ShowcasePhase {
       clearInterval(this.scheduleInterval);
     }
 
-    // Pause backing track
     this.audioEngine.pauseBackingTrack();
 
     const song = this.finalSongs[this.currentSongIndex];
@@ -423,7 +411,6 @@ export class ShowcasePhase {
       this.animationFrameId = null;
     }
 
-    // Stop backing track
     this.audioEngine.stopBackingTrack();
   }
 
@@ -443,7 +430,6 @@ export class ShowcasePhase {
       event.scheduled = false;
     });
 
-    // Restart backing track
     if (this.gameState.playback.isPlaying) {
       this.audioEngine.startBackingTrack();
     }
@@ -472,7 +458,6 @@ export class ShowcasePhase {
       event.scheduled = false;
     });
 
-    // Sync backing track
     this.audioEngine.seekBackingTrack(time);
 
     this.uiManager.updateShowcaseTransportControls(
@@ -482,7 +467,6 @@ export class ShowcasePhase {
       this.isSequentialMode,
     );
 
-    // Redraw canvas to show new position
     this.draw();
   }
 
@@ -513,15 +497,12 @@ export class ShowcasePhase {
   }
 
   cleanup() {
-    // Clean up transport and button event listeners
     this.inputController.cleanupTransportEvents();
     this.inputController.cleanupButtonEvents();
 
-    // Stop all audio previews
     this.audioEngine.stopPreview();
     this.audioEngine.stopEditPreview();
 
-    // Stop scheduling and animation
     if (this.scheduleInterval) {
       clearInterval(this.scheduleInterval);
     }
@@ -529,10 +510,7 @@ export class ShowcasePhase {
       cancelAnimationFrame(this.animationFrameId);
     }
 
-    // Stop backing track
     this.audioEngine.stopBackingTrack();
-
-    // Reset playback state and sequential mode
     this.gameState.setPlaybackState(false, 0, 0);
     this.isSequentialMode = true;
     this.hasPlayedAllSongs = false;

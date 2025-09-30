@@ -1,48 +1,37 @@
 /**
- * GameState - Manages the game's state and data
- * Centralized state management for the music game
+ * GameState - Centralized state management for the music game
  */
 export class GameState {
   constructor() {
-    // Game flow state
-    this.currentState = "menu"; // menu, tutorial, selection, performance, editing, final
-
-    // Audio data
+    this.currentState = "menu";
     this.soundList = [];
-    this.selectedSounds = []; // 3 chosen sounds with audio buffers and icons
-    this.availableSounds = []; // 5 random sounds for selection
-
-    // Music data
-    this.events = []; // Array of SoundEvent objects
+    this.selectedSounds = [];
+    this.availableSounds = [];
+    this.events = [];
     this.nextEventId = 0;
 
-    // Timing configuration
     this.config = {
-      segmentLength: 8, // Default value - overridden by backing track duration
+      segmentLength: 8,
       selectionTime: 30,
       performanceTime: 90,
       editingTime: 60,
       replacementTime: 30,
     };
 
-    // Backing track state
     this.backingTrack = {
       path: null,
-      duration: 8, // Default fallback
+      duration: 8,
     };
 
-    // Playback state
     this.playback = {
       currentTime: 0,
       isPlaying: false,
       startTime: 0,
     };
 
-    // Icon preloading callback (set by Game)
     this.onIconPreload = null;
   }
 
-  // State management
   setState(newState) {
     const previousState = this.currentState;
     this.currentState = newState;
@@ -53,7 +42,6 @@ export class GameState {
     return this.currentState;
   }
 
-  // Sound management
   async loadSoundList() {
     try {
       const response = await fetch("./soundlist.json");
@@ -70,6 +58,11 @@ export class GameState {
     this.availableSounds = shuffled.slice(0, count);
   }
 
+  /**
+   * @param {Object} soundData - Sound data including icon and audio URL
+   * @param {number} originalIndex - Index in available sounds array
+   * @returns {boolean} Success status
+   */
   addSelectedSound(soundData, originalIndex) {
     if (this.selectedSounds.length >= 3) return false;
 
@@ -79,7 +72,6 @@ export class GameState {
       audio: soundData.audio,
     });
 
-    // Preload icon if callback is set
     if (this.onIconPreload && soundData.icon) {
       this.onIconPreload(soundData.icon);
     }
@@ -102,7 +94,12 @@ export class GameState {
     this.selectedSounds = [];
   }
 
-  // Event management
+  /**
+   * @param {number} soundIndex - Index of selected sound (0-2)
+   * @param {number} startTimeSec - Start time in seconds
+   * @param {number} pitchSemitones - Pitch adjustment in semitones
+   * @returns {Object} Created event object
+   */
   addEvent(soundIndex, startTimeSec, pitchSemitones = 0) {
     const event = {
       id: this.nextEventId++,
@@ -134,7 +131,6 @@ export class GameState {
     return this.events.filter((event) => event.soundIndex === soundIndex);
   }
 
-  // Playback state
   setPlaybackState(isPlaying, currentTime = null, startTime = null) {
     this.playback.isPlaying = isPlaying;
     if (currentTime !== null) this.playback.currentTime = currentTime;
@@ -149,12 +145,15 @@ export class GameState {
     }
   }
 
-  // Backing track management
+  /**
+   * @param {Object} backingTrackInfo - Backing track info with path and duration
+   * @description Sets backing track and overrides segment length with track duration
+   */
   setBackingTrack(backingTrackInfo) {
     if (backingTrackInfo) {
       this.backingTrack.path = backingTrackInfo.path;
       this.backingTrack.duration = backingTrackInfo.duration;
-      this.config.segmentLength = backingTrackInfo.duration; // Override segment length
+      this.config.segmentLength = backingTrackInfo.duration;
     }
   }
 
@@ -162,7 +161,6 @@ export class GameState {
     return this.backingTrack.duration || this.config.segmentLength;
   }
 
-  // Reset methods
   resetGameData() {
     this.clearEvents();
     this.clearSelectedSounds();

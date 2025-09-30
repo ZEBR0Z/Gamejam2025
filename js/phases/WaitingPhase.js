@@ -9,8 +9,6 @@ export class WaitingPhase {
     this.audioEngine = audioEngine;
     this.multiplayerManager = multiplayerManager;
     this.onPhaseComplete = null;
-
-    // Audio management properties
     this.backgroundMusic = null;
     this.isActive = false;
   }
@@ -22,21 +20,16 @@ export class WaitingPhase {
     console.log("Starting waiting phase");
     this.uiManager.showScreen("waiting-for-players");
 
-    // Update the waiting screen with current game state
     const gameState = this.multiplayerManager.getGameState();
     if (gameState) {
       this.uiManager.updateWaitingScreen(gameState);
     }
 
-    // Load and start background music (only if still active)
     if (this.isActive) {
       await this.loadBackgroundMusic();
     }
 
-    // Fetch and display random fact
     await this.fetchRandomFact();
-
-    // Set up multiplayer event handlers
     this.setupEventHandlers();
   }
 
@@ -81,7 +74,11 @@ export class WaitingPhase {
       }
     } catch (error) {
       console.error("Failed to fetch random fact:", error);
-      // Keep default message on error
+      const waitingMessage = document.getElementById("waiting-message");
+      await this.typeText(
+        waitingMessage,
+        "Sometimes either the internet, API, or JavaScript, just want to... not work!",
+      );
     }
   }
 
@@ -109,7 +106,6 @@ export class WaitingPhase {
         this.backgroundMusic.load();
       });
 
-      // Only play if phase is still active
       if (this.isActive) {
         this.backgroundMusic.play();
         console.log("Waiting phase background music loaded and playing");
@@ -121,18 +117,15 @@ export class WaitingPhase {
   }
 
   cleanup() {
-    // Mark phase as inactive to stop any ongoing async operations
     this.isActive = false;
 
-    // Stop background music
     if (this.backgroundMusic) {
       this.backgroundMusic.pause();
       this.backgroundMusic.currentTime = 0;
       this.backgroundMusic = null;
     }
 
-    // Clean up event handlers
     this.multiplayerManager.onWaitingUpdate = null;
-    // Note: Don't clear onPhaseChange as it might be used by other phases
+    // Note: We don't clear onPhaseChange as it might be used by other phases
   }
 }

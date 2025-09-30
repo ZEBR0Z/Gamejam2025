@@ -9,9 +9,9 @@ export class SoundReplacementPhase {
     this.uiManager = uiManager;
     this.audioEngine = audioEngine;
     this.onPhaseComplete = null;
-    this.replacementOptions = []; // 3 random sounds to choose from
+    this.replacementOptions = [];
     this.selectedReplacementIndex = -1;
-    this.replacementSoundIndex = -1; // Which existing sound will be replaced
+    this.replacementSoundIndex = -1;
     this.continueHandler = null;
     this.countdownInterval = null;
   }
@@ -22,24 +22,16 @@ export class SoundReplacementPhase {
     console.log("Starting sound replacement phase");
     this.uiManager.showScreen("sound-replacement");
 
-    // Reset state
     this.selectedReplacementIndex = -1;
     this.replacementOptions = [];
 
-    // Determine which existing sound will be replaced (randomly)
     this.replacementSoundIndex = Math.floor(Math.random() * 3);
 
-    // Select 3 random replacement options (excluding current sounds)
     this.selectReplacementOptions();
 
-    // Setup UI
     await this.populateReplacementGrid();
     this.updateUI();
-
-    // Start countdown timer (30 seconds)
     this.startCountdown();
-
-    // Setup event handlers
     this.setupEventHandlers();
   }
 
@@ -111,7 +103,6 @@ export class SoundReplacementPhase {
         i,
       );
 
-      // Add event listeners
       soundOption.addEventListener("mouseenter", () => this.previewSound(i));
       soundOption.addEventListener("mouseleave", () => this.stopPreview());
       soundOption.addEventListener("click", () => this.selectReplacement(i));
@@ -147,16 +138,13 @@ export class SoundReplacementPhase {
     try {
       // Check if this replacement is already selected
       if (this.selectedReplacementIndex === index) {
-        // Unselect the replacement
         this.selectedReplacementIndex = -1;
         soundOption.classList.remove("selected");
         this.updateUI();
 
-        // Disable continue button and re-enable all replacements
         this.uiManager.updateReplacementContinueButton(false);
         this.uiManager.enableAllReplacements();
       } else {
-        // First, clear any previous selection
         if (this.selectedReplacementIndex !== -1) {
           const previousOption = document.querySelector(
             `[data-replacement-index="${this.selectedReplacementIndex}"]`,
@@ -166,12 +154,10 @@ export class SoundReplacementPhase {
           }
         }
 
-        // Select this replacement
         this.selectedReplacementIndex = index;
         soundOption.classList.add("selected");
         this.updateUI();
 
-        // Enable continue button
         this.uiManager.updateReplacementContinueButton(true);
         this.uiManager.disableNonSelectedReplacements();
       }
@@ -193,7 +179,6 @@ export class SoundReplacementPhase {
   }
 
   updateUI() {
-    // Update which sound will be replaced
     const soundToReplace =
       this.gameState.selectedSounds[this.replacementSoundIndex];
     this.uiManager.updateReplacementInfo(
@@ -201,7 +186,6 @@ export class SoundReplacementPhase {
       this.replacementSoundIndex,
     );
 
-    // Update continue button state
     this.uiManager.updateReplacementContinueButton(
       this.selectedReplacementIndex !== -1,
     );
@@ -216,7 +200,6 @@ export class SoundReplacementPhase {
   }
 
   complete() {
-    // Ensure we have a replacement selected
     if (this.selectedReplacementIndex === -1) {
       this.autoSelectReplacement();
     }
@@ -228,21 +211,18 @@ export class SoundReplacementPhase {
     this.stopPreview();
     this.stopCountdown();
 
-    // Apply the sound replacement
     if (
       this.selectedReplacementIndex !== -1 &&
       this.replacementSoundIndex !== -1
     ) {
       const newSound = this.replacementOptions[this.selectedReplacementIndex];
 
-      // Replace the sound in the selected sounds array
       this.gameState.selectedSounds[this.replacementSoundIndex] = {
-        originalIndex: this.replacementSoundIndex, // Keep the same index position
+        originalIndex: this.replacementSoundIndex,
         icon: newSound.icon,
         audio: newSound.audio,
       };
 
-      // Preload the new icon if callback is set
       if (this.gameState.onIconPreload && newSound.icon) {
         this.gameState.onIconPreload(newSound.icon);
       }
@@ -259,7 +239,6 @@ export class SoundReplacementPhase {
   }
 
   cleanup() {
-    // Clean up event listeners
     const continueBtn = this.uiManager.getElement("replacementContinueBtn");
     if (continueBtn && this.continueHandler) {
       continueBtn.removeEventListener("click", this.continueHandler);

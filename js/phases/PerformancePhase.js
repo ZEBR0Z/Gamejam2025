@@ -30,20 +30,12 @@ export class PerformancePhase {
     console.log("Starting performance phase");
     this.uiManager.showScreen("performance");
 
-    // Reset performance state
     this.gameState.clearEvents();
     this.gameState.setPlaybackState(false, 0, 0);
-
-    // Load backing track for current song
     await this.loadCurrentSongBackingTrack();
 
-    // Setup UI
     this.setupUI();
-
-    // Setup event handlers
     this.setupEventHandlers();
-
-    // Start loop
     this.startLoop();
   }
 
@@ -67,7 +59,6 @@ export class PerformancePhase {
   }
 
   setupUI() {
-    // Update sound icons
     this.uiManager.updateSoundIcons(this.gameState.selectedSounds);
 
     // Clear timeline
@@ -91,7 +82,6 @@ export class PerformancePhase {
   }
 
   setupEventHandlers() {
-    // Register input handlers
     this.inputController.registerHandler(
       "keyPress",
       "performance",
@@ -108,13 +98,11 @@ export class PerformancePhase {
       },
     );
 
-    // Setup canvas events
     const timelineCanvas = this.uiManager.getCanvas("timelineCanvas");
     if (timelineCanvas) {
       this.inputController.setupCanvasEvents(timelineCanvas, "timeline");
     }
 
-    // Transport controls
     const transportHandlers = {
       "play-pause-btn": () => this.togglePlayback(),
       "restart-btn": () => this.restart(),
@@ -126,7 +114,6 @@ export class PerformancePhase {
   }
 
   startLoop() {
-    // Refresh UI in case selected sounds have changed (e.g., in subsequent rounds)
     this.refreshUI();
 
     this.gameState.setPlaybackState(true, 0, this.audioEngine.getCurrentTime());
@@ -137,13 +124,8 @@ export class PerformancePhase {
       this.gameState.getSegmentLength(),
     );
 
-    // Start backing track
     this.audioEngine.startBackingTrack();
-
-    // Start performance countdown
     this.startCountdown();
-
-    // Start scheduling and animation
     this.startScheduling();
     this.startAnimation();
   }
@@ -179,7 +161,6 @@ export class PerformancePhase {
   }
 
   refreshUI() {
-    // Update sound icons with current selected sounds
     this.uiManager.updateSoundIcons(this.gameState.selectedSounds);
 
     // Clear timeline
@@ -337,7 +318,6 @@ export class PerformancePhase {
       this.audioEngine.getCurrentTime() - this.gameState.playback.currentTime,
     );
 
-    // Reset event scheduling
     this.gameState.events.forEach((event) => {
       event.scheduled = false;
     });
@@ -352,7 +332,6 @@ export class PerformancePhase {
       this.gameState.getSegmentLength(),
     );
 
-    // Resume backing track if needed
     this.audioEngine.resumeBackingTrack();
   }
 
@@ -369,7 +348,6 @@ export class PerformancePhase {
       this.gameState.getSegmentLength(),
     );
 
-    // Pause backing track
     this.audioEngine.pauseBackingTrack();
   }
 
@@ -380,7 +358,6 @@ export class PerformancePhase {
       this.audioEngine.getCurrentTime(),
     );
 
-    // Reset event scheduling
     this.gameState.events.forEach((event) => {
       event.scheduled = false;
     });
@@ -392,7 +369,6 @@ export class PerformancePhase {
       this.gameState.getSegmentLength(),
     );
 
-    // Restart backing track
     if (this.gameState.playback.isPlaying) {
       this.audioEngine.startBackingTrack();
     }
@@ -405,7 +381,6 @@ export class PerformancePhase {
       this.audioEngine.getCurrentTime() - time,
     );
 
-    // Reset event scheduling
     this.gameState.events.forEach((event) => {
       event.scheduled = false;
     });
@@ -417,10 +392,7 @@ export class PerformancePhase {
       this.gameState.getSegmentLength(),
     );
 
-    // Sync backing track
     this.audioEngine.seekBackingTrack(time);
-
-    // Redraw canvas to show new position
     this.draw();
   }
 
@@ -436,14 +408,11 @@ export class PerformancePhase {
   }
 
   cleanup() {
-    // Unregister handlers
     this.inputController.unregisterHandler("keyPress", "performance");
     this.inputController.unregisterHandler("timelineRightClick", "performance");
 
-    // Clean up transport event listeners
     this.inputController.cleanupTransportEvents();
 
-    // Stop scheduling and animation
     if (this.scheduleInterval) {
       clearInterval(this.scheduleInterval);
     }
@@ -451,7 +420,6 @@ export class PerformancePhase {
       cancelAnimationFrame(this.animationFrameId);
     }
 
-    // Stop backing track
     this.audioEngine.stopBackingTrack();
 
     this.stopCountdown();

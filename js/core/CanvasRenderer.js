@@ -6,44 +6,36 @@ export class CanvasRenderer {
   constructor() {
     this.soundColors = ["#ff6b6b", "#4ecdc4", "#45b7d1"];
     this.semitoneHeight = 25;
-    this.iconCache = new Map(); // Cache for loaded icons
-    this.colorCache = new Map(); // Cache for generated colors
+    this.iconCache = new Map();
+    this.colorCache = new Map();
 
-    // Scrollable timeline properties
-    this.pixelsPerSecond = 200; // How many pixels per second of audio
-    this.viewportOffset = 0; // Current scroll position in seconds
-    this.autoScrollEnabled = true; // Whether to auto-scroll with playhead
+    this.pixelsPerSecond = 200;
+    this.viewportOffset = 0;
+    this.autoScrollEnabled = true;
   }
 
-  // Generate a simple hash from a string
   hashString(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
       hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
+      hash = hash & hash;
     }
     return Math.abs(hash);
   }
 
-  // Generate a pastel color based on icon filename
   getColorForIcon(iconUrl) {
-    if (!iconUrl) return "#ddd"; // Default light gray
+    if (!iconUrl) return "#ddd";
 
     if (this.colorCache.has(iconUrl)) {
       return this.colorCache.get(iconUrl);
     }
 
-    // Extract filename from URL
     const filename = iconUrl.split("/").pop().split(".")[0];
-
-    // Generate hue from filename hash (0-360)
     const hash = this.hashString(filename);
     const hue = hash % 360;
-
-    // Use pastel colors: high lightness (75-85%), moderate saturation (45-65%)
-    const saturation = 45 + (hash % 20); // 45-65%
-    const lightness = 75 + (hash % 10); // 75-85%
+    const saturation = 45 + (hash % 20);
+    const lightness = 75 + (hash % 10);
 
     const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
     this.colorCache.set(iconUrl, color);
@@ -51,7 +43,11 @@ export class CanvasRenderer {
     return color;
   }
 
-  // Load icon and cache it
+  /**
+   * Loads an icon image and caches it for future use
+   * @param {string} iconUrl - URL of the icon to load
+   * @returns {Promise<Image|null>} The loaded image or null if loading fails
+   */
   async loadIcon(iconUrl) {
     if (!iconUrl) return null;
 
@@ -73,17 +69,27 @@ export class CanvasRenderer {
     });
   }
 
-  // Get icon for an event (handles both performance and preview/showcase events)
   getEventIcon(event, selectedSounds = null) {
     if (event.icon) {
-      return event.icon; // Direct icon from server data (preview/showcase)
+      return event.icon;
     } else if (selectedSounds && selectedSounds[event.soundIndex]) {
-      return selectedSounds[event.soundIndex].icon; // Icon from selected sounds (performance/editing)
+      return selectedSounds[event.soundIndex].icon;
     }
     return null;
   }
 
-  // Draw a note with icon (synchronous - loads icon if available, otherwise shows fallback)
+  /**
+   * Draws a note with an icon on the canvas
+   * @param {CanvasRenderingContext2D} ctx - Canvas rendering context
+   * @param {number} x - X coordinate
+   * @param {number} y - Y coordinate
+   * @param {number} radius - Note circle radius
+   * @param {Object} event - Event data containing sound information
+   * @param {Array} selectedSounds - Array of selected sound objects
+   * @param {number} fallbackNumber - Number to display if icon not available
+   * @param {number} opacity - Opacity value (0.0 to 1.0)
+   * @returns {boolean} True if icon was drawn, false if fallback was used
+   */
   drawNoteWithIcon(
     ctx,
     x,
@@ -159,10 +165,9 @@ export class CanvasRenderer {
     // Restore context
     ctx.restore();
 
-    return false; // Did not draw icon
+    return false;
   }
 
-  // Calculate viewport parameters for scrollable timeline
   calculateViewport(currentTime, segmentLength, canvasWidth) {
     const viewportDuration = canvasWidth / this.pixelsPerSecond;
 
@@ -461,7 +466,6 @@ export class CanvasRenderer {
     this.drawScrollablePlayhead(ctx, currentTime, viewport, width, height);
   }
 
-  // Helper methods
   drawTimeGrid(ctx, width, height, segmentLength) {
     ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
     ctx.lineWidth = 1;
@@ -476,7 +480,6 @@ export class CanvasRenderer {
     }
   }
 
-  // Scrollable time grid for viewport-based timeline
   drawScrollableTimeGrid(ctx, width, height, viewport) {
     ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
     ctx.lineWidth = 1;
@@ -505,7 +508,6 @@ export class CanvasRenderer {
   drawPitchGrid(ctx, width, height) {
     const centerY = height / 2;
 
-    // Draw center line (0 semitones)
     ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -513,11 +515,10 @@ export class CanvasRenderer {
     ctx.lineTo(width, centerY);
     ctx.stroke();
 
-    // Draw semitone lines
     ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
     ctx.lineWidth = 1;
     for (let i = -12; i <= 12; i++) {
-      if (i === 0) continue; // Skip center line
+      if (i === 0) continue;
       const y = centerY - i * this.semitoneHeight;
       if (y >= 0 && y <= height) {
         ctx.beginPath();
@@ -548,11 +549,9 @@ export class CanvasRenderer {
     ctx.stroke();
   }
 
-  // Scrollable playhead for viewport-based timeline
   drawScrollablePlayhead(ctx, currentTime, viewport, width, height) {
     const playheadX = this.timeToX(currentTime, viewport);
 
-    // Only draw playhead if it's visible in the current viewport
     if (playheadX >= 0 && playheadX <= width) {
       ctx.strokeStyle = "#ff4757";
       ctx.lineWidth = 3;
@@ -561,7 +560,6 @@ export class CanvasRenderer {
       ctx.lineTo(playheadX, height);
       ctx.stroke();
 
-      // Add a triangular playhead indicator at the top
       ctx.fillStyle = "#ff4757";
       ctx.beginPath();
       ctx.moveTo(playheadX - 6, 0);
@@ -572,7 +570,17 @@ export class CanvasRenderer {
     }
   }
 
-  // Interaction helpers - updated for scrollable timeline
+  /**
+   * Gets the event at a specific mouse position on the canvas
+   * @param {Array} events - Array of event objects to check
+   * @param {number} mouseX - Mouse X coordinate
+   * @param {number} mouseY - Mouse Y coordinate
+   * @param {HTMLCanvasElement} canvas - Canvas element
+   * @param {number} segmentLength - Length of the audio segment in seconds
+   * @param {number} soundIndex - Optional sound index to filter by
+   * @param {number} currentTime - Current playback time for viewport calculation
+   * @returns {Object|null} The event at the position or null if none found
+   */
   getEventAtPosition(
     events,
     mouseX,
@@ -649,7 +657,6 @@ export class CanvasRenderer {
     });
   }
 
-  // Add method to convert mouse position to time in scrollable timeline
   getTimeAtPosition(mouseX, canvas, segmentLength, currentTime = 0) {
     if (!canvas) return 0;
 
@@ -661,17 +668,25 @@ export class CanvasRenderer {
     return this.xToTime(mouseX, viewport);
   }
 
-  // Calculate pitch change from mouse movement
+  /**
+   * Calculates pitch change in semitones from vertical mouse movement
+   * @param {number} deltaY - Vertical distance moved in pixels
+   * @returns {number} Pitch change in semitones
+   */
   calculatePitchChange(deltaY) {
     return Math.round(deltaY / this.semitoneHeight);
   }
 
-  // Constrain pitch to valid range
+  /**
+   * Constrains pitch value to a valid range
+   * @param {number} pitch - Pitch value to constrain
+   * @param {number} min - Minimum pitch value
+   * @param {number} max - Maximum pitch value
+   * @returns {number} Constrained pitch value
+   */
   constrainPitch(pitch, min = -12, max = 12) {
     return Math.max(min, Math.min(max, pitch));
   }
-
-  // Manual scrolling controls
   setAutoScroll(enabled) {
     this.autoScrollEnabled = enabled;
   }

@@ -14,7 +14,6 @@
  * Each song passes through all players, creating N-segment collaborative pieces
  */
 
-// Core systems
 import { AudioEngine } from "./core/AudioEngine.js";
 import { GameState } from "./core/GameState.js";
 import { UIManager } from "./core/UIManager.js";
@@ -23,7 +22,6 @@ import { InputController } from "./core/InputController.js";
 import { MultiplayerManager } from "./core/MultiplayerManager.js";
 import { PhaseManager } from "./core/PhaseManager.js";
 
-// Game phases
 import { SelectionPhase } from "./phases/SelectionPhase.js";
 import { PerformancePhase } from "./phases/PerformancePhase.js";
 import { EditingPhase } from "./phases/EditingPhase.js";
@@ -34,7 +32,6 @@ import { ShowcasePhase } from "./phases/ShowcasePhase.js";
 
 export class Game {
   constructor() {
-    // Core systems
     this.audioEngine = new AudioEngine();
     this.gameState = new GameState();
     this.uiManager = new UIManager();
@@ -47,7 +44,6 @@ export class Game {
     this.multiplayerManager = new MultiplayerManager();
     this.phaseManager = new PhaseManager();
 
-    // Game phases
     this.selectionPhase = new SelectionPhase(
       this.gameState,
       this.uiManager,
@@ -101,17 +97,14 @@ export class Game {
     this.serverUrl = "https://ruelalarcon.dev/ythserver";
     this.hasUserInteracted = false;
 
-    // Set up icon preloading callback
     this.gameState.onIconPreload = (iconUrl) => {
       this.canvasRenderer.loadIcon(iconUrl);
     };
 
-    // Register phases with the phase manager
     this.setupPhaseManager();
   }
 
   setupPhaseManager() {
-    // Register all phases
     this.phaseManager.registerPhase("selection", this.selectionPhase);
     this.phaseManager.registerPhase("performance", this.performancePhase);
     this.phaseManager.registerPhase("editing", this.editingPhase);
@@ -123,12 +116,10 @@ export class Game {
     );
     this.phaseManager.registerPhase("showcase", this.showcasePhase);
 
-    // Set up phase transition callback
     this.phaseManager.onTransition = (phaseName, phaseInstance) => {
       console.log(`Transitioned to phase: ${phaseName}`);
       this.gameState.setState(phaseName);
 
-      // Stop menu music when entering game phases
       if (this.audioEngine.isMenuMusicPlaying()) {
         this.audioEngine.stopMenuMusic();
       }
@@ -139,24 +130,14 @@ export class Game {
     try {
       console.log("Initializing Game...");
 
-      // Initialize core systems
       await this.audioEngine.initialize();
       await this.gameState.loadSoundList();
       this.uiManager.initialize();
-
-      // Load menu music (but don't start until user interaction)
       await this.audioEngine.loadMenuMusic();
 
-      // Initialize multiplayer screens
       this.initializeMultiplayerScreens();
-
-      // Setup menu event handlers
       this.setupMenuHandlers();
-
-      // Setup multiplayer event handlers
       this.setupMultiplayerHandlers();
-
-      // Setup user interaction detection for menu music
       this.setupUserInteractionDetection();
 
       console.log("Game initialized successfully");
@@ -169,14 +150,12 @@ export class Game {
   }
 
   initializeMultiplayerScreens() {
-    // Add multiplayer screens to UIManager
     this.uiManager.screens.createLobby =
       document.getElementById("create-lobby");
     this.uiManager.screens.joinLobby = document.getElementById("join-lobby");
     this.uiManager.screens.lobbyWaiting =
       document.getElementById("lobby-waiting");
 
-    // Initialize multiplayer elements
     this.uiManager.elements.playerName = document.getElementById("player-name");
     this.uiManager.elements.joinPlayerName =
       document.getElementById("join-player-name");
@@ -200,7 +179,6 @@ export class Game {
   }
 
   setupMenuHandlers() {
-    // Menu buttons
     const menuHandlers = {
       "tutorial-btn": () => this.showTutorial(),
       "create-lobby-btn": () => this.showCreateLobby(),
@@ -213,14 +191,12 @@ export class Game {
   }
 
   setupUserInteractionDetection() {
-    // Listen for first user interaction to start menu music
     const handleFirstInteraction = () => {
       if (!this.hasUserInteracted) {
         this.handleFirstUserInteraction();
       }
     };
 
-    // Listen for various interaction events
     document.addEventListener("click", handleFirstInteraction, { once: true });
     document.addEventListener("keydown", handleFirstInteraction, {
       once: true,
@@ -234,7 +210,6 @@ export class Game {
     this.hasUserInteracted = true;
     console.log("First user interaction detected, starting menu music");
 
-    // Start menu music if we're not in a game phase
     if (!this.audioEngine.isMenuMusicPlaying()) {
       this.audioEngine.startMenuMusic();
     }
@@ -242,7 +217,6 @@ export class Game {
 
   setupMultiplayerHandlers() {
     console.log("Setting up multiplayer handlers");
-    // Lobby creation and joining
     const lobbyHandlers = {
       "back-to-menu-btn": () => this.uiManager.showScreen("main-menu"),
       "back-to-menu-from-join-btn": () =>
@@ -262,7 +236,6 @@ export class Game {
     );
     this.inputController.setupPersistentButtonEvents(lobbyHandlers);
 
-    // Input field handlers
     const lobbyCodeInput = this.uiManager.elements.lobbyCodeInput;
     if (lobbyCodeInput) {
       lobbyCodeInput.addEventListener("input", (e) => {
@@ -270,7 +243,6 @@ export class Game {
       });
     }
 
-    // Multiplayer event callbacks
     this.multiplayerManager.onGameStateUpdate = (gameState) => {
       this.updateLobbyUI(gameState);
     };
@@ -291,7 +263,6 @@ export class Game {
     };
 
     this.multiplayerManager.onAllPlayersReady = (gameState) => {
-      // Show countdown only when ALL players are ready
       this.showGameStarting();
     };
 
@@ -300,7 +271,6 @@ export class Game {
     };
 
     this.multiplayerManager.onWaitingUpdate = (gameState) => {
-      // Update waiting screen if we're currently in waiting phase
       if (this.currentPhase === this.waitingPhase) {
         this.currentPhase.updateWaitingUI(gameState);
       }
@@ -317,13 +287,11 @@ export class Game {
     const playerNameInput = this.uiManager.elements.playerName;
     const createButton = document.getElementById("create-lobby-confirm-btn");
 
-    // Disable button initially
     if (createButton) {
       createButton.disabled = true;
       createButton.classList.add("is-disabled");
     }
 
-    // Enable button when name is entered
     if (playerNameInput) {
       playerNameInput.focus();
 
@@ -340,7 +308,7 @@ export class Game {
       };
 
       playerNameInput.addEventListener("input", validateInput);
-      validateInput(); // Check initial state
+      validateInput();
     }
   }
 
@@ -350,13 +318,11 @@ export class Game {
     const lobbyCodeInput = this.uiManager.elements.lobbyCodeInput;
     const joinButton = document.getElementById("join-lobby-confirm-btn");
 
-    // Disable button initially
     if (joinButton) {
       joinButton.disabled = true;
       joinButton.classList.add("is-disabled");
     }
 
-    // Enable button when name and valid lobby code are entered
     const validateInput = () => {
       const hasName = playerNameInput?.value.trim().length > 0;
       const hasValidCode = lobbyCodeInput?.value.trim().length === 6;
@@ -381,13 +347,12 @@ export class Game {
       lobbyCodeInput.addEventListener("input", validateInput);
     }
 
-    validateInput(); // Check initial state
+    validateInput();
   }
 
   async createLobby() {
     console.log("createLobby method called");
 
-    // Disable the button to prevent multiple clicks
     const createButton = document.getElementById("create-lobby-confirm-btn");
     if (createButton) {
       createButton.disabled = true;
@@ -398,14 +363,12 @@ export class Game {
     const playerName = this.uiManager.elements.playerName?.value.trim();
 
     try {
-      // Connect to server
       console.log("Attempting to connect to server:", this.serverUrl);
       const connected = await this.multiplayerManager.connect(this.serverUrl);
       console.log("Connection result:", connected);
       if (!connected) {
         console.log("Failed to connect to server");
         this.showError("Failed to connect to server. Please try again.");
-        // Re-enable button on error
         if (createButton) {
           createButton.disabled = false;
           createButton.textContent = "Create Lobby";
@@ -415,17 +378,14 @@ export class Game {
       }
       console.log("Successfully connected to server");
 
-      // Create lobby
       const response = await this.multiplayerManager.createLobby(playerName);
       console.log("CreateLobby response in Game.js:", response);
       if (response.success) {
         console.log("Lobby created successfully, showing lobby waiting screen");
         this.showLobbyWaiting(response.gameState);
-        // Button will be hidden when we switch screens, so no need to re-enable
       } else {
         console.log("Failed to create lobby:", response.error);
         this.showError(response.error || "Failed to create lobby");
-        // Re-enable button on error
         if (createButton) {
           createButton.disabled = false;
           createButton.textContent = "Create Lobby";
@@ -435,7 +395,6 @@ export class Game {
     } catch (error) {
       console.error("Error creating lobby:", error);
       this.showError("Failed to create lobby. Please try again.");
-      // Re-enable button on error
       if (createButton) {
         createButton.disabled = false;
         createButton.classList.remove("is-disabled");
@@ -446,7 +405,6 @@ export class Game {
   }
 
   async joinLobby() {
-    // Disable the button to prevent multiple clicks
     const joinButton = document.getElementById("join-lobby-confirm-btn");
     if (joinButton) {
       joinButton.disabled = true;
@@ -458,11 +416,9 @@ export class Game {
     const lobbyCode = this.uiManager.elements.lobbyCodeInput?.value.trim();
 
     try {
-      // Connect to server
       const connected = await this.multiplayerManager.connect(this.serverUrl);
       if (!connected) {
         this.showError("Failed to connect to server. Please try again.");
-        // Re-enable button on error
         if (joinButton) {
           joinButton.disabled = false;
           joinButton.textContent = "Join Lobby";
@@ -471,17 +427,14 @@ export class Game {
         return;
       }
 
-      // Join lobby
       const response = await this.multiplayerManager.joinLobby(
         lobbyCode,
         playerName,
       );
       if (response.success) {
         this.showLobbyWaiting(response.gameState);
-        // Button will be hidden when we switch screens, so no need to re-enable
       } else {
         this.showError(response.error || "Failed to join lobby");
-        // Re-enable button on error
         if (joinButton) {
           joinButton.disabled = false;
           joinButton.textContent = "Join Lobby";
@@ -491,7 +444,6 @@ export class Game {
     } catch (error) {
       console.error("Error joining lobby:", error);
       this.showError("Failed to join lobby. Please try again.");
-      // Re-enable button on error
       if (joinButton) {
         joinButton.disabled = false;
         joinButton.textContent = "Join Lobby";
@@ -584,7 +536,6 @@ export class Game {
     }
 
     this.multiplayerManager.setReady();
-    // Don't show countdown here - wait for server to confirm all players are ready
   }
 
   showGameStarting() {
@@ -622,7 +573,6 @@ export class Game {
     this.multiplayerManager.disconnect();
     this.uiManager.showScreen("main-menu");
 
-    // Restart menu music when returning to main menu (if user has interacted)
     if (this.hasUserInteracted && !this.audioEngine.isMenuMusicPlaying()) {
       this.audioEngine.startMenuMusic();
     }
@@ -630,18 +580,13 @@ export class Game {
 
   async startMultiplayerGame(gameState) {
     try {
-      // Resume audio context if needed
       await this.audioEngine.resume();
-
-      // Reset game state
       this.gameState.resetGameData();
 
-      // Load available sounds from server
       this.gameState.availableSounds = gameState.availableSounds.map(
         (index) => this.gameState.soundList[index],
       );
 
-      // Start with selection phase
       this.startSelectionPhase();
     } catch (error) {
       console.error("Failed to start multiplayer game:", error);
@@ -650,8 +595,8 @@ export class Game {
   }
 
   /**
-   * Handle phase changes from server
-   * Routes to appropriate phase based on game state
+   * Handle phase changes from server and route to appropriate phase
+   * @param {Object} gameState - Current game state from server
    */
   handlePhaseChange(gameState) {
     switch (gameState.state) {
@@ -714,7 +659,6 @@ export class Game {
 
   startSelectionPhase() {
     this.phaseManager.transitionTo("selection", () => {
-      // Selection complete - immediately go to performance phase
       console.log("Selection phase complete, moving to performance phase");
       this.phaseManager.transitionTo("performance", () => {
         console.log("Performance phase complete, moving to editing phase");
@@ -730,10 +674,9 @@ export class Game {
 
   /**
    * Submit completed song segment to server
-   * Converts events to server format and includes sound selection data
+   * @description Converts events to server format with sound file references and timing/pitch data
    */
   submitSongToServer() {
-    // Convert events to server format (filenames + timing/pitch data)
     const songData = this.gameState.events.map((event) => {
       const selectedSound = this.gameState.selectedSounds[event.soundIndex];
       return {
@@ -744,7 +687,6 @@ export class Game {
       };
     });
 
-    // Include selected sounds (for subsequent rounds to use same sounds)
     const selectedSounds = this.gameState.selectedSounds.map((sound) => ({
       audio: sound.audio,
       icon: sound.icon,
@@ -752,25 +694,21 @@ export class Game {
 
     this.multiplayerManager.submitSong(songData, selectedSounds);
 
-    // Transition to waiting phase after submitting song
     this.phaseManager.transitionTo("waiting-for-players", (gameState) => {
       this.handlePhaseChange(gameState);
     });
   }
 
   restartGame() {
-    // For multiplayer, return to lobby
     this.leaveLobby();
   }
 
   exitToMenu() {
-    // Clean up and return to menu
     this.cleanupCurrentPhase();
     this.multiplayerManager.disconnect();
     this.gameState.resetForNewGame();
     this.uiManager.showScreen("main-menu");
 
-    // Restart menu music (if user has interacted)
     if (this.hasUserInteracted && !this.audioEngine.isMenuMusicPlaying()) {
       this.audioEngine.startMenuMusic();
     }
@@ -781,9 +719,7 @@ export class Game {
   }
 
   showNotification(message) {
-    // Simple notification system
     console.log("Notification:", message);
-    // Could implement a toast notification system here
   }
 
   showError(message) {
@@ -793,12 +729,10 @@ export class Game {
       messageElement.textContent = message;
       dialog.showModal();
     } else {
-      // Fallback to alert if dialog not found
       alert(message);
     }
   }
 
-  // Global cleanup method
   cleanup() {
     this.cleanupCurrentPhase();
     this.audioEngine.stopPreview();
@@ -809,11 +743,8 @@ export class Game {
   }
 }
 
-// Auto-initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", async () => {
   const game = new Game();
   await game.initialize();
-
-  // Make game globally accessible for debugging
   window.multiplayerGame = game;
 });

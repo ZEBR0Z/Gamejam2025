@@ -7,16 +7,14 @@ export class AudioEngine {
     this.context = null;
     this.currentPreview = null;
     this.currentEditPreview = null;
-    this.lookaheadTime = 0.2; // seconds
-    this.audioBufferCache = new Map(); // Cache for loaded audio buffers
-    this.loadingPromises = new Map(); // Track ongoing loads to prevent duplicates
+    this.lookaheadTime = 0.2;
+    this.audioBufferCache = new Map();
+    this.loadingPromises = new Map();
 
-    // Backing track playback using HTML5 Audio for easy looping
     this.backingTrackAudio = null;
     this.backingTrackStartTime = 0;
     this.isBackingTrackLoaded = false;
 
-    // Menu music playback using HTML5 Audio for easy looping
     this.menuMusicAudio = null;
     this.isMenuMusicLoaded = false;
   }
@@ -51,19 +49,19 @@ export class AudioEngine {
   /**
    * Get an audio buffer for the given URL, loading it if necessary
    * Uses caching to avoid loading the same file multiple times
+   *
+   * @param {string} url - Audio file URL
+   * @returns {Promise<AudioBuffer>} The decoded audio buffer
    */
   async getAudioBuffer(url) {
-    // Check if already cached
     if (this.audioBufferCache.has(url)) {
       return this.audioBufferCache.get(url);
     }
 
-    // Check if already loading
     if (this.loadingPromises.has(url)) {
       return await this.loadingPromises.get(url);
     }
 
-    // Start loading
     const loadPromise = this.loadAudioBuffer(url);
     this.loadingPromises.set(url, loadPromise);
 
@@ -78,15 +76,18 @@ export class AudioEngine {
     }
   }
 
+  /**
+   * @param {AudioBuffer} audioBuffer - Buffer to play
+   * @param {number} pitchSemitones - Pitch adjustment in semitones
+   * @param {number} scheduleTime - Web Audio API time to schedule playback
+   * @returns {AudioBufferSourceNode|null} The audio source node
+   */
   playSound(audioBuffer, pitchSemitones = 0, scheduleTime = null) {
     if (!audioBuffer || !this.context) return null;
 
     const source = this.context.createBufferSource();
     source.buffer = audioBuffer;
-
-    // Apply pitch adjustment (100 cents per semitone)
     source.detune.value = pitchSemitones * 100;
-
     source.connect(this.context.destination);
     source.start(scheduleTime || this.context.currentTime);
 
@@ -95,7 +96,11 @@ export class AudioEngine {
 
   /**
    * Play a sound from a URL, loading it if necessary
-   * Returns a promise that resolves to the audio source node
+   *
+   * @param {string} audioUrl - Audio file URL
+   * @param {number} pitchSemitones - Pitch adjustment in semitones
+   * @param {number} scheduleTime - Web Audio API time to schedule playback
+   * @returns {Promise<AudioBufferSourceNode|null>} The audio source node
    */
   async playSoundFromUrl(audioUrl, pitchSemitones = 0, scheduleTime = null) {
     try {
@@ -126,9 +131,7 @@ export class AudioEngine {
     if (this.currentPreview) {
       try {
         this.currentPreview.stop();
-      } catch (e) {
-        // Ignore if already stopped
-      }
+      } catch (e) {}
       this.currentPreview = null;
     }
   }
@@ -137,7 +140,6 @@ export class AudioEngine {
     this.stopEditPreview();
     this.currentEditPreview = this.playSound(audioBuffer, pitchSemitones);
 
-    // Clear reference when sound ends naturally
     if (this.currentEditPreview) {
       this.currentEditPreview.onended = () => {
         this.currentEditPreview = null;
@@ -151,7 +153,6 @@ export class AudioEngine {
       const audioBuffer = await this.getAudioBuffer(audioUrl);
       this.currentEditPreview = this.playSound(audioBuffer, pitchSemitones);
 
-      // Clear reference when sound ends naturally
       if (this.currentEditPreview) {
         this.currentEditPreview.onended = () => {
           this.currentEditPreview = null;
@@ -166,9 +167,7 @@ export class AudioEngine {
     if (this.currentEditPreview) {
       try {
         this.currentEditPreview.stop();
-      } catch (e) {
-        // Ignore if already stopped
-      }
+      } catch (e) {}
       this.currentEditPreview = null;
     }
   }
@@ -177,16 +176,14 @@ export class AudioEngine {
     return this.context ? this.context.currentTime : 0;
   }
 
-  // Backing track management
   async loadBackingTrack(trackPath) {
     try {
       this.stopBackingTrack();
 
       this.backingTrackAudio = new Audio(trackPath);
       this.backingTrackAudio.loop = true;
-      this.backingTrackAudio.volume = 0.8; // Slightly lower volume so user sounds are prominent
+      this.backingTrackAudio.volume = 0.8;
 
-      // Wait for the audio to be loadable
       await new Promise((resolve, reject) => {
         this.backingTrackAudio.addEventListener("canplaythrough", resolve, {
           once: true,
@@ -250,16 +247,14 @@ export class AudioEngine {
     return this.backingTrackAudio && !this.backingTrackAudio.paused;
   }
 
-  // Menu music management
   async loadMenuMusic() {
     try {
       this.stopMenuMusic();
 
       this.menuMusicAudio = new Audio("assets/sfx/menu.mp3");
       this.menuMusicAudio.loop = true;
-      this.menuMusicAudio.volume = 0.3; // Lower volume for background music
+      this.menuMusicAudio.volume = 0.3;
 
-      // Wait for the audio to be loadable
       await new Promise((resolve, reject) => {
         this.menuMusicAudio.addEventListener("canplaythrough", resolve, {
           once: true,

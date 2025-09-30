@@ -1,6 +1,6 @@
 /**
- * PhaseManager - Manages game phase transitions with proper state machine
- * Prevents invalid transitions and ensures proper cleanup between phases
+ * PhaseManager - State machine for game phase transitions
+ * @description Prevents invalid transitions and ensures proper cleanup between phases
  */
 export class PhaseManager {
   constructor() {
@@ -8,7 +8,6 @@ export class PhaseManager {
     this.currentPhaseName = null;
     this.phases = new Map();
 
-    // Define valid transitions
     this.validTransitions = new Map([
       ["selection", ["performance"]],
       ["performance", ["editing"]],
@@ -16,32 +15,30 @@ export class PhaseManager {
       ["waiting-for-players", ["preview", "showcase"]],
       ["preview", ["sound-replacement"]],
       ["sound-replacement", ["performance"]],
-      ["showcase", ["menu"]], // Only exit to menu allowed
+      ["showcase", ["menu"]],
     ]);
 
-    this.onTransition = null; // Callback for when transitions happen
+    this.onTransition = null;
   }
 
   /**
-   * Register a phase with the manager
+   * @param {string} name - Phase name
+   * @param {Object} phaseInstance - Phase instance with start/cleanup methods
    */
   registerPhase(name, phaseInstance) {
     this.phases.set(name, phaseInstance);
   }
 
-  /**
-   * Get the current phase name
-   */
   getCurrentPhaseName() {
     return this.currentPhaseName;
   }
 
   /**
-   * Check if a transition is valid
+   * @param {string} targetPhase - Phase to transition to
+   * @returns {boolean} Whether transition is valid
    */
   canTransitionTo(targetPhase) {
     if (!this.currentPhaseName) {
-      // No current phase, allow any initial phase
       return true;
     }
 
@@ -50,10 +47,11 @@ export class PhaseManager {
   }
 
   /**
-   * Transition to a new phase
+   * @param {string} phaseName - Phase to transition to
+   * @param {...any} args - Arguments to pass to phase.start()
+   * @returns {boolean} Success status
    */
   transitionTo(phaseName, ...args) {
-    // Validate transition
     if (!this.canTransitionTo(phaseName)) {
       console.error(
         `Invalid transition from '${this.currentPhaseName}' to '${phaseName}'`,
@@ -61,7 +59,6 @@ export class PhaseManager {
       return false;
     }
 
-    // Get the target phase
     const targetPhase = this.phases.get(phaseName);
     if (!targetPhase) {
       console.error(`Phase '${phaseName}' not registered`);
@@ -72,21 +69,17 @@ export class PhaseManager {
       `Phase transition: ${this.currentPhaseName || "none"} -> ${phaseName}`,
     );
 
-    // Cleanup current phase
     if (this.currentPhase && typeof this.currentPhase.cleanup === "function") {
       this.currentPhase.cleanup();
     }
 
-    // Set new phase
     this.currentPhase = targetPhase;
     this.currentPhaseName = phaseName;
 
-    // Notify about transition
     if (this.onTransition) {
       this.onTransition(phaseName, this.currentPhase);
     }
 
-    // Start the new phase
     if (typeof targetPhase.start === "function") {
       targetPhase.start(...args);
     }
@@ -95,7 +88,10 @@ export class PhaseManager {
   }
 
   /**
-   * Force transition (bypasses validation) - use carefully
+   * Force transition bypassing validation
+   * @param {string} phaseName - Phase to transition to
+   * @param {...any} args - Arguments to pass to phase.start()
+   * @returns {boolean} Success status
    */
   forceTransitionTo(phaseName, ...args) {
     const targetPhase = this.phases.get(phaseName);
@@ -108,21 +104,17 @@ export class PhaseManager {
       `Force transition: ${this.currentPhaseName || "none"} -> ${phaseName}`,
     );
 
-    // Cleanup current phase
     if (this.currentPhase && typeof this.currentPhase.cleanup === "function") {
       this.currentPhase.cleanup();
     }
 
-    // Set new phase
     this.currentPhase = targetPhase;
     this.currentPhaseName = phaseName;
 
-    // Notify about transition
     if (this.onTransition) {
       this.onTransition(phaseName, this.currentPhase);
     }
 
-    // Start the new phase
     if (typeof targetPhase.start === "function") {
       targetPhase.start(...args);
     }
@@ -130,9 +122,6 @@ export class PhaseManager {
     return true;
   }
 
-  /**
-   * Cleanup current phase without transitioning
-   */
   cleanup() {
     if (this.currentPhase && typeof this.currentPhase.cleanup === "function") {
       this.currentPhase.cleanup();
@@ -141,9 +130,6 @@ export class PhaseManager {
     this.currentPhaseName = null;
   }
 
-  /**
-   * Get list of valid next phases from current phase
-   */
   getValidNextPhases() {
     if (!this.currentPhaseName) {
       return Array.from(this.validTransitions.keys());

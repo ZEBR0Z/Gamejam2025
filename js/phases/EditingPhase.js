@@ -22,7 +22,7 @@ export class EditingPhase {
     this.scheduleInterval = null;
     this.animationFrameId = null;
     this.countdownInterval = null;
-    this.selectedSoundIndex = 0; // Currently selected sound for editing (0, 1, or 2)
+    this.selectedSoundIndex = 0;
   }
 
   async start(onComplete) {
@@ -31,31 +31,20 @@ export class EditingPhase {
     console.log("Starting editing phase");
     this.uiManager.showScreen("editing");
 
-    // Reset editing state
     this.gameState.setPlaybackState(false, 0, 0);
-
-    // Load backing track for current song (backing track should already be set from preview/performance)
-    // But load it again in case we're starting editing without going through those phases
     await this.loadCurrentSongBackingTrack();
 
-    // Setup UI
     this.setupUI();
-
-    // Setup event handlers
     this.setupEventHandlers();
-
-    // Start timer for length of editing phase
     this.startEditingTimer();
   }
 
   setupUI() {
-    // Update sound icons to show selected sounds
     this.uiManager.updateEditingSoundIcons(
       this.gameState.selectedSounds,
       this.selectedSoundIndex,
     );
 
-    // Reset transport controls
     this.uiManager.updateTransportControls(
       "editing",
       false,
@@ -63,12 +52,10 @@ export class EditingPhase {
       this.gameState.getSegmentLength(),
     );
 
-    // Draw initial editing view
     this.draw();
   }
 
   setupEventHandlers() {
-    // Register input handlers for editing
     this.inputController.registerHandler(
       "editingMouseDown",
       "editing",
@@ -77,7 +64,6 @@ export class EditingPhase {
       },
     );
 
-    // Register sound selection key handlers
     this.inputController.registerHandler(
       "keyPress",
       "editing",
@@ -102,7 +88,6 @@ export class EditingPhase {
       },
     );
 
-    // Setup canvas events for unified editing timeline
     const editingCanvas = this.uiManager.getCanvas("editingTimelineCanvas");
     if (editingCanvas) {
       this.inputController.setupCanvasEvents(editingCanvas, "editing");
@@ -118,7 +103,6 @@ export class EditingPhase {
       }
     }
 
-    // Transport controls
     const transportHandlers = {
       "edit-play-pause-btn": () => this.togglePlayback(),
       "edit-restart-btn": () => this.restart(),
@@ -130,10 +114,8 @@ export class EditingPhase {
   }
 
   startEditingTimer() {
-    // Draw the editing view immediately when starting
     this.draw();
 
-    // Auto-start playback after countdown (like performance phase)
     this.gameState.setPlaybackState(true, 0, this.audioEngine.getCurrentTime());
     this.uiManager.updateTransportControls(
       "editing",
@@ -142,14 +124,9 @@ export class EditingPhase {
       this.gameState.getSegmentLength(),
     );
 
-    // Start backing track
     this.audioEngine.startBackingTrack();
-
-    // Start scheduling and animation
     this.startScheduling();
     this.startAnimation();
-
-    // Start editing countdown
     this.startCountdown();
   }
 
@@ -184,7 +161,6 @@ export class EditingPhase {
   }
 
   async loadCurrentSongBackingTrack() {
-    // Backing track should already be loaded from previous phases, but ensure it's loaded
     if (
       this.gameState.backingTrack.path &&
       !this.audioEngine.isBackingTrackLoaded
@@ -209,8 +185,8 @@ export class EditingPhase {
       mouseY,
       canvas,
       this.gameState.getSegmentLength(),
-      this.selectedSoundIndex, // Only events for currently selected sound
-      this.gameState.playback.currentTime, // currentTime for viewport calculation
+      this.selectedSoundIndex,
+      this.gameState.playback.currentTime,
     );
 
     if (clickedEvent) {
@@ -259,7 +235,6 @@ export class EditingPhase {
   }
 
   draw() {
-    // Draw unified timeline with all events, but highlight selected sound
     const canvas = this.uiManager.getCanvas("editingTimelineCanvas");
     if (canvas) {
       this.canvasRenderer.drawEditingTimeline(
@@ -370,7 +345,6 @@ export class EditingPhase {
       this.audioEngine.getCurrentTime() - this.gameState.playback.currentTime,
     );
 
-    // Reset event scheduling
     this.gameState.events.forEach((event) => {
       event.scheduled = false;
     });
@@ -385,7 +359,6 @@ export class EditingPhase {
       this.gameState.getSegmentLength(),
     );
 
-    // Resume backing track
     this.audioEngine.resumeBackingTrack();
   }
 
@@ -402,7 +375,6 @@ export class EditingPhase {
       this.gameState.getSegmentLength(),
     );
 
-    // Pause backing track
     this.audioEngine.pauseBackingTrack();
   }
 
@@ -424,7 +396,6 @@ export class EditingPhase {
       this.gameState.getSegmentLength(),
     );
 
-    // Restart backing track
     if (this.gameState.playback.isPlaying) {
       this.audioEngine.startBackingTrack();
     }
@@ -448,10 +419,7 @@ export class EditingPhase {
       this.gameState.getSegmentLength(),
     );
 
-    // Sync backing track
     this.audioEngine.seekBackingTrack(time);
-
-    // Redraw canvas to show new position
     this.draw();
   }
 
@@ -462,7 +430,7 @@ export class EditingPhase {
         this.gameState.selectedSounds,
         this.selectedSoundIndex,
       );
-      this.draw(); // Redraw to update transparency
+      this.draw();
     }
   }
 
@@ -479,7 +447,6 @@ export class EditingPhase {
   }
 
   cleanup() {
-    // Unregister handlers
     this.inputController.unregisterHandler("editingMouseDown", "editing");
     this.inputController.unregisterHandler("editingMouseMove", "editing");
     this.inputController.unregisterHandler("editingMouseUp", "editing");
@@ -493,10 +460,8 @@ export class EditingPhase {
       }
     }
 
-    // Clean up transport event listeners
     this.inputController.cleanupTransportEvents();
 
-    // Stop scheduling and animation
     if (this.scheduleInterval) {
       clearInterval(this.scheduleInterval);
     }

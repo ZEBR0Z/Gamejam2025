@@ -8,7 +8,6 @@ export class UIManager {
     this.elements = {};
     this.initialized = false;
 
-    // Transport control mapping for different phases
     this.transportControls = {
       performance: {
         playPauseBtn: "playPauseBtn",
@@ -64,7 +63,6 @@ export class UIManager {
   }
 
   initializeElements() {
-    // Countdown elements
     this.elements.selectionCountdown = document.getElementById(
       "selection-countdown",
     );
@@ -74,12 +72,10 @@ export class UIManager {
     this.elements.editingCountdown =
       document.getElementById("editing-countdown");
 
-    // Selection elements
     this.elements.selectedCount = document.getElementById("selected-count");
     this.elements.soundGrid = document.getElementById("sound-grid");
     this.elements.continueBtn = document.getElementById("continue-btn");
 
-    // Replacement elements
     this.elements.replacementCountdown = document.getElementById(
       "replacement-countdown",
     );
@@ -96,7 +92,6 @@ export class UIManager {
     this.elements.replacementStatus =
       document.getElementById("replacement-status");
 
-    // Performance transport controls
     this.elements.playPauseBtn = document.getElementById("play-pause-btn");
     this.elements.restartBtn = document.getElementById("restart-btn");
     this.elements.progressBar = document.getElementById("progress-bar");
@@ -105,7 +100,6 @@ export class UIManager {
       "performance-continue-btn",
     );
 
-    // Editing transport controls
     this.elements.editPlayPauseBtn = document.getElementById(
       "edit-play-pause-btn",
     );
@@ -115,7 +109,6 @@ export class UIManager {
     this.elements.editTimeDisplay =
       document.getElementById("edit-time-display");
 
-    // Final transport controls
     this.elements.finalPlayPauseBtn = document.getElementById(
       "final-play-pause-btn",
     );
@@ -126,14 +119,12 @@ export class UIManager {
     this.elements.finalTimeDisplay =
       document.getElementById("final-time-display");
 
-    // Sound icons
     this.elements.soundIcons = [
       document.getElementById("sound-1-icon"),
       document.getElementById("sound-2-icon"),
       document.getElementById("sound-3-icon"),
     ];
 
-    // Canvas elements
     this.elements.timelineCanvas = document.getElementById("timeline-canvas");
     this.elements.editingTimelineCanvas = document.getElementById(
       "editing-timeline-canvas",
@@ -145,19 +136,16 @@ export class UIManager {
     ];
     this.elements.finalCanvas = document.getElementById("final-canvas");
 
-    // Editing sound icons
     this.elements.editingSoundIcons = [
       document.getElementById("editing-sound-1-icon"),
       document.getElementById("editing-sound-2-icon"),
       document.getElementById("editing-sound-3-icon"),
     ];
 
-    // Waiting for players elements
     this.elements.waitingMessage = document.getElementById("waiting-message");
     this.elements.currentRound = document.getElementById("current-round");
     this.elements.totalRounds = document.getElementById("total-rounds");
 
-    // Song preview elements
     this.elements.previousPlayerName = document.getElementById(
       "previous-player-name",
     );
@@ -187,7 +175,6 @@ export class UIManager {
       "continue-to-performance-btn",
     );
 
-    // Final showcase elements
     this.elements.currentSongNumber = document.getElementById(
       "current-song-number",
     );
@@ -224,7 +211,6 @@ export class UIManager {
     if (this.screens[screenName]) {
       this.screens[screenName].classList.add("active");
 
-      // Reset button states when returning to main menu
       if (screenName === "main-menu") {
         this.resetMainMenuButtons();
       }
@@ -296,10 +282,16 @@ export class UIManager {
     }
   }
 
-  // Transport control updates
+  /**
+   * Updates transport controls (play/pause button, progress bar, time display)
+   * @param {string} phase - Current game phase
+   * @param {boolean} isPlaying - Whether audio is currently playing
+   * @param {number} currentTime - Current playback time in seconds
+   * @param {number} segmentLength - Total segment length in seconds
+   */
   updateTransportControls(phase, isPlaying, currentTime, segmentLength) {
     const controls = this.transportControls[phase];
-    if (!controls) return; // Unknown phase
+    if (!controls) return;
 
     const playPauseBtn = this.getElement(controls.playPauseBtn);
     const progressBar = this.getElement(controls.progressBar);
@@ -331,17 +323,21 @@ export class UIManager {
     }
   }
 
+  /**
+   * Creates a sound option element for selection grid
+   * @param {Object} soundData - Sound data containing icon URL
+   * @param {number} index - Index of the sound option
+   * @returns {HTMLElement} The created sound option element
+   */
   createSoundOption(soundData, index) {
     const soundOption = document.createElement("div");
     soundOption.className = "sound-option";
     soundOption.dataset.index = index;
 
-    // Add skeleton loader
     const skeleton = document.createElement("div");
     skeleton.className = "sound-skeleton";
     soundOption.appendChild(skeleton);
 
-    // Load icon
     const img = document.createElement("img");
     img.onload = () => {
       skeleton.remove();
@@ -349,7 +345,7 @@ export class UIManager {
     };
     img.onerror = () => {
       skeleton.remove();
-      soundOption.innerHTML = "🎵"; // Fallback
+      soundOption.innerHTML = "🎵";
       soundOption.style.display = "flex";
       soundOption.style.alignItems = "center";
       soundOption.style.justifyContent = "center";
@@ -389,9 +385,12 @@ export class UIManager {
     });
   }
 
-  // Editing sound icon updates with selection highlighting
+  /**
+   * Updates editing phase sound icons and highlights the selected sound
+   * @param {Array} selectedSounds - Array of selected sound objects
+   * @param {number} selectedSoundIndex - Index of currently selected sound
+   */
   updateEditingSoundIcons(selectedSounds, selectedSoundIndex) {
-    // Refresh cached references to ensure we're updating current DOM elements
     this.elements.editingSoundIcons = [
       document.getElementById("editing-sound-1-icon"),
       document.getElementById("editing-sound-2-icon"),
@@ -402,11 +401,8 @@ export class UIManager {
       if (icon && selectedSounds[index]) {
         const newIconUrl = selectedSounds[index].icon;
 
-        // Only update if the icon URL has actually changed
         if (icon.src !== newIconUrl) {
-          // Force refresh by clearing src first, then setting new URL
           icon.src = "";
-          // Use setTimeout to ensure the src clear takes effect
           setTimeout(() => {
             icon.src = newIconUrl;
           }, 0);
@@ -414,7 +410,6 @@ export class UIManager {
       }
     });
 
-    // Update selection highlighting on sound key elements
     const editingSounds = document.querySelectorAll(".phase-sound-selectable");
     editingSounds.forEach((soundEl, index) => {
       if (index === selectedSoundIndex) {
@@ -480,7 +475,6 @@ export class UIManager {
     if (this.elements.totalRounds) {
       this.elements.totalRounds.textContent = gameState.maxRounds;
     }
-    // Simple waiting screen - no individual player progress shown
   }
 
   // Song preview screen methods
@@ -519,7 +513,13 @@ export class UIManager {
     }
   }
 
-  // Final showcase screen methods
+  /**
+   * Updates the showcase screen with current song information
+   * @param {number} currentSongIndex - Index of currently displayed song
+   * @param {number} totalSongs - Total number of songs
+   * @param {Array<string>} songCreators - Array of player names who contributed
+   * @param {boolean} isSequentialMode - Whether sequential playback mode is active
+   */
   updateShowcaseScreen(
     currentSongIndex,
     totalSongs,
@@ -536,7 +536,6 @@ export class UIManager {
       this.elements.songCreators.textContent = songCreators.join(", then ");
     }
 
-    // Update navigation buttons - disable in sequential mode
     if (this.elements.prevSongBtn) {
       this.elements.prevSongBtn.disabled =
         isSequentialMode || currentSongIndex === 0;
@@ -549,6 +548,13 @@ export class UIManager {
     }
   }
 
+  /**
+   * Updates showcase transport controls with playback state
+   * @param {boolean} isPlaying - Whether audio is currently playing
+   * @param {number} currentTime - Current playback time in seconds
+   * @param {number} totalTime - Total song length in seconds
+   * @param {boolean} isSequentialMode - Whether sequential playback mode is active
+   */
   updateShowcaseTransportControls(
     isPlaying,
     currentTime,
@@ -585,7 +591,6 @@ export class UIManager {
     }
   }
 
-  // Sound replacement methods
   clearReplacementGrid() {
     const replacementGrid = this.getElement("replacementGrid");
     if (replacementGrid) {
@@ -598,12 +603,10 @@ export class UIManager {
     soundOption.className = "sound-option replacement-option";
     soundOption.dataset.replacementIndex = index;
 
-    // Add skeleton loader
     const skeleton = document.createElement("div");
     skeleton.className = "sound-skeleton";
     soundOption.appendChild(skeleton);
 
-    // Load icon
     const img = document.createElement("img");
     img.onload = () => {
       skeleton.remove();
@@ -611,7 +614,7 @@ export class UIManager {
     };
     img.onerror = () => {
       skeleton.remove();
-      soundOption.innerHTML = "🎵"; // Fallback
+      soundOption.innerHTML = "🎵";
       soundOption.style.display = "flex";
       soundOption.style.alignItems = "center";
       soundOption.style.justifyContent = "center";
