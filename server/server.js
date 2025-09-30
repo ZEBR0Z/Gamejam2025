@@ -14,7 +14,6 @@ const io = socketIo(server, {
   },
 });
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..")));
@@ -33,14 +32,10 @@ app.use(express.static(path.join(__dirname, "..")));
  * For N players: N songs, each with N segments (N × 8 seconds total)
  */
 
-// Game state management
-const lobbies = new Map(); // lobbyCode -> Lobby instance
-const playerSockets = new Map(); // socketId -> playerId mapping
-
-// Sound list will be loaded from audiomap.json
+const lobbies = new Map();
+const playerSockets = new Map();
 let soundList = null;
 
-// Load sound list at startup
 function loadSoundList() {
   try {
     const audioMapPath = path.join(__dirname, "..", "audiomap.json");
@@ -53,10 +48,8 @@ function loadSoundList() {
   }
 }
 
-// Initialize sound list on startup
 loadSoundList();
 
-// Utility functions
 function generateLobbyCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
@@ -66,7 +59,7 @@ function generatePlayerId() {
 }
 
 /**
- * Lobby Class - Manages a single game session
+ * Lobby - Manages a single game session
  *
  * States: waiting -> selection -> performance -> editing -> waiting-for-players -> preview -> showcase
  *
@@ -78,14 +71,14 @@ function generatePlayerId() {
 class Lobby {
   constructor(code) {
     this.code = code;
-    this.players = new Map(); // playerId -> player object
-    this.state = "waiting"; // waiting, selection, performance, editing, waiting-for-players, preview, showcase
+    this.players = new Map();
+    this.state = "waiting";
     this.currentRound = 0;
-    this.maxRounds = 0; // Will be set to number of players
-    this.songs = new Map(); // songId -> song object with segments array
-    this.currentSongAssignments = new Map(); // playerId -> songId they're working on
-    this.roundSubmissions = new Map(); // playerId -> boolean (submitted this round)
-    this.availableSounds = []; // 5 random sounds for this lobby
+    this.maxRounds = 0;
+    this.songs = new Map();
+    this.currentSongAssignments = new Map();
+    this.roundSubmissions = new Map();
+    this.availableSounds = [];
   }
 
   addPlayer(socketId, playerName) {
@@ -128,33 +121,35 @@ class Lobby {
   }
 
   /**
-   * Start the game - initializes songs and begins selection phase
-   * Each player gets their own song to start with
+   * Initializes N songs (one per player) and starts the selection phase.
+   * Returns false if fewer than 2 players.
    */
   startGame() {
     if (this.players.size < 2) {
-      return false; // Need at least 2 players
+      return false;
     }
 
-    this.maxRounds = this.players.size; // Each song passes through all players
+    this.maxRounds = this.players.size;
     this.currentRound = 0;
 
-    // Initialize one song per player
     this.players.forEach((player) => {
       const songId = `song_${player.id}`;
       this.songs.set(songId, {
         id: songId,
         originalCreator: player.id,
-        segments: [], // Will contain one segment per round
+        segments: [],
         contributors: [player.id],
       });
     });
 
-    this.selectRandomSounds(); // Pick 5 sounds for this lobby
+    this.selectRandomSounds();
     this.startSelectionPhase();
     return true;
   }
 
+  /**
+   * Selects 5 random sound indices from the available sound list for this lobby.
+   */
   selectRandomSounds() {
     if (!soundList || soundList.length === 0) {
       console.error("No sounds available in audiomap.json");
@@ -172,57 +167,50 @@ class Lobby {
   }
 
   /**
-   * Start selection phase - players choose 3 sounds from 5 options
-   * Each player initially works on their own song
+   * Transitions to selection phase. Each player is assigned to their own song initially.
    */
   startSelectionPhase() {
     this.state = "selection";
 
-    // Assign each player to their own song initially
     this.currentSongAssignments.clear();
     this.players.forEach((player) => {
       const songId = `song_${player.id}`;
       this.currentSongAssignments.set(player.id, songId);
     });
 
-    // Reset ready states
     this.players.forEach((player) => {
       player.isReady = false;
     });
   }
 
+  /**
+   * Checks if all players are ready. If so and in selection state, transitions to performance.
+   */
   checkAllPlayersReady() {
-    // Check if all players are ready to move on
     const allReady = Array.from(this.players.values()).every(
       (player) => player.isReady,
     );
 
-    if (allReady) {
-      if (this.state === "selection") {
-        this.startPerformancePhase();
-      }
+    if (allReady && this.state === "selection") {
+      this.startPerformancePhase();
     }
   }
 
   startPerformancePhase() {
     this.state = "performance";
 
-    // Reset player ready states
     this.players.forEach((player) => {
       player.isReady = false;
     });
   }
 
-  /**
-   * Start waiting phase - players submit their completed segments
-   */
   startWaitingForPlayers() {
     this.state = "waiting-for-players";
   }
 
   /**
-   * Check if all players have submitted their songs for the current round
-   * If so, either move to next round or end the game
+   * Called after each player submits their segment.
+   * If all submitted, either rotates songs for next round or moves to showcase.
    */
   checkAllPlayersSubmitted() {
     const allSubmitted = Array.from(this.players.keys()).every(
@@ -233,53 +221,42 @@ class Lobby {
       this.currentRound++;
 
       if (this.currentRound < this.maxRounds) {
-        // More rounds to go - rotate songs and continue
-        this.roundSubmissions.clear(); // Reset for new round
+        this.roundSubmissions.clear();
         this.rotateSongAssignments();
         this.startSongPreview();
       } else {
-        // All rounds complete - show final results
         this.startFinalShowcase();
       }
     }
   }
 
-  /**
-   * Start song preview phase - players listen to previous work before adding to it
-   */
   startSongPreview() {
     this.state = "preview";
   }
 
   endSongPreviewPhase() {
-    // All players continue to performance phase
     this.startPerformancePhase();
   }
 
-  /**
-   * Start final showcase - display all completed collaborative songs
-   */
   startFinalShowcase() {
     this.state = "showcase";
   }
 
   /**
-   * Rotate song assignments - Gartic Phone style
-   * Each player gets the song from the previous player in the rotation
+   * Rotates song assignments Gartic Phone style.
+   * Each player receives the song from the previous player in the rotation order.
    */
   rotateSongAssignments() {
     const playerIds = Array.from(this.players.keys());
     const newAssignments = new Map();
 
     playerIds.forEach((playerId, index) => {
-      // Get song from previous player (with wraparound)
       const prevIndex = (index - 1 + playerIds.length) % playerIds.length;
       const prevPlayerId = playerIds[prevIndex];
       const songId = this.currentSongAssignments.get(prevPlayerId);
 
       newAssignments.set(playerId, songId);
 
-      // Track that this player will contribute to this song
       const song = this.songs.get(songId);
       if (song && !song.contributors.includes(playerId)) {
         song.contributors.push(playerId);
@@ -290,16 +267,14 @@ class Lobby {
   }
 
   /**
-   * Submit a song segment from a player
-   * Adds the segment to the assigned song and checks if round is complete
+   * Adds a segment to the player's assigned song.
+   * Stores backing track from first segment. Returns false if duplicate or invalid submission.
    */
   submitSong(playerId, songData) {
-    // Prevent duplicate submissions
     if (this.roundSubmissions.get(playerId) === true) {
       return false;
     }
 
-    // Get assigned song
     const songId = this.currentSongAssignments.get(playerId);
     const song = this.songs.get(songId);
 
@@ -308,13 +283,11 @@ class Lobby {
       return false;
     }
 
-    // Prevent songs from getting too many segments
     if (song.segments.length >= this.maxRounds) {
       console.warn(`Song ${songId} already complete, ignoring submission`);
       return false;
     }
 
-    // Add segment to song
     const segment = {
       roundNumber: this.currentRound,
       playerId: playerId,
@@ -325,15 +298,11 @@ class Lobby {
 
     song.segments.push(segment);
 
-    // Store backing track at song level from first segment
     if (this.currentRound === 0 && songData.backingTrack) {
       song.backingTrack = songData.backingTrack;
     }
 
-    // Mark player as submitted
     this.roundSubmissions.set(playerId, true);
-
-    // Check if round is complete
     this.checkAllPlayersSubmitted();
 
     return true;
@@ -352,13 +321,11 @@ class Lobby {
         hasSubmitted: this.roundSubmissions.get(p.id) || false,
       })),
       availableSounds: this.availableSounds,
-      currentSongAssignment: null, // Will be set per player
+      currentSongAssignment: null,
     };
   }
 
-  cleanup() {
-    // Cleanup when lobby is deleted
-  }
+  cleanup() {}
 }
 
 /**
@@ -374,7 +341,6 @@ class Lobby {
  * - getFinalSongs: Get all completed songs for showcase
  */
 io.on("connection", (socket) => {
-  // Create lobby
   socket.on("createLobby", (data, callback) => {
     const { playerName } = data;
     const code = generateLobbyCode();
@@ -395,7 +361,6 @@ io.on("connection", (socket) => {
     console.log(`Lobby created: ${code} by ${playerName}`);
   });
 
-  // Join lobby
   socket.on("joinLobby", (data, callback) => {
     const { lobbyCode, playerName } = data;
     const lobby = lobbies.get(lobbyCode.toUpperCase());
@@ -421,7 +386,6 @@ io.on("connection", (socket) => {
       gameState: gameState,
     });
 
-    // Notify all players in lobby
     socket.to(lobbyCode).emit("playerJoined", {
       player: {
         id: player.id,
@@ -434,7 +398,6 @@ io.on("connection", (socket) => {
     console.log(`${playerName} joined lobby ${lobbyCode}`);
   });
 
-  // Player ready
   socket.on("playerReady", (data) => {
     const lobby = findLobbyBySocket(socket.id);
     if (!lobby) return;
@@ -444,20 +407,16 @@ io.on("connection", (socket) => {
 
     player.isReady = true;
 
-    // Notify all players
     io.to(lobby.code).emit("playerReady", {
       playerId: player.id,
       gameState: lobby.getGameState(),
     });
 
-    // Check if all players are ready
     if (lobby.areAllPlayersReady() && lobby.state === "waiting") {
-      // First notify all players that everyone is ready (triggers countdown)
       io.to(lobby.code).emit("allPlayersReady", {
         gameState: lobby.getGameState(),
       });
 
-      // Then start the game after a delay (3 seconds)
       setTimeout(() => {
         if (lobby.startGame()) {
           io.to(lobby.code).emit("gameStarted", {
@@ -470,7 +429,6 @@ io.on("connection", (socket) => {
     console.log(`${player.name} is ready in lobby ${lobby.code}`);
   });
 
-  // Player completed selection phase (optional tracking)
   socket.on("completeSelection", () => {
     const lobby = findLobbyBySocket(socket.id);
     if (!lobby) return;
@@ -478,13 +436,11 @@ io.on("connection", (socket) => {
     const player = lobby.getPlayer(socket.id);
     if (!player) return;
 
-    // Just log for tracking - no server action needed since clients handle their own phases
     console.log(`${player.name} completed sound selection`);
   });
 
-  // Submit song (final song data with filenames)
   socket.on("submitSong", (data) => {
-    const { songData, backingTrack } = data; // Array of {audio, icon, time, pitch} objects + backing track info
+    const { songData, backingTrack } = data;
     const lobby = findLobbyBySocket(socket.id);
     if (!lobby) return;
 
@@ -494,26 +450,21 @@ io.on("connection", (socket) => {
     const success = lobby.submitSong(player.id, { songData, backingTrack });
 
     if (success) {
-      // Notify all players about the submission and updated game state
       io.to(lobby.code).emit("songSubmitted", {
         playerId: player.id,
         playerName: player.name,
         gameState: lobby.getGameState(),
       });
 
-      // Check if we should transition to next phase
       if (lobby.state === "waiting-for-players") {
-        // Notify about waiting state update
         io.to(lobby.code).emit("waitingUpdate", {
           gameState: lobby.getGameState(),
         });
       } else if (lobby.state === "preview") {
-        // All players submitted, moving to song preview
         io.to(lobby.code).emit("phaseChanged", {
           gameState: lobby.getGameState(),
         });
       } else if (lobby.state === "showcase") {
-        // All rounds complete, moving to final showcase
         io.to(lobby.code).emit("phaseChanged", {
           gameState: lobby.getGameState(),
         });
@@ -525,7 +476,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Get current song assignment
   socket.on("getCurrentSong", (callback) => {
     const lobby = findLobbyBySocket(socket.id);
     if (!lobby) {
@@ -559,7 +509,6 @@ io.on("connection", (socket) => {
     });
   });
 
-  // Get previous song for preview
   socket.on("getPreviousSong", (callback) => {
     const lobby = findLobbyBySocket(socket.id);
     if (!lobby) {
@@ -581,7 +530,6 @@ io.on("connection", (socket) => {
       return;
     }
 
-    // Get the previous player's name
     const previousSegment = song.segments[song.segments.length - 1];
     const previousPlayer = previousSegment
       ? lobby.players.get(previousSegment.playerId)
@@ -600,7 +548,6 @@ io.on("connection", (socket) => {
     });
   });
 
-  // Continue to performance phase from preview
   socket.on("continueToPerformance", () => {
     const lobby = findLobbyBySocket(socket.id);
     if (!lobby) return;
@@ -608,14 +555,11 @@ io.on("connection", (socket) => {
     const player = lobby.getPlayer(socket.id);
     if (!player) return;
 
-    // Mark player as ready to continue
     player.isReady = true;
 
-    // Check if all players are ready to continue
     const allReady = Array.from(lobby.players.values()).every((p) => p.isReady);
 
     if (allReady) {
-      // Reset ready states and start performance phase
       lobby.players.forEach((p) => {
         p.isReady = false;
       });
@@ -627,7 +571,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Get all final songs for showcase
   socket.on("getFinalSongs", (callback) => {
     const lobby = findLobbyBySocket(socket.id);
     if (!lobby) {
@@ -652,7 +595,6 @@ io.on("connection", (socket) => {
     });
   });
 
-  // Disconnect handling
   socket.on("disconnect", () => {
     console.log(`Player disconnected: ${socket.id}`);
 
@@ -661,12 +603,10 @@ io.on("connection", (socket) => {
       const playerId = lobby.removePlayer(socket.id);
 
       if (lobby.players.size === 0) {
-        // Clean up empty lobby
         lobby.cleanup();
         lobbies.delete(lobby.code);
         console.log(`Lobby ${lobby.code} cleaned up`);
       } else {
-        // Notify remaining players
         io.to(lobby.code).emit("playerLeft", {
           playerId: playerId,
           gameState: lobby.getGameState(),
@@ -676,7 +616,9 @@ io.on("connection", (socket) => {
   });
 });
 
-// Helper functions
+/**
+ * Finds the lobby that contains the player with the given socket ID.
+ */
 function findLobbyBySocket(socketId) {
   for (const lobby of lobbies.values()) {
     if (lobby.players.has(playerSockets.get(socketId))) {
@@ -686,7 +628,6 @@ function findLobbyBySocket(socketId) {
   return null;
 }
 
-// API endpoints
 app.get("/api/lobbies", (req, res) => {
   const lobbyList = Array.from(lobbies.values()).map((lobby) => ({
     code: lobby.code,
@@ -707,7 +648,6 @@ app.get("/api/lobby/:code", (req, res) => {
   res.json(lobby.getGameState());
 });
 
-// Serve the main game
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "index.html"));
 });
@@ -718,11 +658,9 @@ server.listen(PORT, () => {
   console.log(`Game available at http://localhost:${PORT}`);
 });
 
-// Graceful shutdown
 process.on("SIGTERM", () => {
   console.log("SIGTERM received, shutting down gracefully");
 
-  // Clean up all lobbies
   lobbies.forEach((lobby) => {
     lobby.cleanup();
   });

@@ -43,18 +43,14 @@ export class PerformancePhase {
     try {
       const response = await this.multiplayerManager.getCurrentSong();
       if (response.success && response.song) {
-        // Check if song already has a backing track (from previous segments)
         let backingTrack = null;
-        if (response.song.segments && response.song.segments.length > 0) {
-          // Extract backing track info from first segment if it exists
-          const firstSegment = response.song.segments[0];
-          if (firstSegment.backingTrack) {
-            backingTrack = firstSegment.backingTrack;
-          }
-        }
 
-        // If no backing track exists, select a random one (this is round 0)
-        if (!backingTrack) {
+        // First check if song has a backing track at the song level (from round 0)
+        if (response.song.backingTrack) {
+          backingTrack = response.song.backingTrack;
+        }
+        // If no backing track at song level, this is round 0 - select a random one
+        else {
           const backingTracks = this.gameState.backingTracks;
           if (backingTracks && backingTracks.length > 0) {
             const randomIndex = Math.floor(
