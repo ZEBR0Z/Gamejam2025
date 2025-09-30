@@ -12,11 +12,6 @@ export class WaitingPhase {
 
     // Audio management properties
     this.backgroundMusic = null;
-    this.fadeInterval = null;
-    this.currentVolume = 0;
-    this.targetVolume = 0.2; // Target volume for the background music
-    this.fadeSteps = 20; // Number of fade steps
-    this.fadeStepDuration = 10; // Milliseconds per fade step
   }
 
   async start(onComplete) {
@@ -36,9 +31,6 @@ export class WaitingPhase {
 
     // Load and start background music
     await this.loadBackgroundMusic();
-    if (this.backgroundMusic) {
-      this.fadeIn();
-    }
 
     // Set up multiplayer event handlers
     this.setupEventHandlers();
@@ -69,52 +61,6 @@ export class WaitingPhase {
     }
   }
 
-  fadeIn() {
-    if (!this.backgroundMusic || this.fadeInterval) {
-      return; // No music loaded or fade already in progress
-    }
-
-    this.currentVolume = 0;
-    this.backgroundMusic.volume = 0;
-    this.backgroundMusic.play();
-
-    this.fadeInterval = setInterval(() => {
-      const volumeStep = this.targetVolume / this.fadeSteps;
-      this.currentVolume += volumeStep;
-
-      if (this.currentVolume >= this.targetVolume) {
-        this.currentVolume = this.targetVolume;
-        this.backgroundMusic.volume = this.currentVolume;
-        clearInterval(this.fadeInterval);
-        this.fadeInterval = null;
-      } else {
-        this.backgroundMusic.volume = this.currentVolume;
-      }
-    }, this.fadeStepDuration);
-  }
-
-  fadeOut() {
-    if (!this.backgroundMusic || this.fadeInterval) {
-      return; // No music loaded or fade already in progress
-    }
-
-    this.fadeInterval = setInterval(() => {
-      const volumeStep = this.targetVolume / this.fadeSteps;
-      this.currentVolume -= volumeStep;
-
-      if (this.currentVolume <= 0) {
-        this.currentVolume = 0;
-        this.backgroundMusic.volume = 0;
-        this.backgroundMusic.pause();
-        this.backgroundMusic.currentTime = 0;
-        clearInterval(this.fadeInterval);
-        this.fadeInterval = null;
-      } else {
-        this.backgroundMusic.volume = this.currentVolume;
-      }
-    }, this.fadeStepDuration);
-  }
-
   async fetchRandomFact() {
     try {
       const response = await fetch("https://uselessfacts.jsph.pl/api/v2/facts/random");
@@ -141,7 +87,7 @@ export class WaitingPhase {
     try {
       this.backgroundMusic = new Audio("assets/sfx/gameshow_presentation.mp3");
       this.backgroundMusic.loop = true;
-      this.backgroundMusic.volume = 0;
+      this.backgroundMusic.volume = 0.2;
 
       // Wait for the audio to be loadable
       await new Promise((resolve, reject) => {
@@ -152,7 +98,8 @@ export class WaitingPhase {
         this.backgroundMusic.load();
       });
 
-      console.log("Waiting phase background music loaded");
+      this.backgroundMusic.play();
+      console.log("Waiting phase background music loaded and playing");
     } catch (error) {
       console.error("Failed to load waiting phase background music:", error);
       this.backgroundMusic = null;
@@ -160,24 +107,11 @@ export class WaitingPhase {
   }
 
   cleanup() {
-    // Fade out and stop background music
+    // Stop background music
     if (this.backgroundMusic) {
-      this.fadeOut();
-      // Give fade out time to complete, then cleanup
-      setTimeout(
-        () => {
-          if (this.backgroundMusic) {
-            this.backgroundMusic.pause();
-            this.backgroundMusic.currentTime = 0;
-            this.backgroundMusic = null;
-          }
-          if (this.fadeInterval) {
-            clearInterval(this.fadeInterval);
-            this.fadeInterval = null;
-          }
-        },
-        this.fadeSteps * this.fadeStepDuration + 100,
-      );
+      this.backgroundMusic.pause();
+      this.backgroundMusic.currentTime = 0;
+      this.backgroundMusic = null;
     }
 
     // Clean up event handlers
