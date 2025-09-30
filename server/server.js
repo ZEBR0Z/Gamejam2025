@@ -50,11 +50,11 @@ const GAME_CONFIG = {
 const BACKING_TRACKS = [
   {
     path: "assets/backing_tracks/klezmer.mp3",
-    duration: 12.722, // seconds - you should measure these accurately
+    duration: 12.722,
   },
   {
     path: "assets/backing_tracks/sad.mp3",
-    duration: 14.785, // seconds - you should measure these accurately
+    duration: 14.785,
   },
   {
     path: "assets/backing_tracks/trap.mp3",
