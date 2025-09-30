@@ -780,7 +780,7 @@ app.get("/", (req, res) => {
   res.redirect(subPath);
 });
 
-const PORT = process.env.PORT || 443;
+const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Game available at http://localhost:${PORT}`);
