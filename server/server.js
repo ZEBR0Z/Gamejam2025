@@ -393,7 +393,7 @@ io.on("connection", (socket) => {
     const lobby = lobbies.get(lobbyCode.toUpperCase());
 
     if (!lobby) {
-      callback({ success: false, error: "Lobby not found" });
+      callback({ success: false, error: "Lobby not found." });
       return;
     }
 
@@ -697,7 +697,7 @@ app.get("/api/lobbies", (req, res) => {
 app.get("/api/lobby/:code", (req, res) => {
   const lobby = lobbies.get(req.params.code.toUpperCase());
   if (!lobby) {
-    res.status(404).json({ error: "Lobby not found" });
+    res.status(404).json({ error: "Lobby not found." });
     return;
   }
 

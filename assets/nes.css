@@ -969,9 +969,9 @@ input[type="radio"] {
 .nes-btn:hover::after {
   box-shadow: inset -6px -6px #adafbc;
 }
-.nes-btn:focus {
+/*.nes-btn:focus {
   box-shadow: 0 0 0 6px rgba(173, 175, 188, 0.3);
-}
+}*/
 .nes-btn:active:not(.is-disabled)::after {
   box-shadow: inset 4px 4px #adafbc;
 }
@@ -1008,9 +1008,9 @@ input[type="radio"] {
 .nes-btn.is-primary:hover::after {
   box-shadow: inset -6px -6px #006bb3;
 }
-.nes-btn.is-primary:focus {
+/*.nes-btn.is-primary:focus {
   box-shadow: 0 0 0 6px rgba(0, 107, 179, 0.3);
-}
+}*/
 .nes-btn.is-primary:active:not(.is-disabled)::after {
   box-shadow: inset 4px 4px #006bb3;
 }
