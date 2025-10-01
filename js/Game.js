@@ -320,10 +320,14 @@ export class Game {
       this.showNotification(`${player.name} joined the lobby`);
     };
 
-    this.multiplayerManager.onPlayerLeft = (playerId, gameState) => {
+    this.multiplayerManager.onPlayerLeft = (
+      playerId,
+      playerName,
+      gameState,
+    ) => {
       this.updateStateVersion(gameState);
       this.updateLobbyUI(gameState);
-      this.showNotification("A player left the lobby");
+      this.showNotification(`${playerName} left the lobby`);
     };
 
     this.multiplayerManager.onGameStarted = (gameState) => {

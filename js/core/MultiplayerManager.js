@@ -99,10 +99,10 @@ export class MultiplayerManager {
     });
 
     this.socket.on("playerLeft", (data) => {
-      console.log("Player left:", data.playerId);
+      console.log("Player left:", data.playerName);
       this.gameState = data.gameState;
       if (this.onPlayerLeft) {
-        this.onPlayerLeft(data.playerId, data.gameState);
+        this.onPlayerLeft(data.playerId, data.playerName, data.gameState);
       }
     });
 

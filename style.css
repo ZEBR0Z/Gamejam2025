@@ -899,6 +899,7 @@ canvas {
 .toastify .nes-balloon {
   font-family: readableFont;
   font-size: 18px;
+  margin-bottom: 15px;
   text-shadow: none;
   text-transform: none;
   color: #212529;

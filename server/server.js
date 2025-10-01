@@ -104,11 +104,13 @@ class Lobby {
   removePlayer(socketId) {
     const playerId = playerSockets.get(socketId);
     if (playerId) {
+      const player = this.players.get(playerId);
       this.players.delete(playerId);
       playerSockets.delete(socketId);
       this.incrementStateVersion();
+      return player;
     }
-    return playerId;
+    return null;
   }
 
   getPlayer(socketId) {
@@ -656,15 +658,16 @@ io.on("connection", (socket) => {
 
     const lobby = findLobbyBySocket(socket.id);
     if (lobby) {
-      const playerId = lobby.removePlayer(socket.id);
+      const player = lobby.removePlayer(socket.id);
 
       if (lobby.players.size === 0) {
         lobby.cleanup();
         lobbies.delete(lobby.code);
         console.log(`Lobby ${lobby.code} cleaned up`);
-      } else {
+      } else if (player) {
         io.to(lobby.code).emit("playerLeft", {
-          playerId: playerId,
+          playerId: player.id,
+          playerName: player.name,
           gameState: lobby.getGameState(),
         });
       }
