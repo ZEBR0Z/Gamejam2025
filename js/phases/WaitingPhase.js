@@ -30,21 +30,6 @@ export class WaitingPhase {
     }
 
     await this.fetchRandomFact();
-    this.setupEventHandlers();
-  }
-
-  setupEventHandlers() {
-    // Listen for waiting updates from server
-    this.multiplayerManager.onWaitingUpdate = (gameState) => {
-      this.updateWaitingUI(gameState);
-    };
-
-    // Listen for phase changes (when all players have submitted)
-    this.multiplayerManager.onPhaseChange = (gameState) => {
-      if (gameState.state === "preview" || gameState.state === "showcase") {
-        this.complete(gameState);
-      }
-    };
   }
 
   updateWaitingUI(gameState) {
@@ -124,8 +109,5 @@ export class WaitingPhase {
       this.backgroundMusic.currentTime = 0;
       this.backgroundMusic = null;
     }
-
-    this.multiplayerManager.onWaitingUpdate = null;
-    // Note: We don't clear onPhaseChange as it might be used by other phases
   }
 }
