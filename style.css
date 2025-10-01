@@ -876,3 +876,44 @@ canvas {
 .nes-btn :hover {
   cursor: url("./assets/art/cursor.png");
 }
+
+/* Notification System using Toastify */
+.toastify {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  cursor: url("./assets/art/cursor.png") !important;
+  font-family: readableFont;
+}
+
+.toastify .message {
+  display: inline-block;
+  pointer-events: auto;
+  transition: transform 0.2s ease;
+}
+
+.toastify:hover .message {
+  transform: translateX(-5px);
+}
+
+.toastify .nes-balloon {
+  font-family: readableFont;
+  font-size: 18px;
+  text-shadow: none;
+  text-transform: none;
+  color: #212529;
+  max-width: 350px;
+  word-wrap: break-word;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.toastify.on {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .toastify .nes-balloon {
+    max-width: calc(100vw - 60px);
+  }
+}

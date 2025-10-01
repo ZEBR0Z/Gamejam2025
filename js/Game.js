@@ -874,11 +874,36 @@ export class Game {
   }
 
   /**
-   * Display notification to user (currently console-only)
-   * TODO: Implement visual notification system
+   * Display notification to user
    */
   showNotification(message) {
     console.log("Notification:", message);
+
+    const messageDiv = document.createElement("section");
+    messageDiv.className = "message -right";
+
+    const balloon = document.createElement("div");
+    balloon.className = "nes-balloon from-right";
+    balloon.textContent = message;
+
+    messageDiv.appendChild(balloon);
+
+    const toast = Toastify({
+      node: messageDiv,
+      duration: 3000,
+      gravity: "bottom",
+      position: "right",
+      stopOnFocus: true,
+      offset: {
+        x: 20,
+        y: 20,
+      },
+      onClick: function () {
+        toast.hideToast();
+      },
+    });
+
+    toast.showToast();
   }
 
   /**
