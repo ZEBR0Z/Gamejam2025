@@ -79,11 +79,6 @@ class Lobby {
     this.currentSongAssignments = new Map();
     this.roundSubmissions = new Map();
     this.availableSounds = [];
-    this.stateVersion = 0;
-  }
-
-  incrementStateVersion() {
-    this.stateVersion++;
   }
 
   addPlayer(socketId, playerName) {
@@ -97,7 +92,6 @@ class Lobby {
 
     this.players.set(playerId, player);
     playerSockets.set(socketId, playerId);
-    this.incrementStateVersion();
     return player;
   }
 
@@ -107,7 +101,6 @@ class Lobby {
       const player = this.players.get(playerId);
       this.players.delete(playerId);
       playerSockets.delete(socketId);
-      this.incrementStateVersion();
       return player;
     }
     return null;
@@ -180,7 +173,6 @@ class Lobby {
    */
   startSelectionPhase() {
     this.state = "selection";
-    this.incrementStateVersion();
 
     this.currentSongAssignments.clear();
     this.players.forEach((player) => {
@@ -208,7 +200,6 @@ class Lobby {
 
   startPerformancePhase() {
     this.state = "performance";
-    this.incrementStateVersion();
 
     this.players.forEach((player) => {
       player.isReady = false;
@@ -217,7 +208,6 @@ class Lobby {
 
   startWaitingForPlayers() {
     this.state = "waiting_for_players";
-    this.incrementStateVersion();
   }
 
   /**
@@ -244,7 +234,6 @@ class Lobby {
 
   startSongPreview() {
     this.state = "preview";
-    this.incrementStateVersion();
   }
 
   endSongPreviewPhase() {
@@ -253,7 +242,6 @@ class Lobby {
 
   startFinalShowcase() {
     this.state = "showcase";
-    this.incrementStateVersion();
   }
 
   /**
@@ -283,30 +271,17 @@ class Lobby {
   /**
    * Adds a segment to the player's assigned song.
    * Stores backing track from first segment. Returns false if duplicate or invalid submission.
-   * Idempotent: checks for existing submission by (playerId, roundNumber) tuple.
    */
   submitSong(playerId, songData) {
+    if (this.roundSubmissions.get(playerId) === true) {
+      return false;
+    }
+
     const songId = this.currentSongAssignments.get(playerId);
     const song = this.songs.get(songId);
 
     if (!song) {
       console.error(`No song found for player ${playerId}`);
-      return false;
-    }
-
-    // Check if this player already submitted for this round (idempotency check)
-    const alreadySubmitted = song.segments.some(
-      (segment) =>
-        segment.playerId === playerId &&
-        segment.roundNumber === this.currentRound,
-    );
-
-    if (alreadySubmitted) {
-      console.log(
-        `Player ${playerId} already submitted for round ${this.currentRound}, ignoring duplicate`,
-      );
-      // Still mark as submitted in case roundSubmissions was cleared
-      this.roundSubmissions.set(playerId, true);
       return false;
     }
 
@@ -330,7 +305,6 @@ class Lobby {
     }
 
     this.roundSubmissions.set(playerId, true);
-    this.incrementStateVersion();
     this.checkAllPlayersSubmitted();
 
     return true;
@@ -340,7 +314,6 @@ class Lobby {
     return {
       code: this.code,
       state: this.state,
-      stateVersion: this.stateVersion,
       currentRound: this.currentRound,
       maxRounds: this.maxRounds,
       players: this.getAllPlayers().map((p) => ({
@@ -622,35 +595,6 @@ io.on("connection", (socket) => {
       success: true,
       songs: songs,
     });
-  });
-
-  socket.on("heartbeat", (data, callback) => {
-    const lobby = findLobbyBySocket(socket.id);
-    if (!lobby) {
-      callback({ success: false, error: "Not in a lobby" });
-      return;
-    }
-
-    const { lastKnownVersion } = data;
-
-    // If client's version is outdated, send full game state
-    if (lastKnownVersion !== lobby.stateVersion) {
-      console.log(
-        `Heartbeat: Client version ${lastKnownVersion} outdated, server version ${lobby.stateVersion}`,
-      );
-      callback({
-        success: true,
-        stateChanged: true,
-        gameState: lobby.getGameState(),
-      });
-    } else {
-      // Client is up to date
-      callback({
-        success: true,
-        stateChanged: false,
-        stateVersion: lobby.stateVersion,
-      });
-    }
   });
 
   socket.on("disconnect", () => {

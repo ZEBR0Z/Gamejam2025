@@ -272,24 +272,6 @@ export class MultiplayerManager {
   }
 
   /**
-   * Sends a heartbeat to check for state changes
-   * @param {number} lastKnownVersion - Client's last known state version
-   * @returns {Promise<Object>} Response with stateChanged flag and optionally new gameState
-   */
-  async sendHeartbeat(lastKnownVersion) {
-    if (!this.isConnected || !this.lobbyCode) return null;
-
-    return new Promise((resolve) => {
-      this.socket.emit("heartbeat", { lastKnownVersion }, (response) => {
-        if (response.success && response.stateChanged && response.gameState) {
-          this.gameState = response.gameState;
-        }
-        resolve(response);
-      });
-    });
-  }
-
-  /**
    * Gets all final completed songs for showcase phase
    * @returns {Promise<Object>} Response object with all final songs
    */

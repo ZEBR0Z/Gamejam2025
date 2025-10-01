@@ -119,11 +119,6 @@ export class Game {
     // Modern browsers require user gesture before playing audio
     this.hasUserInteracted = false;
 
-    // State synchronization - track server state version for heartbeat reconciliation
-    this.lastKnownStateVersion = 0;
-    this.heartbeatInterval = null;
-    this.heartbeatIntervalMs = 2500;
-
     // Wire up icon preloading when game state loads sounds
     // This ensures icons are ready for rendering before they're needed
     this.gameState.onIconPreload = (iconUrl) => {
@@ -310,12 +305,10 @@ export class Game {
 
     // Server event callbacks - these are triggered by socket messages
     this.multiplayerManager.onGameStateUpdate = (gameState) => {
-      this.updateStateVersion(gameState);
       this.updateLobbyUI(gameState);
     };
 
     this.multiplayerManager.onPlayerJoined = (player, gameState) => {
-      this.updateStateVersion(gameState);
       this.updateLobbyUI(gameState);
       this.showNotification(`${player.name} joined the lobby`);
     };
@@ -325,30 +318,25 @@ export class Game {
       playerName,
       gameState,
     ) => {
-      this.updateStateVersion(gameState);
       this.updateLobbyUI(gameState);
       this.showNotification(`${playerName} left the lobby`);
     };
 
     this.multiplayerManager.onGameStarted = (gameState) => {
-      this.updateStateVersion(gameState);
       this.hideGameStarting();
       this.startMultiplayerGame(gameState);
     };
 
     this.multiplayerManager.onAllPlayersReady = (gameState) => {
-      this.updateStateVersion(gameState);
       this.showGameStarting();
     };
 
     // Core game flow - server dictates phase transitions
     this.multiplayerManager.onPhaseChange = (gameState) => {
-      this.updateStateVersion(gameState);
       this.handlePhaseChange(gameState);
     };
 
     this.multiplayerManager.onWaitingUpdate = (gameState) => {
-      this.updateStateVersion(gameState);
       if (this.currentPhase === this.waitingPhase) {
         this.currentPhase.updateWaitingUI(gameState);
       }
@@ -753,7 +741,6 @@ export class Game {
         // SERVER SIGNAL: New round starting, all players submitted previous round
         // Songs have been rotated, now preview the song before adding to it
         // Chain: preview -> sound_replacement -> performance -> editing -> submit -> waiting
-        this.stopHeartbeat();
         this.phaseManager.transitionTo("preview", () => {
           console.log(
             "Song preview complete, moving to sound replacement phase",
@@ -779,7 +766,6 @@ export class Game {
 
       case "showcase":
         // SERVER SIGNAL: All rounds complete, show final collaborative songs
-        this.stopHeartbeat();
         this.phaseManager.transitionTo(
           "showcase",
           () => this.restartGame(), // onRestart callback
@@ -837,11 +823,9 @@ export class Game {
     };
 
     this.multiplayerManager.submitSong(songData, backingTrack);
-    this.startHeartbeat();
 
     // Enter waiting phase, which will recursively handle next phase change
     this.phaseManager.transitionTo("waiting_for_players", (gameState) => {
-      this.stopHeartbeat();
       this.handlePhaseChange(gameState);
     });
   }
@@ -926,69 +910,10 @@ export class Game {
   }
 
   /**
-   * Start heartbeat polling to detect state changes
-   * Used during waiting/preview phases to ensure clients stay synchronized
-   */
-  startHeartbeat() {
-    if (this.heartbeatInterval) {
-      console.log("Heartbeat already running");
-      return;
-    }
-
-    console.log("Starting heartbeat polling");
-    this.heartbeatInterval = setInterval(async () => {
-      try {
-        const response = await this.multiplayerManager.sendHeartbeat(
-          this.lastKnownStateVersion,
-        );
-
-        if (!response || !response.success) {
-          console.warn("Heartbeat failed:", response);
-          return;
-        }
-
-        if (response.stateChanged && response.gameState) {
-          console.log(
-            `Heartbeat detected state change: ${this.lastKnownStateVersion} -> ${response.gameState.stateVersion}`,
-          );
-          this.lastKnownStateVersion = response.gameState.stateVersion;
-
-          // Trigger phase change handler to reconcile state
-          this.handlePhaseChange(response.gameState);
-        }
-      } catch (error) {
-        console.error("Heartbeat error:", error);
-      }
-    }, this.heartbeatIntervalMs);
-  }
-
-  /**
-   * Stop heartbeat polling
-   */
-  stopHeartbeat() {
-    if (this.heartbeatInterval) {
-      console.log("Stopping heartbeat polling");
-      clearInterval(this.heartbeatInterval);
-      this.heartbeatInterval = null;
-    }
-  }
-
-  /**
-   * Update last known state version from game state
-   * Called whenever we receive a fresh state from the server
-   */
-  updateStateVersion(gameState) {
-    if (gameState && gameState.stateVersion !== undefined) {
-      this.lastKnownStateVersion = gameState.stateVersion;
-    }
-  }
-
-  /**
    * Full cleanup of all game systems
    * Called on page unload or when reinitializing game
    */
   cleanup() {
-    this.stopHeartbeat();
     this.cleanupCurrentPhase();
     this.audioEngine.stopPreview();
     this.audioEngine.stopEditPreview();
