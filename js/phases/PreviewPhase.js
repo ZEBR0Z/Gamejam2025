@@ -99,26 +99,36 @@ export class PreviewPhase {
       if (uniqueSounds.size >= 3) break;
     }
 
-    // If no sounds were found (empty preview), select 3 random sounds
-    if (uniqueSounds.size === 0 && this.gameState.soundList.length > 0) {
+    // If we found fewer than 3 sounds, fill remaining slots with random sounds
+    // This is helpful gameplay-wise, because if a player finds certain sounds
+    // too difficult to use for their song and end up not using them, the following player isn't
+    // also stuck with those sounds.
+    if (uniqueSounds.size < 3 && this.gameState.soundList.length > 0) {
+      const usedAudioPaths = new Set(Array.from(uniqueSounds.keys()));
       const randomIndices = [];
-      while (randomIndices.length < 3) {
+
+      while (
+        uniqueSounds.size < 3 &&
+        randomIndices.length < this.gameState.soundList.length
+      ) {
         const randomIndex = Math.floor(
           Math.random() * this.gameState.soundList.length,
         );
-        if (!randomIndices.includes(randomIndex)) {
+        const sound = this.gameState.soundList[randomIndex];
+
+        // Ensure we don't duplicate sounds that were already used
+        if (
+          !randomIndices.includes(randomIndex) &&
+          !usedAudioPaths.has(sound.audio)
+        ) {
           randomIndices.push(randomIndex);
+          uniqueSounds.set(sound.audio, {
+            audio: sound.audio,
+            icon: sound.icon,
+            originalIndex: uniqueSounds.size,
+          });
         }
       }
-
-      randomIndices.forEach((index, i) => {
-        const sound = this.gameState.soundList[index];
-        uniqueSounds.set(sound.audio, {
-          audio: sound.audio,
-          icon: sound.icon,
-          originalIndex: i,
-        });
-      });
     }
 
     // Set selected sounds in game state for next phases
