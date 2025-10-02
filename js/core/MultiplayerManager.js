@@ -29,17 +29,12 @@ export class MultiplayerManager {
   async connect(serverUrl) {
     try {
       if (!window.io) {
-        console.log("Loading Socket.IO client script...");
         await this.loadSocketIO(serverUrl);
-      } else {
-        console.log("Socket.IO client already loaded");
       }
 
       this.socket = window.io(serverUrl);
-      console.log("Socket.IO connection object created:", this.socket);
 
       this.socket.on("connect", () => {
-        console.log("Socket ID:", this.socket.id);
         this.isConnected = true;
       });
 
@@ -62,7 +57,7 @@ export class MultiplayerManager {
         });
 
         this.socket.on("connect_error", (error) => {
-          console.log("Socket connection error:", error);
+          console.error("Socket connection error:", error);
           clearTimeout(timeout);
           resolve(false);
         });
@@ -92,7 +87,6 @@ export class MultiplayerManager {
     });
 
     this.socket.on("playerLeft", (data) => {
-      console.log("Player left:", data.playerName);
       this.gameState = data.gameState;
       if (this.onPlayerLeft) {
         this.onPlayerLeft(data.playerId, data.playerName, data.gameState);
@@ -107,7 +101,6 @@ export class MultiplayerManager {
     });
 
     this.socket.on("allPlayersReady", (data) => {
-      console.log("All players ready.");
       this.gameState = data.gameState;
       if (this.onAllPlayersReady) {
         this.onAllPlayersReady(data.gameState);
@@ -122,7 +115,6 @@ export class MultiplayerManager {
     });
 
     this.socket.on("phaseChanged", (data) => {
-      console.log("Phase changed to:", data.gameState.state);
       this.gameState = data.gameState;
       if (this.onPhaseChange) {
         this.onPhaseChange(data.gameState);
@@ -130,7 +122,6 @@ export class MultiplayerManager {
     });
 
     this.socket.on("songSubmitted", (data) => {
-      console.log("Song submitted by:", data.playerId);
       this.gameState = data.gameState;
       if (this.onSongSubmitted) {
         this.onSongSubmitted(data.playerId, data.gameState);
@@ -152,7 +143,7 @@ export class MultiplayerManager {
    */
   async createLobby(playerName) {
     if (!this.isConnected) {
-      console.log("Not connected to server");
+      console.error("Not connected to server");
       return null;
     }
 
