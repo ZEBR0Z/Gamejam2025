@@ -5,11 +5,12 @@
  * NEW: Doesn't call onComplete - Game.js handles state checking
  */
 export class WaitingPhase {
-  constructor(gameState, uiManager, audioEngine, multiplayerManager) {
+  constructor(gameState, uiManager, audioEngine, multiplayerManager, getCurrentRound) {
     this.gameState = gameState;
     this.uiManager = uiManager;
     this.audioEngine = audioEngine;
     this.multiplayerManager = multiplayerManager;
+    this.getCurrentRound = getCurrentRound;
     this.onPhaseComplete = null;
     this.backgroundMusic = null;
     this.isActive = false;
@@ -34,7 +35,13 @@ export class WaitingPhase {
   }
 
   updateWaitingUI(state) {
-    this.uiManager.updateWaitingScreen(state);
+    // Transform state to include currentRound and maxRounds for UIManager
+    const transformedState = {
+      ...state,
+      currentRound: this.getCurrentRound() - 1, // UIManager adds 1, so subtract 1 here
+      maxRounds: state.rounds,
+    };
+    this.uiManager.updateWaitingScreen(transformedState);
   }
 
   async fetchRandomFact() {

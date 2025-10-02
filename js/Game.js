@@ -84,6 +84,7 @@ export class Game {
       this.uiManager,
       this.audioEngine,
       this.multiplayerManager,
+      () => this.currentRound,
     );
     this.previewPhase = new PreviewPhase(
       this.gameState,
