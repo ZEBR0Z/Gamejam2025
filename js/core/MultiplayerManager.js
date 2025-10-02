@@ -1,6 +1,11 @@
 /**
  * MultiplayerManager - Handles multiplayer communication with the server
- * Manages WebSocket connections and game state synchronization
+ * Manages WebSocket connections and state synchronization
+ * 
+ * New Flow:
+ * - Server broadcasts state updates
+ * - Client processes state and decides phase transitions
+ * - Client sends minimal updates (ready, phase changes, submissions)
  */
 export class MultiplayerManager {
   constructor() {
@@ -8,17 +13,10 @@ export class MultiplayerManager {
     this.isConnected = false;
     this.playerId = null;
     this.lobbyCode = null;
-    this.gameState = null;
-    this.currentSong = null;
+    this.lobbyState = null;
 
-    this.onGameStateUpdate = null;
-    this.onPhaseChange = null;
-    this.onPlayerJoined = null;
-    this.onPlayerLeft = null;
-    this.onSongSubmitted = null;
-    this.onGameStarted = null;
-    this.onAllPlayersReady = null;
-    this.onWaitingUpdate = null;
+    // Callbacks
+    this.onStateUpdate = null;
   }
 
   /**
@@ -29,12 +27,17 @@ export class MultiplayerManager {
   async connect(serverUrl) {
     try {
       if (!window.io) {
+        console.log("Loading Socket.IO client script...");
         await this.loadSocketIO(serverUrl);
+      } else {
+        console.log("Socket.IO client already loaded");
       }
 
       this.socket = window.io(serverUrl);
+      console.log("Socket.IO connection object created:", this.socket);
 
       this.socket.on("connect", () => {
+        console.log("Socket ID:", this.socket.id);
         this.isConnected = true;
       });
 
@@ -57,7 +60,7 @@ export class MultiplayerManager {
         });
 
         this.socket.on("connect_error", (error) => {
-          console.error("Socket connection error:", error);
+          console.log("Socket connection error:", error);
           clearTimeout(timeout);
           resolve(false);
         });
@@ -79,59 +82,13 @@ export class MultiplayerManager {
   }
 
   setupEventHandlers() {
-    this.socket.on("playerJoined", (data) => {
-      this.gameState = data.gameState;
-      if (this.onPlayerJoined) {
-        this.onPlayerJoined(data.player, data.gameState);
-      }
-    });
-
-    this.socket.on("playerLeft", (data) => {
-      this.gameState = data.gameState;
-      if (this.onPlayerLeft) {
-        this.onPlayerLeft(data.playerId, data.playerName, data.gameState);
-      }
-    });
-
-    this.socket.on("playerReady", (data) => {
-      this.gameState = data.gameState;
-      if (this.onGameStateUpdate) {
-        this.onGameStateUpdate(data.gameState);
-      }
-    });
-
-    this.socket.on("allPlayersReady", (data) => {
-      this.gameState = data.gameState;
-      if (this.onAllPlayersReady) {
-        this.onAllPlayersReady(data.gameState);
-      }
-    });
-
-    this.socket.on("gameStarted", (data) => {
-      this.gameState = data.gameState;
-      if (this.onGameStarted) {
-        this.onGameStarted(data.gameState);
-      }
-    });
-
-    this.socket.on("phaseChanged", (data) => {
-      this.gameState = data.gameState;
-      if (this.onPhaseChange) {
-        this.onPhaseChange(data.gameState);
-      }
-    });
-
-    this.socket.on("songSubmitted", (data) => {
-      this.gameState = data.gameState;
-      if (this.onSongSubmitted) {
-        this.onSongSubmitted(data.playerId, data.gameState);
-      }
-    });
-
-    this.socket.on("waitingUpdate", (data) => {
-      this.gameState = data.gameState;
-      if (this.onWaitingUpdate) {
-        this.onWaitingUpdate(data.gameState);
+    // Single event handler for all state updates
+    this.socket.on("stateUpdate", (data) => {
+      console.log("State update received:", data.state);
+      this.lobbyState = data.state;
+      
+      if (this.onStateUpdate) {
+        this.onStateUpdate(data.state);
       }
     });
   }
@@ -143,7 +100,7 @@ export class MultiplayerManager {
    */
   async createLobby(playerName) {
     if (!this.isConnected) {
-      console.error("Not connected to server");
+      console.log("Not connected to server");
       return null;
     }
 
@@ -152,7 +109,7 @@ export class MultiplayerManager {
         if (response.success) {
           this.playerId = response.playerId;
           this.lobbyCode = response.lobbyCode;
-          this.gameState = response.gameState;
+          this.lobbyState = response.state;
         }
         resolve(response);
       });
@@ -176,7 +133,7 @@ export class MultiplayerManager {
           if (response.success) {
             this.playerId = response.playerId;
             this.lobbyCode = lobbyCode.toUpperCase();
-            this.gameState = response.gameState;
+            this.lobbyState = response.state;
             console.log(`Joined lobby: ${this.lobbyCode}`);
           }
           resolve(response);
@@ -185,74 +142,104 @@ export class MultiplayerManager {
     });
   }
 
-  setReady() {
+  /**
+   * Sets player ready status
+   * @param {boolean} isReady - Ready status
+   */
+  setReady(isReady = true) {
     if (!this.isConnected || !this.lobbyCode) return;
 
-    this.socket.emit("playerReady", {});
-  }
-
-  completeSelection() {
-    if (!this.isConnected || !this.lobbyCode) return;
-
-    this.socket.emit("completeSelection");
-  }
-
-  submitSong(songData, backingTrack = null) {
-    if (!this.isConnected || !this.lobbyCode) return;
-
-    this.socket.emit("submitSong", { songData, backingTrack });
+    this.socket.emit("setReady", { isReady });
   }
 
   /**
-   * Gets the current song data for this player's turn
-   * @returns {Promise<Object>} Response object with song data
+   * Updates player's current phase and round
+   * @param {string} phase - Current phase name
+   * @param {number} round - Current round number
+   * @param {Object} submission - Optional song submission (for waiting_for_players phase)
    */
-  async getCurrentSong() {
-    if (!this.isConnected || !this.lobbyCode) return null;
+  updatePhase(phase, round, submission = null) {
+    if (!this.isConnected || !this.lobbyCode) return;
 
-    return new Promise((resolve) => {
-      this.socket.emit("getCurrentSong", (response) => {
-        if (response.success) {
-          this.currentSong = response.song;
-          this.gameState = response.gameState;
-        }
-        resolve(response);
-      });
+    this.socket.emit("updatePhase", { phase, round, submission });
+  }
+
+  /**
+   * Gets the assignment for this player for a specific round
+   * @param {number} round - Round number (1-indexed)
+   * @returns {string|null} Player ID whose song this player should work on
+   */
+  getAssignment(round) {
+    if (!this.lobbyState || !this.lobbyState.assignments) return null;
+    
+    const assignments = this.lobbyState.assignments[this.playerId];
+    if (!assignments || round < 2) return null;
+    
+    // Round 1 = work on own song (no assignment needed)
+    // Round 2 = index 0, Round 3 = index 1, etc.
+    return assignments[round - 2];
+  }
+
+  /**
+   * Gets a specific player's submission for a specific round
+   * @param {string} playerId - Player ID
+   * @param {number} round - Round number (1-indexed)
+   * @returns {Object|null} Song submission object
+   */
+  getPlayerSubmission(playerId, round) {
+    if (!this.lobbyState || !this.lobbyState.players) return null;
+    
+    const player = this.lobbyState.players.find((p) => p.id === playerId);
+    if (!player || !player.submissions) return null;
+    
+    // Round 1 = index 0, Round 2 = index 1, etc.
+    return player.submissions[round - 1] || null;
+  }
+
+  /**
+   * Gets this player's own data
+   * @returns {Object|null} Player object
+   */
+  getMyPlayerData() {
+    if (!this.lobbyState || !this.lobbyState.players) return null;
+    
+    return this.lobbyState.players.find((p) => p.id === this.playerId) || null;
+  }
+
+  /**
+   * Checks if all players are at or past a specific phase/round
+   * @param {number} round - Round to check
+   * @param {string} phase - Phase to check
+   * @returns {boolean}
+   */
+  areAllPlayersAtPhase(round, phase) {
+    if (!this.lobbyState || !this.lobbyState.players) return false;
+    
+    return this.lobbyState.players.every((p) => {
+      if (p.round > round) return true;
+      if (p.round === round && this.isPhaseAtOrPast(p.phase, phase)) return true;
+      return false;
     });
   }
 
   /**
-   * Gets the previous player's song data for preview
-   * @returns {Promise<Object>} Response object with previous song data
+   * Helper to determine if phase1 is at or past phase2
    */
-  async getPreviousSong() {
-    if (!this.isConnected || !this.lobbyCode) return null;
-
-    return new Promise((resolve) => {
-      this.socket.emit("getPreviousSong", (response) => {
-        resolve(response);
-      });
-    });
-  }
-
-  continueToPerformance() {
-    if (!this.isConnected || !this.lobbyCode) return;
-
-    this.socket.emit("continueToPerformance");
-  }
-
-  /**
-   * Gets all final completed songs for showcase phase
-   * @returns {Promise<Object>} Response object with all final songs
-   */
-  async getFinalSongs() {
-    if (!this.isConnected || !this.lobbyCode) return null;
-
-    return new Promise((resolve) => {
-      this.socket.emit("getFinalSongs", (response) => {
-        resolve(response);
-      });
-    });
+  isPhaseAtOrPast(phase1, phase2) {
+    const phaseOrder = [
+      "lobby",
+      "selection",
+      "preview",
+      "sound_replacement",
+      "performance",
+      "editing",
+      "waiting_for_players",
+    ];
+    
+    const index1 = phaseOrder.indexOf(phase1);
+    const index2 = phaseOrder.indexOf(phase2);
+    
+    return index1 >= index2;
   }
 
   disconnect() {
@@ -263,8 +250,7 @@ export class MultiplayerManager {
     this.isConnected = false;
     this.playerId = null;
     this.lobbyCode = null;
-    this.gameState = null;
-    this.currentSong = null;
+    this.lobbyState = null;
   }
 
   getPlayerId() {
@@ -275,12 +261,8 @@ export class MultiplayerManager {
     return this.lobbyCode;
   }
 
-  getGameState() {
-    return this.gameState;
-  }
-
-  getCurrentSongData() {
-    return this.currentSong;
+  getLobbyState() {
+    return this.lobbyState;
   }
 
   isInLobby() {

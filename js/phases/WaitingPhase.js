@@ -1,6 +1,8 @@
 /**
  * WaitingPhase - Handles the waiting for players phase
  * Shows a simple waiting screen while everyone completes their songs
+ * 
+ * NEW: Doesn't call onComplete - Game.js handles state checking
  */
 export class WaitingPhase {
   constructor(gameState, uiManager, audioEngine, multiplayerManager) {
@@ -19,9 +21,9 @@ export class WaitingPhase {
 
     this.uiManager.showScreen("waiting_for_players");
 
-    const gameState = this.multiplayerManager.getGameState();
-    if (gameState) {
-      this.uiManager.updateWaitingScreen(gameState);
+    const state = this.multiplayerManager.getLobbyState();
+    if (state) {
+      this.updateWaitingUI(state);
     }
 
     if (this.isActive) {
@@ -29,31 +31,10 @@ export class WaitingPhase {
     }
 
     await this.fetchRandomFact();
-    this.setupEventHandlers();
   }
 
-  setupEventHandlers() {
-    // Listen for waiting updates from server
-    this.multiplayerManager.onWaitingUpdate = (gameState) => {
-      this.updateWaitingUI(gameState);
-    };
-
-    // Listen for phase changes (when all players have submitted)
-    this.multiplayerManager.onPhaseChange = (gameState) => {
-      if (gameState.state === "preview" || gameState.state === "showcase") {
-        this.complete(gameState);
-      }
-    };
-  }
-
-  updateWaitingUI(gameState) {
-    this.uiManager.updateWaitingScreen(gameState);
-  }
-
-  complete(gameState) {
-    if (this.onPhaseComplete) {
-      this.onPhaseComplete(gameState);
-    }
+  updateWaitingUI(state) {
+    this.uiManager.updateWaitingScreen(state);
   }
 
   async fetchRandomFact() {
@@ -73,10 +54,12 @@ export class WaitingPhase {
     } catch (error) {
       console.error("Failed to fetch random fact:", error);
       const waitingMessage = document.getElementById("waiting-message");
-      await this.typeText(
-        waitingMessage,
-        "Sometimes either the internet, API, or JavaScript, just want to... not work!",
-      );
+      if (waitingMessage) {
+        await this.typeText(
+          waitingMessage,
+          "Sometimes either the internet, API, or JavaScript, just want to... not work!",
+        );
+      }
     }
   }
 
@@ -95,7 +78,6 @@ export class WaitingPhase {
       this.backgroundMusic.loop = true;
       this.backgroundMusic.volume = 0.2;
 
-      // Wait for the audio to be loadable
       await new Promise((resolve, reject) => {
         this.backgroundMusic.addEventListener("canplaythrough", resolve, {
           once: true,
@@ -121,8 +103,5 @@ export class WaitingPhase {
       this.backgroundMusic.currentTime = 0;
       this.backgroundMusic = null;
     }
-
-    this.multiplayerManager.onWaitingUpdate = null;
-    // Note: We don't clear onPhaseChange as it might be used by other phases
   }
 }

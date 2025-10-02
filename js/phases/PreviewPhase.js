@@ -1,10 +1,10 @@
 /**
  * PreviewPhase - Preview previous player's work before adding to it
  *
- * - Loads and displays only the most recent segment (from previous player)
- * - Plays back a single segment timeline with backing track
- * - Loads the original sound selection for the next performance phase
- * - Transitions to performance when player is ready
+ * NEW: Uses assignments map and player submissions to find previous song
+ * - Gets assignment from multiplayerManager.getAssignment(currentRound)
+ * - Fetches that player's previous submission
+ * - Displays the segment timeline with backing track
  */
 export class PreviewPhase {
   constructor(
@@ -46,105 +46,75 @@ export class PreviewPhase {
 
   async loadPreviousSong() {
     try {
-      const response = await this.multiplayerManager.getPreviousSong();
-      if (response.success) {
-        this.previousSong = response.song;
-
-        if (this.previousSong.backingTrack) {
-          this.gameState.setBackingTrack(this.previousSong.backingTrack);
-          await this.audioEngine.loadBackingTrack(
-            this.previousSong.backingTrack.audio,
-          );
-        }
-
-        this.uiManager.updatePreviewScreen(
-          response.gameState,
-          response.previousPlayerName,
-        );
-
-        await this.convertSongToEvents();
-      } else {
-        console.error("Failed to load previous song:", response.error);
+      const state = this.multiplayerManager.getLobbyState();
+      const myData = this.multiplayerManager.getMyPlayerData();
+      
+      if (!state || !myData) {
+        console.error("No lobby state or player data available");
+        return;
       }
+
+      const currentRound = myData.round;
+      
+      // Get assignment for this round
+      const assignedPlayerId = this.multiplayerManager.getAssignment(currentRound);
+      
+      if (!assignedPlayerId) {
+        console.error("No assignment found for round:", currentRound);
+        return;
+      }
+
+      // Get that player's previous submission (currentRound - 1)
+      const submission = this.multiplayerManager.getPlayerSubmission(
+        assignedPlayerId,
+        currentRound - 1,
+      );
+
+      if (!submission) {
+        console.error("No submission found for player:", assignedPlayerId);
+        return;
+      }
+
+      this.previousSong = submission;
+
+      // Load backing track
+      if (submission.backingTrack) {
+        this.gameState.setBackingTrack(submission.backingTrack);
+        await this.audioEngine.loadBackingTrack(submission.backingTrack.audio);
+      }
+
+      // Find the player's name for display
+      const assignedPlayer = state.players.find((p) => p.id === assignedPlayerId);
+      const playerName = assignedPlayer ? assignedPlayer.name : "Unknown";
+
+      this.uiManager.updatePreviewScreen(state, playerName);
+
+      await this.convertSongToEvents();
     } catch (error) {
       console.error("Error loading previous song:", error);
     }
   }
 
   async convertSongToEvents() {
-    if (
-      !this.previousSong ||
-      !this.previousSong.segments ||
-      this.previousSong.segments.length === 0
-    )
-      return;
+    if (!this.previousSong || !this.previousSong.songData) return;
 
     this.previewEvents = [];
     let eventId = 0;
 
-    // Derive selected sounds from the first 3 unique sounds in all segments
-    const uniqueSounds = new Map();
-    for (const segment of this.previousSong.segments) {
-      for (const soundEvent of segment.songData) {
-        if (!uniqueSounds.has(soundEvent.audio)) {
-          uniqueSounds.set(soundEvent.audio, {
-            audio: soundEvent.audio,
-            icon: soundEvent.icon,
-            originalIndex: uniqueSounds.size,
-          });
-        }
-        if (uniqueSounds.size >= 3) break;
-      }
-      if (uniqueSounds.size >= 3) break;
+    // Load selected sounds from previous submission
+    if (this.previousSong.selectedSounds) {
+      this.gameState.clearSelectedSounds();
+      this.previousSong.selectedSounds.forEach((sound, index) => {
+        this.gameState.addSelectedSound(sound, index);
+      });
     }
 
-    // If we found fewer than 3 sounds, fill remaining slots with random sounds
-    // This is helpful gameplay-wise, because if a player finds certain sounds
-    // too difficult to use for their song and end up not using them, the following player isn't
-    // also stuck with those sounds.
-    if (uniqueSounds.size < 3 && this.gameState.soundList.length > 0) {
-      const usedAudioPaths = new Set(Array.from(uniqueSounds.keys()));
-      const randomIndices = [];
-
-      while (
-        uniqueSounds.size < 3 &&
-        randomIndices.length < this.gameState.soundList.length
-      ) {
-        const randomIndex = Math.floor(
-          Math.random() * this.gameState.soundList.length,
-        );
-        const sound = this.gameState.soundList[randomIndex];
-
-        // Ensure we don't duplicate sounds that were already used
-        if (
-          !randomIndices.includes(randomIndex) &&
-          !usedAudioPaths.has(sound.audio)
-        ) {
-          randomIndices.push(randomIndex);
-          uniqueSounds.set(sound.audio, {
-            audio: sound.audio,
-            icon: sound.icon,
-            originalIndex: uniqueSounds.size,
-          });
-        }
-      }
-    }
-
-    // Set selected sounds in game state for next phases
-    this.gameState.clearSelectedSounds();
-    Array.from(uniqueSounds.values()).forEach((sound) => {
-      this.gameState.addSelectedSound(sound, sound.originalIndex);
-    });
-
-    // Only process the most recent segment (from the previous player)
-    const mostRecentSegment =
-      this.previousSong.segments[this.previousSong.segments.length - 1];
-
-    for (const soundEvent of mostRecentSegment.songData) {
+    // Convert song data to preview events
+    for (const soundEvent of this.previousSong.songData) {
       this.previewEvents.push({
         id: eventId++,
-        soundIndex: 0, // We'll map this to the loaded sound
-        startTimeSec: soundEvent.time, // No time offset needed since we're only showing one segment
+        soundIndex: 0,
+        startTimeSec: soundEvent.time,
         pitchSemitones: soundEvent.pitch || 0,
         scheduled: false,
         audio: soundEvent.audio,
@@ -160,12 +130,11 @@ export class PreviewPhase {
   }
 
   setupEventHandlers() {
-    // Transport controls
     const transportHandlers = {
       "preview-play-pause-btn": () => this.togglePlayback(),
       "preview-restart-btn": () => this.restart(),
       "preview-progress-bar": (value) => this.seekTo(value),
-      "continue-to-performance-btn": () => this.continueToPerformance(),
+      "continue-to-performance-btn": () => this.continueToNextPhase(),
     };
 
     this.inputController.setupTransportEvents(transportHandlers);
@@ -263,7 +232,6 @@ export class PreviewPhase {
     if (canvas && this.previewEvents.length > 0) {
       const totalTime = this.gameState.getSegmentLength();
 
-      // Use the final view renderer to show the single segment preview timeline
       this.canvasRenderer.drawFinalView(
         canvas,
         this.previewEvents,
@@ -372,24 +340,22 @@ export class PreviewPhase {
 
   startPhaseTimer() {
     this.phaseStartTime = Date.now();
-    const previewTime = 20; // 20 seconds
+    const previewTime = 20;
 
     this.updatePhaseTimer(previewTime);
 
-    // Update timer every second
     this.phaseTimerInterval = setInterval(() => {
       const elapsed = (Date.now() - this.phaseStartTime) / 1000;
       const timeLeft = Math.max(0, previewTime - elapsed);
 
       this.updatePhaseTimer(Math.ceil(timeLeft));
 
-      // Auto-continue when time runs out
       if (timeLeft <= 0) {
         if (this.phaseTimerInterval) {
           clearInterval(this.phaseTimerInterval);
           this.phaseTimerInterval = null;
         }
-        this.continueToPerformance();
+        this.continueToNextPhase();
       }
     }, 1000);
   }
@@ -400,7 +366,7 @@ export class PreviewPhase {
     }
   }
 
-  async continueToPerformance() {
+  async continueToNextPhase() {
     if (this.phaseTimerInterval) {
       clearInterval(this.phaseTimerInterval);
       this.phaseTimerInterval = null;
@@ -408,28 +374,6 @@ export class PreviewPhase {
 
     this.pause();
     this.audioEngine.stopBackingTrack();
-
-    // Load the selected sounds from the previous song for the next round
-    if (this.previousSong && this.previousSong.selectedSounds) {
-      this.gameState.selectedSounds = this.previousSong.selectedSounds.map(
-        (sound, index) => ({
-          audio: sound.audio,
-          icon: sound.icon,
-          originalIndex: index,
-        }),
-      );
-
-      // Preload icons for next phase
-      if (this.gameState.onIconPreload) {
-        this.previousSong.selectedSounds.forEach((sound) => {
-          if (sound.icon) {
-            this.gameState.onIconPreload(sound.icon);
-          }
-        });
-      }
-    }
-
-    this.multiplayerManager.continueToPerformance();
 
     if (this.onPhaseComplete) {
       this.onPhaseComplete();

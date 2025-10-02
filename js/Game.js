@@ -1,33 +1,28 @@
 /**
  * Game - Main orchestrator for a Gartic Phone-style collaborative music game
  *
- * ARCHITECTURE:
- * This class coordinates all major game systems and acts as the primary integration point:
- * - Core systems (audio, state, UI, rendering, input, networking)
- * - Phase management (orchestrating the game's state machine)
- * - Multiplayer synchronization (handling server events and state updates)
+ * NEW ARCHITECTURE (Client-Driven):
+ * - Server maintains lobby state (code, players, rounds, assignments)
+ * - Server broadcasts state updates to all clients
+ * - Clients independently decide phase transitions based on state
+ * - Clients send minimal updates: ready status, phase changes, submissions
  *
  * GAME FLOW:
  * 1. Lobby creation/joining - Players connect and ready up
- * 2. Sound selection - Each player picks 3 sounds from 5 server-provided options
- * 3. Collaborative rounds - Songs rotate between players (like Gartic Phone):
- *    Round 0: Each player creates their own initial 8-second segment
- *    Round 1+: Players add segments to the previous player's song
- *    Each round: Preview -> Performance -> Editing -> Waiting
- * 4. Final showcase - All completed collaborative songs are presented
+ * 2. When all ready (2+ players), server sets state to "in_progress" and generates assignments
+ * 3. Clients detect ready state and move to selection phase
+ * 4. Collaborative rounds - Songs rotate between players:
+ *    Round 1: Each player creates their own initial 8-second segment
+ *    Round 2+: Players add segments to assigned player's song
+ *    Each round: Preview -> Sound Replacement -> Performance -> Editing -> Waiting
+ * 5. Final showcase - All completed collaborative songs are presented
  *
  * KEY RESPONSIBILITIES:
  * - Initializing and wiring together all game subsystems
  * - Managing multiplayer lobby lifecycle (create, join, leave)
- * - Routing phase transitions from server to appropriate phase handlers
+ * - Processing state updates and determining appropriate phase transitions
  * - Converting game state between client and server formats
  * - Handling UI validation and user interaction detection (for audio autoplay)
- *
- * MULTIPLAYER MODEL:
- * - Hybrid authority: Server manages lobby/round state, clients manage phase timing
- * - Server tracks: player ready states, song submissions, round completion, song rotation
- * - Client manages: phase timing, phase transitions within rounds, audio playback/recording
- * - Server signals: round boundaries (preview, showcase), not individual phase changes
  */
 
 import { AudioEngine } from "./core/AudioEngine.js";
@@ -62,7 +57,6 @@ export class Game {
     this.phaseManager = new PhaseManager();
 
     // Phase instances - each handles specific gameplay mechanics
-    // Dependencies are injected to maintain separation of concerns
     this.selectionPhase = new SelectionPhase(
       this.gameState,
       this.uiManager,
@@ -116,11 +110,13 @@ export class Game {
     this.serverUrl = "http://localhost:8000";
 
     // Track user interaction for audio autoplay policy compliance
-    // Modern browsers require user gesture before playing audio
     this.hasUserInteracted = false;
 
-    // Wire up icon preloading when game state loads sounds
-    // This ensures icons are ready for rendering before they're needed
+    // Client-side game tracking
+    this.currentRound = 0;
+    this.currentPhase = "lobby";
+
+    // Wire up icon preloading
     this.gameState.onIconPreload = (iconUrl) => {
       this.canvasRenderer.loadIcon(iconUrl);
     };
@@ -130,7 +126,6 @@ export class Game {
 
   /**
    * Register all game phases with the phase manager
-   * Creates the phase registry that enables phase transitions via string keys
    */
   setupPhaseManager() {
     this.phaseManager.registerPhase("selection", this.selectionPhase);
@@ -144,9 +139,10 @@ export class Game {
     );
     this.phaseManager.registerPhase("showcase", this.showcasePhase);
 
-    // Hook into phase transitions to sync state and stop menu music
+    // Hook into phase transitions to sync state
     this.phaseManager.onTransition = (phaseName, phaseInstance) => {
       this.gameState.setState(phaseName);
+      this.currentPhase = phaseName;
 
       // Stop menu music when entering gameplay phases
       if (this.audioEngine.isMenuMusicPlaying()) {
@@ -157,23 +153,17 @@ export class Game {
 
   /**
    * Initialize all game systems asynchronously
-   * This is the main entry point called once on page load
-   * Sets up audio, loads sound manifests, wires UI, and prepares for multiplayer
    */
   async initialize() {
     try {
-      // Initialize audio context and load assets
       await this.audioEngine.initialize();
       await this.gameState.loadSoundList();
       this.uiManager.initialize();
       await this.audioEngine.loadMenuMusic();
 
-      // Set up multiplayer UI and event handlers
       this.initializeMultiplayerScreens();
       this.setupMenuHandlers();
       this.setupMultiplayerHandlers();
-
-      // Listen for first user interaction to enable audio playback
       this.setupUserInteractionDetection();
     } catch (error) {
       console.error("Failed to initialize Game:", error);
@@ -185,7 +175,6 @@ export class Game {
 
   /**
    * Cache DOM references for multiplayer UI elements
-   * Done once during initialization to avoid repeated querySelector calls
    */
   initializeMultiplayerScreens() {
     this.uiManager.screens.create_lobby =
@@ -228,11 +217,6 @@ export class Game {
     this.inputController.setupPersistentButtonEvents(menuHandlers);
   }
 
-  /**
-   * Set up listeners for first user interaction
-   * Required to comply with browser autoplay policies - audio must be triggered by user gesture
-   * Listens for click, keyboard, or touch events to enable audio playback
-   */
   setupUserInteractionDetection() {
     const handleFirstInteraction = () => {
       if (!this.hasUserInteracted) {
@@ -249,10 +233,6 @@ export class Game {
     });
   }
 
-  /**
-   * Called on first user interaction - enables audio playback and starts menu music
-   * Flag prevents re-triggering on subsequent interactions
-   */
   handleFirstUserInteraction() {
     this.hasUserInteracted = true;
 
@@ -263,11 +243,8 @@ export class Game {
 
   /**
    * Wire up all multiplayer-related event handlers
-   * Connects UI button clicks to lobby actions and server events to UI updates
-   * This creates the bidirectional data flow between client UI and server state
    */
   setupMultiplayerHandlers() {
-    // Button handlers for lobby actions
     const lobbyHandlers = {
       "back-to-menu-btn": () => this.uiManager.showScreen("main_menu"),
       "back-to-menu-from-join-btn": () =>
@@ -282,7 +259,6 @@ export class Game {
 
     this.inputController.setupPersistentButtonEvents(lobbyHandlers);
 
-    // Auto-uppercase lobby codes for consistency
     const lobbyCodeInput = this.uiManager.elements.lobbyCodeInput;
     if (lobbyCodeInput) {
       lobbyCodeInput.addEventListener("input", (e) => {
@@ -290,44 +266,201 @@ export class Game {
       });
     }
 
-    // Server event callbacks - these are triggered by socket messages
-    this.multiplayerManager.onGameStateUpdate = (gameState) => {
-      this.updateLobbyUI(gameState);
+    // NEW: Single state update handler
+    this.multiplayerManager.onStateUpdate = (state) => {
+      this.handleStateUpdate(state);
+    };
+  }
+
+  /**
+   * Handle state updates from server and determine what to do
+   * This is the core of the client-driven architecture
+   */
+  handleStateUpdate(state) {
+    console.log("State update:", state);
+
+    // Always update lobby UI if we're in lobby state (before game starts)
+    if (state.state === "lobby" || this.currentPhase === "lobby") {
+      this.updateLobbyUI(state);
+    }
+
+    // Check if game should start
+    if (
+      state.state === "in_progress" &&
+      this.currentPhase === "lobby" &&
+      this.currentRound === 0
+    ) {
+      this.startGame(state);
+      return;
+    }
+
+    // If in waiting_for_players phase, check if we should move on
+    if (this.currentPhase === "waiting_for_players") {
+      this.checkWaitingPhaseComplete(state);
+    }
+  }
+
+  /**
+   * Start the game when all players are ready
+   */
+  async startGame(state) {
+    console.log("Starting game with state:", state);
+
+    this.hideGameStarting();
+
+    try {
+      await this.audioEngine.resume();
+      this.gameState.resetGameData();
+
+      // Generate 5 random sounds for selection
+      this.gameState.selectRandomSounds(5);
+
+      this.currentRound = 1;
+      this.startSelectionPhase();
+    } catch (error) {
+      console.error("Failed to start game:", error);
+      this.showError("Failed to start the game. Please try again.");
+    }
+  }
+
+  /**
+   * Check if waiting phase is complete and determine next phase
+   */
+  checkWaitingPhaseComplete(state) {
+    const allAtWaiting = this.multiplayerManager.areAllPlayersAtPhase(
+      this.currentRound,
+      "waiting_for_players",
+    );
+
+    if (!allAtWaiting) return;
+
+    const totalRounds = state.rounds;
+
+    // If we're at the final round, move to showcase
+    if (this.currentRound >= totalRounds) {
+      this.moveToShowcase();
+    } else {
+      // Otherwise, move to next round's preview phase
+      this.currentRound++;
+      this.moveToPreview();
+    }
+  }
+
+  /**
+   * Move to preview phase for the next round
+   */
+  moveToPreview() {
+    this.multiplayerManager.updatePhase("preview", this.currentRound);
+
+    this.phaseManager.transitionTo("preview", () => {
+      this.moveToSoundReplacement();
+    });
+  }
+
+  /**
+   * Move to sound replacement phase
+   */
+  moveToSoundReplacement() {
+    this.multiplayerManager.updatePhase(
+      "sound_replacement",
+      this.currentRound,
+    );
+
+    this.phaseManager.transitionTo("sound_replacement", () => {
+      this.moveToPerformance();
+    });
+  }
+
+  /**
+   * Move to performance phase
+   */
+  moveToPerformance() {
+    this.multiplayerManager.updatePhase("performance", this.currentRound);
+
+    this.phaseManager.transitionTo("performance", () => {
+      this.moveToEditing();
+    });
+  }
+
+  /**
+   * Move to editing phase
+   */
+  moveToEditing() {
+    this.multiplayerManager.updatePhase("editing", this.currentRound);
+
+    this.phaseManager.transitionTo("editing", () => {
+      this.submitAndWait();
+    });
+  }
+
+  /**
+   * Submit song and move to waiting phase
+   */
+  submitAndWait() {
+    // Convert events to server format
+    const songData = this.gameState.events.map((event) => {
+      const selectedSound = this.gameState.selectedSounds[event.soundIndex];
+      return {
+        audio: selectedSound.audio,
+        icon: selectedSound.icon,
+        time: event.startTimeSec,
+        pitch: event.pitchSemitones || 0,
+      };
+    });
+
+    const backingTrack = this.gameState.backingTrack
+      ? {
+          audio: this.gameState.backingTrack.path,
+          duration: this.gameState.backingTrack.duration,
+        }
+      : null;
+
+    const selectedSounds = this.gameState.selectedSounds.map((sound) => ({
+      audio: sound.audio,
+      icon: sound.icon,
+    }));
+
+    const submission = {
+      songData,
+      backingTrack,
+      selectedSounds,
     };
 
-    this.multiplayerManager.onPlayerJoined = (player, gameState) => {
-      this.updateLobbyUI(gameState);
-      this.showNotification(`${player.name} joined the lobby`);
-    };
+    // Update phase with submission
+    this.multiplayerManager.updatePhase(
+      "waiting_for_players",
+      this.currentRound,
+      submission,
+    );
 
-    this.multiplayerManager.onPlayerLeft = (
-      playerId,
-      playerName,
-      gameState,
-    ) => {
-      this.updateLobbyUI(gameState);
-      this.showNotification(`${playerName} left the lobby`);
-    };
+    // Transition to waiting phase
+    this.phaseManager.transitionTo("waiting_for_players", () => {
+      // This callback won't be called - waiting phase loops
+    });
+  }
 
-    this.multiplayerManager.onGameStarted = (gameState) => {
-      this.hideGameStarting();
-      this.startMultiplayerGame(gameState);
-    };
+  /**
+   * Move to final showcase phase
+   */
+  moveToShowcase() {
+    this.multiplayerManager.updatePhase("showcase", this.currentRound);
 
-    this.multiplayerManager.onAllPlayersReady = (gameState) => {
-      this.showGameStarting();
-    };
+    this.phaseManager.transitionTo(
+      "showcase",
+      () => this.restartGame(),
+      () => this.exitToMenu(),
+    );
+  }
 
-    // Core game flow - server dictates phase transitions
-    this.multiplayerManager.onPhaseChange = (gameState) => {
-      this.handlePhaseChange(gameState);
-    };
+  /**
+   * Start the initial selection phase
+   */
+  startSelectionPhase() {
+    this.multiplayerManager.updatePhase("selection", this.currentRound);
 
-    this.multiplayerManager.onWaitingUpdate = (gameState) => {
-      if (this.currentPhase === this.waitingPhase) {
-        this.currentPhase.updateWaitingUI(gameState);
-      }
-    };
+    this.phaseManager.transitionTo("selection", () => {
+      this.moveToPerformance();
+    });
   }
 
   showTutorial() {
@@ -335,10 +468,6 @@ export class Game {
     this.uiManager.showScreen("tutorial");
   }
 
-  /**
-   * Show create lobby screen with input validation
-   * Button is disabled until player name is entered
-   */
   showCreateLobby() {
     this.uiManager.showScreen("create_lobby");
     const playerNameInput = this.uiManager.elements.playerName;
@@ -369,10 +498,6 @@ export class Game {
     }
   }
 
-  /**
-   * Show join lobby screen with input validation
-   * Button is disabled until both player name and 6-character lobby code are entered
-   */
   showJoinLobby() {
     this.uiManager.showScreen("join_lobby");
     const playerNameInput = this.uiManager.elements.joinPlayerName;
@@ -437,7 +562,7 @@ export class Game {
       const response = await this.multiplayerManager.createLobby(playerName);
 
       if (response.success) {
-        this.showLobbyWaiting(response.gameState);
+        this.showLobbyWaiting(response.state);
       } else {
         this.showError(response.error || "Failed to create lobby");
         if (createButton) {
@@ -453,7 +578,6 @@ export class Game {
         createButton.disabled = false;
         createButton.classList.remove("is-disabled");
         createButton.textContent = "Create Lobby";
-        createButton.classList.remove("is-disabled");
       }
     }
   }
@@ -486,7 +610,7 @@ export class Game {
         playerName,
       );
       if (response.success) {
-        this.showLobbyWaiting(response.gameState);
+        this.showLobbyWaiting(response.state);
       } else {
         this.showError(response.error || "Failed to join lobby");
         if (joinButton) {
@@ -506,11 +630,10 @@ export class Game {
     }
   }
 
-  showLobbyWaiting(gameState) {
+  showLobbyWaiting(state) {
     this.uiManager.showScreen("lobby_waiting");
-    this.updateLobbyUI(gameState);
+    this.updateLobbyUI(state);
 
-    // Set lobby code displays
     const lobbyCode = this.multiplayerManager.getLobbyCode();
     if (this.uiManager.elements.lobbyCodeDisplay) {
       this.uiManager.elements.lobbyCodeDisplay.textContent = lobbyCode;
@@ -521,24 +644,23 @@ export class Game {
   }
 
   /**
-   * Update lobby waiting screen UI based on current game state
-   * Refreshes player list, ready status, and ready button availability
-   * Called whenever server sends game state updates
+   * Update lobby waiting screen UI based on current state
    */
-  updateLobbyUI(gameState) {
-    if (!gameState) return;
+  updateLobbyUI(state) {
+    if (!state) return;
+
+    console.log("Updating lobby UI");
 
     // Update player count
     if (this.uiManager.elements.playerCount) {
-      this.uiManager.elements.playerCount.textContent =
-        gameState.players.length;
+      this.uiManager.elements.playerCount.textContent = state.players.length;
     }
 
     // Update players list
     if (this.uiManager.elements.playersContainer) {
       this.uiManager.elements.playersContainer.innerHTML = "";
 
-      gameState.players.forEach((player) => {
+      state.players.forEach((player) => {
         const playerItem = document.createElement("div");
         playerItem.className = "player-item";
 
@@ -549,7 +671,7 @@ export class Game {
         const playerStatus = document.createElement("span");
         playerStatus.className = "player-status";
 
-        if (player.isReady) {
+        if (player.ready) {
           playerStatus.textContent = "Ready";
           playerStatus.classList.add("ready");
         } else {
@@ -562,49 +684,56 @@ export class Game {
       });
     }
 
-    // Update ready button state - disabled if already ready or not enough players
+    // Update ready button state
     const readyBtn = document.getElementById("ready-btn");
-    const currentPlayer = gameState.players.find(
+    const currentPlayer = state.players.find(
       (p) => p.id === this.multiplayerManager.getPlayerId(),
     );
     if (readyBtn && currentPlayer) {
-      const hasEnoughPlayers = gameState.players.length >= 2;
+      const hasEnoughPlayers = state.players.length >= 2;
 
-      if (currentPlayer.isReady) {
+      // Disable if player is already ready (lock them in)
+      if (currentPlayer.ready) {
         readyBtn.textContent = "Ready";
         readyBtn.disabled = true;
         readyBtn.classList.add("is-disabled");
-      } else if (!hasEnoughPlayers) {
-        readyBtn.textContent = "Ready";
-        readyBtn.disabled = true;
-        readyBtn.classList.add("is-disabled");
-      } else {
+      }
+      // Enable if 2+ players and not ready yet
+      else if (hasEnoughPlayers) {
         readyBtn.textContent = "Ready";
         readyBtn.disabled = false;
         readyBtn.classList.remove("is-disabled");
       }
+      // Disable if less than 2 players
+      else {
+        readyBtn.textContent = "Ready";
+        readyBtn.disabled = true;
+        readyBtn.classList.add("is-disabled");
+      }
+    }
+
+    // Check if all players ready and show countdown
+    const allReady =
+      state.players.length >= 2 && state.players.every((p) => p.ready);
+    if (allReady && state.state === "lobby") {
+      this.showGameStarting();
     }
   }
 
-  /**
-   * Mark current player as ready
-   * Requires at least 2 players in the lobby
-   */
   setReady() {
-    const gameState = this.multiplayerManager.getGameState();
-    if (!gameState || gameState.players.length < 2) {
+    const state = this.multiplayerManager.getLobbyState();
+    if (!state || state.players.length < 2) {
       return;
     }
 
-    this.multiplayerManager.setReady();
+    this.multiplayerManager.setReady(true);
   }
 
   showGameStarting() {
     const gameStarting = this.uiManager.elements.gameStarting;
-    if (gameStarting) {
+    if (gameStarting && gameStarting.style.display !== "block") {
       gameStarting.style.display = "block";
 
-      // Start countdown
       let countdown = 3;
       const countdownElement = this.uiManager.elements.startCountdown;
 
@@ -639,188 +768,16 @@ export class Game {
     }
   }
 
-  /**
-   * Transition from lobby to actual gameplay
-   * Called when server sends game start signal after all players ready up
-   * Prepares audio context and converts server's sound indices to full sound objects
-   */
-  async startMultiplayerGame(gameState) {
-    try {
-      // Resume audio context (may be suspended by browser autoplay policy)
-      await this.audioEngine.resume();
-      this.gameState.resetGameData();
-
-      // Convert server's sound indices to full sound objects from soundlist
-      this.gameState.availableSounds = gameState.availableSounds.map(
-        (index) => this.gameState.soundList[index],
-      );
-
-      this.startSelectionPhase();
-    } catch (error) {
-      console.error("Failed to start multiplayer game:", error);
-      this.showError("Failed to start the game. Please try again.");
-    }
-  }
-
-  /**
-   * Handle phase changes from server and route to appropriate phase
-   *
-   * CRITICAL: Server only signals at ROUND BOUNDARIES, not every phase
-   * - Server signals: "preview" (new round), "showcase" (game over)
-   * - Client manages: selection -> performance -> editing -> waiting (within round)
-   *
-   * Server's role:
-   * - Tracks song submissions and determines when round is complete
-   * - Rotates song assignments between players (Gartic Phone style)
-   * - Signals "preview" when all players submit (start next round)
-   * - Signals "showcase" when all rounds complete
-   *
-   * Client's role:
-   * - Manages timing for performance (8 sec), editing, etc.
-   * - Chains phases within a round automatically
-   * - Submits completed work to server, then waits
-   *
-   * @param {Object} gameState - Current game state from server
-   */
-  handlePhaseChange(gameState) {
-    switch (gameState.state) {
-      case "performance":
-        // Rare: Server shouldn't send this, but handle it for robustness
-        // Chain: performance -> editing -> submit -> waiting
-        this.phaseManager.transitionTo("performance", () => {
-          this.phaseManager.transitionTo("editing", () => {
-            console.log(
-              "Editing phase complete, submitting song and moving to waiting phase",
-            );
-            this.submitSongToServer();
-          });
-        });
-        break;
-
-      case "editing":
-        // Rare: Direct to editing (shouldn't happen in normal flow)
-        this.phaseManager.transitionTo("editing", () => {
-          console.log(
-            "Editing phase complete, submitting song and moving to waiting phase",
-          );
-          this.submitSongToServer();
-        });
-        break;
-
-      case "waiting_for_players":
-        // Already waiting, just update UI. Server will send next phase when ready
-        this.phaseManager.transitionTo("waiting_for_players", (gameState) => {
-          this.handlePhaseChange(gameState);
-        });
-        break;
-
-      case "preview":
-        // SERVER SIGNAL: New round starting, all players submitted previous round
-        // Songs have been rotated, now preview the song before adding to it
-        // Chain: preview -> sound_replacement -> performance -> editing -> submit -> waiting
-        this.phaseManager.transitionTo("preview", () => {
-          console.log(
-            "Song preview complete, moving to sound replacement phase",
-          );
-          this.phaseManager.transitionTo("sound_replacement", () => {
-            console.log(
-              "Sound replacement complete, moving to performance phase",
-            );
-            this.phaseManager.transitionTo("performance", () => {
-              console.log(
-                "Performance phase complete, moving to editing phase",
-              );
-              this.phaseManager.transitionTo("editing", () => {
-                console.log(
-                  "Editing phase complete, submitting song and moving to waiting phase",
-                );
-                this.submitSongToServer();
-              });
-            });
-          });
-        });
-        break;
-
-      case "showcase":
-        // SERVER SIGNAL: All rounds complete, show final collaborative songs
-        this.phaseManager.transitionTo(
-          "showcase",
-          () => this.restartGame(), // onRestart callback
-          () => this.exitToMenu(), // onExit callback
-        );
-        break;
-    }
-  }
-
-  /**
-   * Start the initial selection phase (first phase of the game)
-   * Chains into performance -> editing -> submit
-   */
-  startSelectionPhase() {
-    this.phaseManager.transitionTo("selection", () => {
-      this.phaseManager.transitionTo("performance", () => {
-        this.phaseManager.transitionTo("editing", () => {
-          console.log(
-            "Editing phase complete, submitting song and moving to waiting phase",
-          );
-          this.submitSongToServer();
-        });
-      });
-    });
-  }
-
-  /**
-   * Submit completed song segment to server
-   *
-   * Converts client's rich event objects into server format:
-   * - Events contain soundIndex (local array position) -> convert to audio file paths
-   * - Includes timing (startTimeSec) and pitch adjustments (pitchSemitones)
-   * - Next player will derive selected sounds from the song segments
-   *
-   * Then transitions to waiting phase until all players submit their segments
-   */
-  submitSongToServer() {
-    // Convert events to server format with sound file references
-    const songData = this.gameState.events.map((event) => {
-      const selectedSound = this.gameState.selectedSounds[event.soundIndex];
-      return {
-        audio: selectedSound.audio,
-        icon: selectedSound.icon,
-        time: event.startTimeSec,
-        pitch: event.pitchSemitones || 0,
-      };
-    });
-
-    // Include backing track info so it persists with the song
-    const backingTrack = {
-      audio: this.gameState.backingTrack.path,
-      duration: this.gameState.backingTrack.duration,
-    };
-
-    this.multiplayerManager.submitSong(songData, backingTrack);
-
-    // Enter waiting phase, which will recursively handle next phase change
-    this.phaseManager.transitionTo("waiting_for_players", (gameState) => {
-      this.handlePhaseChange(gameState);
-    });
-  }
-
-  /**
-   * Restart game - currently just leaves lobby and returns to menu
-   * Called from showcase phase "Play Again" button
-   */
   restartGame() {
     this.leaveLobby();
   }
 
-  /**
-   * Exit to main menu from showcase phase
-   * Cleans up all game state and reconnects menu music
-   */
   exitToMenu() {
     this.cleanupCurrentPhase();
     this.multiplayerManager.disconnect();
     this.gameState.resetForNewGame();
+    this.currentRound = 0;
+    this.currentPhase = "lobby";
     this.uiManager.showScreen("main_menu");
 
     if (this.hasUserInteracted && !this.audioEngine.isMenuMusicPlaying()) {
@@ -828,17 +785,10 @@ export class Game {
     }
   }
 
-  /**
-   * Delegate to phase manager to cleanup current phase
-   * Called when transitioning phases or exiting game
-   */
   cleanupCurrentPhase() {
     this.phaseManager.cleanup();
   }
 
-  /**
-   * Display notification to user
-   */
   showNotification(message) {
     const messageDiv = document.createElement("section");
     messageDiv.className = "message -right";
@@ -867,10 +817,6 @@ export class Game {
     toast.showToast();
   }
 
-  /**
-   * Show error dialog to user
-   * Falls back to alert if dialog element not found
-   */
   showError(message) {
     const dialog = document.getElementById("error-dialog");
     const messageElement = document.getElementById("error-message");
@@ -882,10 +828,6 @@ export class Game {
     }
   }
 
-  /**
-   * Full cleanup of all game systems
-   * Called on page unload or when reinitializing game
-   */
   cleanup() {
     this.cleanupCurrentPhase();
     this.audioEngine.stopPreview();
@@ -898,12 +840,10 @@ export class Game {
 
 /**
  * Bootstrap the game on page load
- * Creates and initializes the game instance, and exposes it globally for debugging
  */
 document.addEventListener("DOMContentLoaded", async () => {
   const game = new Game();
   await game.initialize();
 
-  // Expose game instance globally for debugging and console access
   window.multiplayerGame = game;
 });

@@ -1,10 +1,9 @@
 /**
  * ShowcasePhase - Display all completed collaborative songs
  *
- * - Loads all final songs from server
- * - Allows navigation between different songs
- * - Plays full-length collaborative pieces with backing tracks
- * - Shows song contributors and creation timeline
+ * NEW: Builds songs from player submissions in lobby state
+ * - For each player, combines all their submissions into one song
+ * - Each submission becomes a segment in the final song
  */
 export class ShowcasePhase {
   constructor(
@@ -52,15 +51,57 @@ export class ShowcasePhase {
 
   async loadFinalSongs() {
     try {
-      const response = await this.multiplayerManager.getFinalSongs();
-      if (response.success) {
-        this.finalSongs = response.songs;
-      } else {
-        console.error("Failed to load final songs:", response.error);
+      const state = this.multiplayerManager.getLobbyState();
+      if (!state || !state.players) {
+        console.error("No lobby state available");
+        return;
       }
+
+      // Build songs from player submissions
+      this.finalSongs = state.players.map((player) => {
+        // Get all contributors for this song
+        const contributors = this.getContributorsForSong(state, player.id);
+        
+        return {
+          id: `song_${player.id}`,
+          originalCreator: player.name,
+          segments: player.submissions || [],
+          contributors: contributors,
+          backingTrack: player.submissions[0]?.backingTrack || null,
+        };
+      });
+
+      console.log("Final songs loaded:", this.finalSongs);
     } catch (error) {
       console.error("Error loading final songs:", error);
     }
+  }
+
+  /**
+   * Get list of contributor names for a song
+   * Uses assignments map to determine who contributed to which song
+   */
+  getContributorsForSong(state, originalCreatorId) {
+    const contributors = [originalCreatorId];
+    
+    // For each round after the first, find who worked on this song
+    for (let round = 2; round <= state.rounds; round++) {
+      for (const [playerId, assignments] of Object.entries(state.assignments)) {
+        const assignedId = assignments[round - 2]; // Round 2 = index 0
+        if (assignedId === originalCreatorId || 
+            (contributors.includes(assignedId) && round > 2)) {
+          if (!contributors.includes(playerId)) {
+            contributors.push(playerId);
+          }
+        }
+      }
+    }
+    
+    // Convert player IDs to names
+    return contributors.map((id) => {
+      const player = state.players.find((p) => p.id === id);
+      return player ? player.name : id;
+    });
   }
 
   setupUI() {
@@ -111,7 +152,6 @@ export class ShowcasePhase {
     }
     const totalTime = song.segments.length * this.gameState.getSegmentLength();
 
-    // Reset playback and start
     this.gameState.setPlaybackState(true, 0, this.audioEngine.getCurrentTime());
     this.uiManager.updateShowcaseTransportControls(
       true,
@@ -120,7 +160,6 @@ export class ShowcasePhase {
       this.isSequentialMode,
     );
 
-    // Start backing track and playback
     this.audioEngine.startBackingTrack();
     this.startScheduling();
     this.startAnimation();
@@ -133,7 +172,6 @@ export class ShowcasePhase {
 
     if (!song.segments) return;
 
-    // Process all segments in sequence
     for (
       let segmentIndex = 0;
       segmentIndex < song.segments.length;
@@ -142,7 +180,6 @@ export class ShowcasePhase {
       const segment = song.segments[segmentIndex];
       const timeOffset = segmentIndex * this.gameState.getSegmentLength();
 
-      // Convert each sound event in the segment
       for (const soundEvent of segment.songData) {
         this.currentSongEvents.push({
           id: eventId++,
@@ -150,7 +187,7 @@ export class ShowcasePhase {
           startTimeSec: soundEvent.time + timeOffset,
           pitchSemitones: soundEvent.pitch || 0,
           scheduled: false,
-          audio: soundEvent.audio, // Store audio URL instead of buffer
+          audio: soundEvent.audio,
           icon: soundEvent.icon,
         });
       }
@@ -180,7 +217,6 @@ export class ShowcasePhase {
       ? song.segments.length * this.gameState.getSegmentLength()
       : this.gameState.getSegmentLength();
 
-    // In sequential mode, don't loop - just play once
     const effectivePlaybackTime = this.isSequentialMode
       ? playbackTime
       : playbackTime % totalTime;
@@ -191,14 +227,12 @@ export class ShowcasePhase {
         let nextEventTime = eventTime;
 
         if (this.isSequentialMode) {
-          // In sequential mode, only schedule events that haven't passed yet
           if (eventTime >= effectivePlaybackTime) {
             nextEventTime = eventTime;
           } else {
-            return; // Skip events that have already passed
+            return;
           }
         } else {
-          // In navigation mode, handle looping
           if (eventTime < effectivePlaybackTime) {
             nextEventTime = eventTime + totalTime;
           }
@@ -257,7 +291,6 @@ export class ShowcasePhase {
     const elapsed = currentTime - this.gameState.playback.startTime;
 
     if (this.isSequentialMode) {
-      // In sequential mode, use raw elapsed time for advancement detection
       const actualCurrentTime = Math.min(elapsed, totalTime);
       this.gameState.playback.currentTime = actualCurrentTime;
 
@@ -268,12 +301,10 @@ export class ShowcasePhase {
         this.isSequentialMode,
       );
 
-      // Check if current song finished
       if (elapsed >= totalTime) {
         this.advanceToNextSong();
       }
     } else {
-      // In navigation mode, use normal looping behavior
       this.gameState.updateCurrentTime(currentTime, totalTime);
       this.uiManager.updateShowcaseTransportControls(
         this.gameState.playback.isPlaying,
@@ -292,7 +323,6 @@ export class ShowcasePhase {
         ? song.segments.length * this.gameState.config.segmentLength
         : this.gameState.config.segmentLength;
 
-      // Draw the full song timeline
       this.canvasRenderer.drawFinalView(
         canvas,
         this.currentSongEvents,
@@ -306,17 +336,14 @@ export class ShowcasePhase {
     if (this.currentSongIndex < this.finalSongs.length - 1) {
       this.stopCurrentSong();
 
-      // Show next song after a brief pause
       setTimeout(() => {
         this.showSong(this.currentSongIndex + 1);
       }, 500);
     } else {
-      // Finished all songs - enable navigation mode
       this.isSequentialMode = false;
       this.hasPlayedAllSongs = true;
       this.pause();
 
-      // Update UI to show navigation controls
       const song = this.finalSongs[this.currentSongIndex];
       const creators = song.contributors || [];
       this.uiManager.updateShowcaseScreen(
@@ -395,16 +422,13 @@ export class ShowcasePhase {
   }
 
   stopCurrentSong() {
-    // Stop playback completely
     this.gameState.setPlaybackState(false);
 
-    // Clear scheduling
     if (this.scheduleInterval) {
       clearInterval(this.scheduleInterval);
       this.scheduleInterval = null;
     }
 
-    // Cancel animation
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
