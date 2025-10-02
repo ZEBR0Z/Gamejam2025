@@ -157,7 +157,7 @@ export class CanvasRenderer {
     // Fallback to number if icon not available
     if (fallbackNumber !== null) {
       ctx.fillStyle = "white";
-      ctx.font = "12px heatFont";
+      ctx.font = "12px HeatSans";
       ctx.textAlign = "center";
       ctx.fillText(fallbackNumber.toString(), x, y + 4);
     }
@@ -498,7 +498,7 @@ export class CanvasRenderer {
 
         // Draw time labels
         ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-        ctx.font = "10px readableFont";
+        ctx.font = "10px Basis";
         ctx.textAlign = "center";
         ctx.fillText(`${i}s`, x, 15);
       }
@@ -531,7 +531,7 @@ export class CanvasRenderer {
 
   drawTrackLabels(ctx, trackHeight) {
     ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-    ctx.font = "14px heatFont";
+    ctx.font = "14px HeatSans";
     ctx.textAlign = "left";
     for (let i = 0; i < 3; i++) {
       const y = i * trackHeight + trackHeight / 2;
