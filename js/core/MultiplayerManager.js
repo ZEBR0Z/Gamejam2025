@@ -14,6 +14,7 @@ export class MultiplayerManager {
     this.playerId = null;
     this.lobbyCode = null;
     this.lobbyState = null;
+    this.previousLobbyState = null;
 
     // Callbacks
     this.onStateUpdate = null;
@@ -85,10 +86,16 @@ export class MultiplayerManager {
     // Single event handler for all state updates
     this.socket.on("stateUpdate", (data) => {
       console.log("State update received:", data.state);
-      this.lobbyState = data.state;
+      
+      const previousState = this.lobbyState;
+      const newState = data.state;
+      
+      // Update stored state
+      this.previousLobbyState = previousState;
+      this.lobbyState = newState;
       
       if (this.onStateUpdate) {
-        this.onStateUpdate(data.state);
+        this.onStateUpdate(previousState, newState);
       }
     });
   }
@@ -251,6 +258,7 @@ export class MultiplayerManager {
     this.playerId = null;
     this.lobbyCode = null;
     this.lobbyState = null;
+    this.previousLobbyState = null;
   }
 
   getPlayerId() {

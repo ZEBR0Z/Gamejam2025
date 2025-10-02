@@ -270,37 +270,77 @@ export class Game {
     }
 
     // NEW: Single state update handler
-    this.multiplayerManager.onStateUpdate = (state) => {
-      this.handleStateUpdate(state);
+    this.multiplayerManager.onStateUpdate = (prevState, newState) => {
+      this.handleStateUpdate(prevState, newState);
     };
   }
 
   /**
    * Handle state updates from server and determine what to do
    * This is the core of the client-driven architecture
+   * @param {Object} prevState - Previous state (null on first update)
+   * @param {Object} newState - New state from server
    */
-  handleStateUpdate(state) {
-    console.log("State update:", state);
+  handleStateUpdate(prevState, newState) {
+    console.log("State update:", newState);
+
+    // Detect and notify about state changes
+    this.detectStateChanges(prevState, newState);
 
     // Always update lobby UI if we're in lobby state (before game starts)
-    if (state.state === "lobby" || this.currentPhase === "lobby") {
-      this.updateLobbyUI(state);
+    if (newState.state === "lobby" || this.currentPhase === "lobby") {
+      this.updateLobbyUI(newState);
     }
 
     // Check if game should start
     if (
-      state.state === "in_progress" &&
+      newState.state === "in_progress" &&
       this.currentPhase === "lobby" &&
       this.currentRound === 0
     ) {
-      this.startGame(state);
+      this.startGame(newState);
       return;
     }
 
     // If in waiting_for_players phase, check if we should move on
     if (this.currentPhase === "waiting_for_players") {
-      this.checkWaitingPhaseComplete(state);
+      this.checkWaitingPhaseComplete(newState);
     }
+  }
+
+  /**
+   * Detect and notify about state changes between previous and new state
+   * @param {Object} prevState - Previous state (null on first update)
+   * @param {Object} newState - New state from server
+   */
+  detectStateChanges(prevState, newState) {
+    if (!newState || !newState.players) return;
+
+    // Skip notifications on initial state
+    if (!prevState || !prevState.players) return;
+
+    const prevPlayerIds = prevState.players.map((p) => p.id);
+    const newPlayerIds = newState.players.map((p) => p.id);
+
+    // Detect new players (joined)
+    const joinedPlayers = newState.players.filter(
+      (player) => !prevPlayerIds.includes(player.id)
+    );
+
+    // Detect removed players (left)
+    const leftPlayers = prevState.players.filter(
+      (player) => !newPlayerIds.includes(player.id)
+    );
+
+    // Show notifications for joins
+    joinedPlayers.forEach((player) => {
+      this.showNotification(`${player.name} joined the lobby`);
+    });
+
+    // Show notifications for leaves
+    leftPlayers.forEach((player) => {
+      this.showNotification(`${player.name} left the lobby`);
+    });
   }
 
   /**
