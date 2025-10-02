@@ -49,7 +49,7 @@ export class PreviewPhase {
   async loadPreviousSong() {
     try {
       const state = this.multiplayerManager.getLobbyState();
-      
+
       if (!state) {
         console.error("No lobby state available");
         return;
@@ -57,19 +57,19 @@ export class PreviewPhase {
 
       // Use Game's currentRound instead of server's player data
       const currentRound = this.getCurrentRound();
-      
+
       // Preview phase only happens in round 2+
       // Round 1 goes straight to performance
       if (currentRound < 2) {
         console.error("Preview phase should not run in round 1");
         return;
       }
-      
+
       // Get assignment for this round
       const assignedPlayerId = this.multiplayerManager.getAssignment(currentRound);
-      
+
       if (!assignedPlayerId) {
-        console.error("No assignment found for round:", currentRound);
+        console.warn("No assignment found for round:", currentRound);
         return;
       }
 
@@ -79,8 +79,16 @@ export class PreviewPhase {
         currentRound - 1,
       );
 
+      // Find the player's name for display
+      const assignedPlayer = state.players.find((p) => p.id === assignedPlayerId);
+      const playerName = assignedPlayer ? assignedPlayer.name : "Unknown";
+
+      // Handle missing submission (player left or no data)
       if (!submission) {
-        console.error("No submission found for player:", assignedPlayerId, "round:", currentRound - 1);
+        console.warn("No submission found for player:", assignedPlayerId, "round:", currentRound - 1, "- showing empty timeline");
+        this.previousSong = null;
+        this.previewEvents = [];
+        this.uiManager.updatePreviewScreen(state, playerName);
         return;
       }
 
@@ -92,10 +100,6 @@ export class PreviewPhase {
         await this.audioEngine.loadBackingTrack(submission.backingTrack.audio);
       }
 
-      // Find the player's name for display
-      const assignedPlayer = state.players.find((p) => p.id === assignedPlayerId);
-      const playerName = assignedPlayer ? assignedPlayer.name : "Unknown";
-
       this.uiManager.updatePreviewScreen(state, playerName);
 
       await this.convertSongToEvents();
@@ -105,7 +109,11 @@ export class PreviewPhase {
   }
 
   async convertSongToEvents() {
-    if (!this.previousSong || !this.previousSong.songData) return;
+    if (!this.previousSong || !this.previousSong.songData) {
+      // No song data - set empty events array
+      this.previewEvents = [];
+      return;
+    }
 
     this.previewEvents = [];
     let eventId = 0;
@@ -119,16 +127,19 @@ export class PreviewPhase {
     }
 
     // Convert song data to preview events
-    for (const soundEvent of this.previousSong.songData) {
-      this.previewEvents.push({
-        id: eventId++,
-        soundIndex: 0,
-        startTimeSec: soundEvent.time,
-        pitchSemitones: soundEvent.pitch || 0,
-        scheduled: false,
-        audio: soundEvent.audio,
-        icon: soundEvent.icon,
-      });
+    // Handle case where songData exists but is empty (no notes placed)
+    if (Array.isArray(this.previousSong.songData)) {
+      for (const soundEvent of this.previousSong.songData) {
+        this.previewEvents.push({
+          id: eventId++,
+          soundIndex: 0,
+          startTimeSec: soundEvent.time,
+          pitchSemitones: soundEvent.pitch || 0,
+          scheduled: false,
+          audio: soundEvent.audio,
+          icon: soundEvent.icon,
+        });
+      }
     }
   }
 
@@ -238,9 +249,10 @@ export class PreviewPhase {
 
   draw() {
     const canvas = this.uiManager.elements.previewCanvas;
-    if (canvas && this.previewEvents.length > 0) {
+    if (canvas) {
       const totalTime = this.gameState.getSegmentLength();
 
+      // Draw even if previewEvents is empty (shows empty timeline)
       this.canvasRenderer.drawFinalView(
         canvas,
         this.previewEvents,
