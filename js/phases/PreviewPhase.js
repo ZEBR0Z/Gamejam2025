@@ -99,6 +99,28 @@ export class PreviewPhase {
       if (uniqueSounds.size >= 3) break;
     }
 
+    // If no sounds were found (empty preview), select 3 random sounds
+    if (uniqueSounds.size === 0 && this.gameState.soundList.length > 0) {
+      const randomIndices = [];
+      while (randomIndices.length < 3) {
+        const randomIndex = Math.floor(
+          Math.random() * this.gameState.soundList.length,
+        );
+        if (!randomIndices.includes(randomIndex)) {
+          randomIndices.push(randomIndex);
+        }
+      }
+
+      randomIndices.forEach((index, i) => {
+        const sound = this.gameState.soundList[index];
+        uniqueSounds.set(sound.audio, {
+          audio: sound.audio,
+          icon: sound.icon,
+          originalIndex: i,
+        });
+      });
+    }
+
     // Set selected sounds in game state for next phases
     this.gameState.clearSelectedSounds();
     Array.from(uniqueSounds.values()).forEach((sound) => {
