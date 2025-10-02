@@ -14,6 +14,7 @@ export class PreviewPhase {
     canvasRenderer,
     inputController,
     multiplayerManager,
+    getCurrentRound,
   ) {
     this.gameState = gameState;
     this.uiManager = uiManager;
@@ -21,6 +22,7 @@ export class PreviewPhase {
     this.canvasRenderer = canvasRenderer;
     this.inputController = inputController;
     this.multiplayerManager = multiplayerManager;
+    this.getCurrentRound = getCurrentRound;
 
     this.onPhaseComplete = null;
     this.scheduleInterval = null;
@@ -47,14 +49,21 @@ export class PreviewPhase {
   async loadPreviousSong() {
     try {
       const state = this.multiplayerManager.getLobbyState();
-      const myData = this.multiplayerManager.getMyPlayerData();
       
-      if (!state || !myData) {
-        console.error("No lobby state or player data available");
+      if (!state) {
+        console.error("No lobby state available");
         return;
       }
 
-      const currentRound = myData.round;
+      // Use Game's currentRound instead of server's player data
+      const currentRound = this.getCurrentRound();
+      
+      // Preview phase only happens in round 2+
+      // Round 1 goes straight to performance
+      if (currentRound < 2) {
+        console.error("Preview phase should not run in round 1");
+        return;
+      }
       
       // Get assignment for this round
       const assignedPlayerId = this.multiplayerManager.getAssignment(currentRound);
@@ -71,7 +80,7 @@ export class PreviewPhase {
       );
 
       if (!submission) {
-        console.error("No submission found for player:", assignedPlayerId);
+        console.error("No submission found for player:", assignedPlayerId, "round:", currentRound - 1);
         return;
       }
 

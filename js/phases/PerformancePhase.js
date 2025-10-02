@@ -10,6 +10,7 @@ export class PerformancePhase {
     canvasRenderer,
     inputController,
     multiplayerManager,
+    getCurrentRound,
   ) {
     this.gameState = gameState;
     this.uiManager = uiManager;
@@ -17,6 +18,7 @@ export class PerformancePhase {
     this.canvasRenderer = canvasRenderer;
     this.inputController = inputController;
     this.multiplayerManager = multiplayerManager;
+    this.getCurrentRound = getCurrentRound;
 
     this.onPhaseComplete = null;
     this.scheduleInterval = null;
@@ -40,30 +42,41 @@ export class PerformancePhase {
 
   async loadCurrentSongBackingTrack() {
     try {
-      const response = await this.multiplayerManager.getCurrentSong();
-      if (response.success && response.song) {
-        let backingTrack = null;
+      const state = this.multiplayerManager.getLobbyState();
+      
+      if (!state) {
+        console.error("No lobby state");
+        return;
+      }
 
-        // First check if song has a backing track at the song level (from round 0)
-        if (response.song.backingTrack) {
-          backingTrack = response.song.backingTrack;
+      let backingTrack = null;
+      // Use Game's currentRound instead of server's player data
+      const currentRound = this.getCurrentRound();
+
+      // Round 1: Select a random backing track (working on own song)
+      if (currentRound === 1) {
+        const backingTracks = this.gameState.backingTracks;
+        if (backingTracks && backingTracks.length > 0) {
+          const randomIndex = Math.floor(Math.random() * backingTracks.length);
+          backingTrack = backingTracks[randomIndex];
         }
-        // If no backing track at song level, this is round 0 - select a random one
-        else {
-          const backingTracks = this.gameState.backingTracks;
-          if (backingTracks && backingTracks.length > 0) {
-            const randomIndex = Math.floor(
-              Math.random() * backingTracks.length,
-            );
-            backingTrack = backingTracks[randomIndex];
+      } 
+      // Round 2+: Use backing track from the song we're working on
+      else {
+        const assignedPlayerId = this.multiplayerManager.getAssignment(currentRound);
+        if (assignedPlayerId) {
+          // Get the first submission (which has the backing track)
+          const firstSubmission = this.multiplayerManager.getPlayerSubmission(assignedPlayerId, 1);
+          if (firstSubmission && firstSubmission.backingTrack) {
+            backingTrack = firstSubmission.backingTrack;
           }
         }
+      }
 
-        if (backingTrack) {
-          this.currentBackingTrack = backingTrack;
-          this.gameState.setBackingTrack(backingTrack);
-          await this.audioEngine.loadBackingTrack(backingTrack.audio);
-        }
+      if (backingTrack) {
+        this.currentBackingTrack = backingTrack;
+        this.gameState.setBackingTrack(backingTrack);
+        await this.audioEngine.loadBackingTrack(backingTrack.audio);
       }
     } catch (error) {
       console.error("Failed to load backing track:", error);

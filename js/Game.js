@@ -69,6 +69,7 @@ export class Game {
       this.canvasRenderer,
       this.inputController,
       this.multiplayerManager,
+      () => this.currentRound,
     );
     this.editingPhase = new EditingPhase(
       this.gameState,
@@ -91,6 +92,7 @@ export class Game {
       this.canvasRenderer,
       this.inputController,
       this.multiplayerManager,
+      () => this.currentRound,
     );
     this.soundReplacementPhase = new SoundReplacementPhase(
       this.gameState,
