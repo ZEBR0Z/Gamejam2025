@@ -30,8 +30,6 @@ export class InputController {
       this.handleGlobalMouseMove(e),
     );
     document.addEventListener("mouseup", (e) => this.handleGlobalMouseUp(e));
-
-    console.log("InputController event listeners setup complete");
   }
 
   /**
@@ -241,23 +239,14 @@ export class InputController {
    * @param {Object} buttonHandlers - Map of button IDs to handler functions
    */
   setupPersistentButtonEvents(buttonHandlers) {
-    console.log(
-      "setupPersistentButtonEvents called with:",
-      Object.keys(buttonHandlers),
-    );
     if (!this.persistentButtonHandlers) {
       this.persistentButtonHandlers = new Map();
     }
 
     Object.entries(buttonHandlers).forEach(([buttonId, handler]) => {
       const button = document.getElementById(buttonId);
-      console.log(
-        `Setting up button ${buttonId}:`,
-        button ? "found" : "NOT FOUND",
-      );
       if (button) {
         button.addEventListener("click", handler);
-        console.log(`Added click listener to ${buttonId}`);
 
         this.persistentButtonHandlers.set(buttonId, {
           element: button,
@@ -359,7 +348,5 @@ export class InputController {
     this.cleanupPersistentButtonEvents();
 
     this.eventHandlers.clear();
-
-    console.log("InputController cleaned up");
   }
 }

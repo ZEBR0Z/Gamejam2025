@@ -38,7 +38,6 @@ export class ShowcasePhase {
     this.onRestart = onRestart;
     this.onExit = onExit;
 
-    console.log("Starting final showcase phase");
     this.uiManager.showScreen("showcase");
 
     await this.loadFinalSongs();
@@ -490,7 +489,6 @@ export class ShowcasePhase {
   exitToMenu() {
     this.cleanup();
 
-    console.log("Exiting to menu");
     if (this.onExit) {
       this.onExit();
     }

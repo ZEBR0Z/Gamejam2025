@@ -27,7 +27,6 @@ export class PerformancePhase {
   async start(onComplete) {
     this.onPhaseComplete = onComplete;
 
-    console.log("Starting performance phase");
     this.uiManager.showScreen("performance");
 
     this.gameState.clearEvents();
@@ -64,12 +63,6 @@ export class PerformancePhase {
           this.currentBackingTrack = backingTrack;
           this.gameState.setBackingTrack(backingTrack);
           await this.audioEngine.loadBackingTrack(backingTrack.audio);
-          console.log(
-            "Loaded backing track:",
-            backingTrack.audio,
-            "duration:",
-            backingTrack.duration,
-          );
         }
       }
     } catch (error) {
@@ -420,7 +413,6 @@ export class PerformancePhase {
     this.audioEngine.stopBackingTrack();
     this.stopCountdown();
 
-    console.log("Performance phase complete");
     if (this.onPhaseComplete) {
       this.onPhaseComplete();
     }

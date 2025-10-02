@@ -17,7 +17,6 @@ export class WaitingPhase {
     this.onPhaseComplete = onComplete;
     this.isActive = true;
 
-    console.log("Starting waiting phase");
     this.uiManager.showScreen("waiting_for_players");
 
     const gameState = this.multiplayerManager.getGameState();
@@ -52,7 +51,6 @@ export class WaitingPhase {
   }
 
   complete(gameState) {
-    console.log("Waiting phase complete, transitioning to:", gameState.state);
     if (this.onPhaseComplete) {
       this.onPhaseComplete(gameState);
     }
@@ -108,7 +106,6 @@ export class WaitingPhase {
 
       if (this.isActive) {
         this.backgroundMusic.play();
-        console.log("Waiting phase background music loaded and playing");
       }
     } catch (error) {
       console.error("Failed to load waiting phase background music:", error);

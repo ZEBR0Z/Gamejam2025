@@ -41,7 +41,6 @@ export class UIManager {
     this.initializeScreens();
     this.initializeElements();
     this.initialized = true;
-    console.log("UIManager initialized");
   }
 
   initializeScreens() {

@@ -14,7 +14,6 @@ export class SelectionPhase {
   async start(onComplete) {
     this.onPhaseComplete = onComplete;
 
-    console.log("Starting selection phase");
     this.uiManager.showScreen("selection");
 
     this.gameState.clearSelectedSounds();
@@ -184,7 +183,6 @@ export class SelectionPhase {
     this.stopPreview();
     this.stopCountdown();
 
-    console.log("Selection phase complete");
     if (this.onPhaseComplete) {
       this.onPhaseComplete();
     }

@@ -28,7 +28,6 @@ export class EditingPhase {
   async start(onComplete) {
     this.onPhaseComplete = onComplete;
 
-    console.log("Starting editing phase");
     this.uiManager.showScreen("editing");
 
     this.gameState.setPlaybackState(false, 0, 0);
@@ -440,7 +439,6 @@ export class EditingPhase {
     this.audioEngine.stopBackingTrack();
     this.stopCountdown();
 
-    console.log("Editing phase complete");
     if (this.onPhaseComplete) {
       this.onPhaseComplete();
     }

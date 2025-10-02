@@ -34,7 +34,6 @@ export class PreviewPhase {
   async start(onComplete) {
     this.onPhaseComplete = onComplete;
 
-    console.log("Starting song preview phase");
     this.uiManager.showScreen("preview");
 
     await this.loadPreviousSong();

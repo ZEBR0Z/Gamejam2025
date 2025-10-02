@@ -146,7 +146,6 @@ export class Game {
 
     // Hook into phase transitions to sync state and stop menu music
     this.phaseManager.onTransition = (phaseName, phaseInstance) => {
-      console.log(`Transitioned to phase: ${phaseName}`);
       this.gameState.setState(phaseName);
 
       // Stop menu music when entering gameplay phases
@@ -163,8 +162,6 @@ export class Game {
    */
   async initialize() {
     try {
-      console.log("Initializing Game...");
-
       // Initialize audio context and load assets
       await this.audioEngine.initialize();
       await this.gameState.loadSoundList();
@@ -178,8 +175,6 @@ export class Game {
 
       // Listen for first user interaction to enable audio playback
       this.setupUserInteractionDetection();
-
-      console.log("Game initialized successfully");
     } catch (error) {
       console.error("Failed to initialize Game:", error);
       this.showError(
@@ -260,7 +255,6 @@ export class Game {
    */
   handleFirstUserInteraction() {
     this.hasUserInteracted = true;
-    console.log("First user interaction detected, starting menu music");
 
     if (!this.audioEngine.isMenuMusicPlaying()) {
       this.audioEngine.startMenuMusic();
@@ -273,15 +267,12 @@ export class Game {
    * This creates the bidirectional data flow between client UI and server state
    */
   setupMultiplayerHandlers() {
-    console.log("Setting up multiplayer handlers");
-
     // Button handlers for lobby actions
     const lobbyHandlers = {
       "back-to-menu-btn": () => this.uiManager.showScreen("main_menu"),
       "back-to-menu-from-join-btn": () =>
         this.uiManager.showScreen("main_menu"),
       "create-lobby-confirm-btn": () => {
-        console.log("Create lobby button clicked!");
         this.createLobby();
       },
       "join-lobby-confirm-btn": () => this.joinLobby(),
@@ -289,10 +280,6 @@ export class Game {
       "ready-btn": () => this.setReady(),
     };
 
-    console.log(
-      "Setting up persistent button events with handlers:",
-      Object.keys(lobbyHandlers),
-    );
     this.inputController.setupPersistentButtonEvents(lobbyHandlers);
 
     // Auto-uppercase lobby codes for consistency
@@ -425,8 +412,6 @@ export class Game {
   }
 
   async createLobby() {
-    console.log("createLobby method called");
-
     const createButton = document.getElementById("create-lobby-confirm-btn");
     if (createButton) {
       createButton.disabled = true;
@@ -437,11 +422,9 @@ export class Game {
     const playerName = this.uiManager.elements.playerName?.value.trim();
 
     try {
-      console.log("Attempting to connect to server:", this.serverUrl);
       const connected = await this.multiplayerManager.connect(this.serverUrl);
-      console.log("Connection result:", connected);
+
       if (!connected) {
-        console.log("Failed to connect to server");
         this.showError("Failed to connect to server. Please try again.");
         if (createButton) {
           createButton.disabled = false;
@@ -450,15 +433,12 @@ export class Game {
         }
         return;
       }
-      console.log("Successfully connected to server");
 
       const response = await this.multiplayerManager.createLobby(playerName);
-      console.log("CreateLobby response in Game.js:", response);
+
       if (response.success) {
-        console.log("Lobby created successfully, showing lobby waiting screen");
         this.showLobbyWaiting(response.gameState);
       } else {
-        console.log("Failed to create lobby:", response.error);
         this.showError(response.error || "Failed to create lobby");
         if (createButton) {
           createButton.disabled = false;
@@ -527,7 +507,6 @@ export class Game {
   }
 
   showLobbyWaiting(gameState) {
-    console.log("showLobbyWaiting called with gameState:", gameState);
     this.uiManager.showScreen("lobby_waiting");
     this.updateLobbyUI(gameState);
 
@@ -614,7 +593,6 @@ export class Game {
   setReady() {
     const gameState = this.multiplayerManager.getGameState();
     if (!gameState || gameState.players.length < 2) {
-      console.log("Cannot ready up: not enough players");
       return;
     }
 
@@ -710,7 +688,6 @@ export class Game {
         // Rare: Server shouldn't send this, but handle it for robustness
         // Chain: performance -> editing -> submit -> waiting
         this.phaseManager.transitionTo("performance", () => {
-          console.log("Performance phase complete, moving to editing phase");
           this.phaseManager.transitionTo("editing", () => {
             console.log(
               "Editing phase complete, submitting song and moving to waiting phase",
@@ -781,9 +758,7 @@ export class Game {
    */
   startSelectionPhase() {
     this.phaseManager.transitionTo("selection", () => {
-      console.log("Selection phase complete, moving to performance phase");
       this.phaseManager.transitionTo("performance", () => {
-        console.log("Performance phase complete, moving to editing phase");
         this.phaseManager.transitionTo("editing", () => {
           console.log(
             "Editing phase complete, submitting song and moving to waiting phase",
@@ -865,8 +840,6 @@ export class Game {
    * Display notification to user
    */
   showNotification(message) {
-    console.log("Notification:", message);
-
     const messageDiv = document.createElement("section");
     messageDiv.className = "message -right";
 

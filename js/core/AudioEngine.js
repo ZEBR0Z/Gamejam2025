@@ -22,7 +22,6 @@ export class AudioEngine {
   async initialize() {
     try {
       this.context = new (window.AudioContext || window.webkitAudioContext)();
-      console.log("AudioEngine initialized");
     } catch (error) {
       console.error("Failed to initialize AudioEngine:", error);
       throw error;
@@ -195,7 +194,6 @@ export class AudioEngine {
       });
 
       this.isBackingTrackLoaded = true;
-      console.log("Backing track loaded:", trackPath);
     } catch (error) {
       console.error("Failed to load backing track:", error);
       this.isBackingTrackLoaded = false;
@@ -264,7 +262,6 @@ export class AudioEngine {
       });
 
       this.isMenuMusicLoaded = true;
-      console.log("Menu music loaded");
     } catch (error) {
       console.error("Failed to load menu music:", error);
       this.isMenuMusicLoaded = false;

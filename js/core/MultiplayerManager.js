@@ -28,21 +28,17 @@ export class MultiplayerManager {
    */
   async connect(serverUrl) {
     try {
-      console.log("MultiplayerManager.connect called with:", serverUrl);
       if (!window.io) {
         console.log("Loading Socket.IO client script...");
         await this.loadSocketIO(serverUrl);
-        console.log("Socket.IO client script loaded");
       } else {
         console.log("Socket.IO client already loaded");
       }
 
-      console.log("Creating Socket.IO connection...");
       this.socket = window.io(serverUrl);
       console.log("Socket.IO connection object created:", this.socket);
 
       this.socket.on("connect", () => {
-        console.log("Connected to multiplayer server");
         console.log("Socket ID:", this.socket.id);
         this.isConnected = true;
       });
@@ -54,7 +50,6 @@ export class MultiplayerManager {
 
       this.setupEventHandlers();
 
-      console.log("Setting up connection promise...");
       return new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
           console.log("Connection timeout after 10 seconds");
@@ -62,7 +57,6 @@ export class MultiplayerManager {
         }, 10000);
 
         this.socket.on("connect", () => {
-          console.log("Socket connected successfully");
           clearTimeout(timeout);
           resolve(true);
         });
@@ -91,7 +85,6 @@ export class MultiplayerManager {
 
   setupEventHandlers() {
     this.socket.on("playerJoined", (data) => {
-      console.log("Player joined:", data.player.name);
       this.gameState = data.gameState;
       if (this.onPlayerJoined) {
         this.onPlayerJoined(data.player, data.gameState);
@@ -107,7 +100,6 @@ export class MultiplayerManager {
     });
 
     this.socket.on("playerReady", (data) => {
-      console.log("Player ready:", data.playerId);
       this.gameState = data.gameState;
       if (this.onGameStateUpdate) {
         this.onGameStateUpdate(data.gameState);
@@ -115,7 +107,7 @@ export class MultiplayerManager {
     });
 
     this.socket.on("allPlayersReady", (data) => {
-      console.log("All players ready!");
+      console.log("All players ready.");
       this.gameState = data.gameState;
       if (this.onAllPlayersReady) {
         this.onAllPlayersReady(data.gameState);
@@ -123,7 +115,6 @@ export class MultiplayerManager {
     });
 
     this.socket.on("gameStarted", (data) => {
-      console.log("Game started!");
       this.gameState = data.gameState;
       if (this.onGameStarted) {
         this.onGameStarted(data.gameState);
@@ -138,10 +129,6 @@ export class MultiplayerManager {
       }
     });
 
-    this.socket.on("soundSelected", (data) => {
-      console.log("Sound selected:", data.soundIndex);
-    });
-
     this.socket.on("songSubmitted", (data) => {
       console.log("Song submitted by:", data.playerId);
       this.gameState = data.gameState;
@@ -151,7 +138,6 @@ export class MultiplayerManager {
     });
 
     this.socket.on("waitingUpdate", (data) => {
-      console.log("Waiting for players update");
       this.gameState = data.gameState;
       if (this.onWaitingUpdate) {
         this.onWaitingUpdate(data.gameState);
@@ -170,15 +156,12 @@ export class MultiplayerManager {
       return null;
     }
 
-    console.log("Attempting to create lobby for:", playerName);
     return new Promise((resolve) => {
       this.socket.emit("createLobby", { playerName }, (response) => {
-        console.log("Create lobby response:", response);
         if (response.success) {
           this.playerId = response.playerId;
           this.lobbyCode = response.lobbyCode;
           this.gameState = response.gameState;
-          console.log(`Created lobby: ${this.lobbyCode}`);
         }
         resolve(response);
       });
@@ -215,21 +198,18 @@ export class MultiplayerManager {
     if (!this.isConnected || !this.lobbyCode) return;
 
     this.socket.emit("playerReady", {});
-    console.log("Set ready status");
   }
 
   completeSelection() {
     if (!this.isConnected || !this.lobbyCode) return;
 
     this.socket.emit("completeSelection");
-    console.log("Completed sound selection");
   }
 
   submitSong(songData, backingTrack = null) {
     if (!this.isConnected || !this.lobbyCode) return;
 
     this.socket.emit("submitSong", { songData, backingTrack });
-    console.log("Submitted song with", songData.length, "sound events");
   }
 
   /**
@@ -268,7 +248,6 @@ export class MultiplayerManager {
     if (!this.isConnected || !this.lobbyCode) return;
 
     this.socket.emit("continueToPerformance");
-    console.log("Continuing to performance phase");
   }
 
   /**

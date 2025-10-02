@@ -65,10 +65,6 @@ export class PhaseManager {
       return false;
     }
 
-    console.log(
-      `Phase transition: ${this.currentPhaseName || "none"} -> ${phaseName}`,
-    );
-
     if (this.currentPhase && typeof this.currentPhase.cleanup === "function") {
       this.currentPhase.cleanup();
     }
@@ -99,10 +95,6 @@ export class PhaseManager {
       console.error(`Phase '${phaseName}' not registered`);
       return false;
     }
-
-    console.log(
-      `Force transition: ${this.currentPhaseName || "none"} -> ${phaseName}`,
-    );
 
     if (this.currentPhase && typeof this.currentPhase.cleanup === "function") {
       this.currentPhase.cleanup();

@@ -19,7 +19,6 @@ export class SoundReplacementPhase {
   async start(onComplete) {
     this.onPhaseComplete = onComplete;
 
-    console.log("Starting sound replacement phase");
     this.uiManager.showScreen("sound_replacement");
 
     this.selectedReplacementIndex = -1;
@@ -232,7 +231,6 @@ export class SoundReplacementPhase {
       );
     }
 
-    console.log("Sound replacement phase complete");
     if (this.onPhaseComplete) {
       this.onPhaseComplete();
     }

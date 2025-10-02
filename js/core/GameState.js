@@ -36,7 +36,6 @@ export class GameState {
   setState(newState) {
     const previousState = this.currentState;
     this.currentState = newState;
-    console.log(`State changed: ${previousState} -> ${newState}`);
   }
 
   getState() {
