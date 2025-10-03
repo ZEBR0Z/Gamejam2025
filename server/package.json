@@ -1,7 +1,7 @@
 {
   "name": "yo-thats-heat-server",
   "version": "1.0.0",
-  "description": "Multiplayer server for Yo That's Heat - A Gartic Phone-style collaborative music creation game",
+  "description": "Multiplayer server for Yo That's Heat",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

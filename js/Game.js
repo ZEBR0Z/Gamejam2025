@@ -324,12 +324,12 @@ export class Game {
 
     // Detect new players (joined)
     const joinedPlayers = newState.players.filter(
-      (player) => !prevPlayerIds.includes(player.id)
+      (player) => !prevPlayerIds.includes(player.id),
     );
 
     // Detect removed players (left)
     const leftPlayers = prevState.players.filter(
-      (player) => !newPlayerIds.includes(player.id)
+      (player) => !newPlayerIds.includes(player.id),
     );
 
     // Show notifications for joins
@@ -404,10 +404,7 @@ export class Game {
    * Move to sound replacement phase
    */
   moveToSoundReplacement() {
-    this.multiplayerManager.updatePhase(
-      "sound_replacement",
-      this.currentRound,
-    );
+    this.multiplayerManager.updatePhase("sound_replacement", this.currentRound);
 
     this.phaseManager.transitionTo("sound_replacement", () => {
       this.moveToPerformance();

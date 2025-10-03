@@ -61,7 +61,7 @@ export class ShowcasePhase {
       this.finalSongs = state.players.map((player) => {
         // Get all contributors for this song
         const contributors = this.getContributorsForSong(state, player.id);
-        
+
         return {
           id: `song_${player.id}`,
           originalCreator: player.name,
@@ -83,20 +83,22 @@ export class ShowcasePhase {
    */
   getContributorsForSong(state, originalCreatorId) {
     const contributors = [originalCreatorId];
-    
+
     // For each round after the first, find who worked on this song
     for (let round = 2; round <= state.rounds; round++) {
       for (const [playerId, assignments] of Object.entries(state.assignments)) {
         const assignedId = assignments[round - 2]; // Round 2 = index 0
-        if (assignedId === originalCreatorId || 
-            (contributors.includes(assignedId) && round > 2)) {
+        if (
+          assignedId === originalCreatorId ||
+          (contributors.includes(assignedId) && round > 2)
+        ) {
           if (!contributors.includes(playerId)) {
             contributors.push(playerId);
           }
         }
       }
     }
-    
+
     // Convert player IDs to names
     return contributors.map((id) => {
       const player = state.players.find((p) => p.id === id);

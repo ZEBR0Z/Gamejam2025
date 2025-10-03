@@ -1,7 +1,7 @@
 /**
  * MultiplayerManager - Handles multiplayer communication with the server
  * Manages WebSocket connections and state synchronization
- * 
+ *
  * New Flow:
  * - Server broadcasts state updates
  * - Client processes state and decides phase transitions
@@ -86,14 +86,14 @@ export class MultiplayerManager {
     // Single event handler for all state updates
     this.socket.on("stateUpdate", (data) => {
       console.log("State update received:", data.state);
-      
+
       const previousState = this.lobbyState;
       const newState = data.state;
-      
+
       // Update stored state
       this.previousLobbyState = previousState;
       this.lobbyState = newState;
-      
+
       if (this.onStateUpdate) {
         this.onStateUpdate(previousState, newState);
       }
@@ -178,10 +178,10 @@ export class MultiplayerManager {
    */
   getAssignment(round) {
     if (!this.lobbyState || !this.lobbyState.assignments) return null;
-    
+
     const assignments = this.lobbyState.assignments[this.playerId];
     if (!assignments || round < 2) return null;
-    
+
     // Round 1 = work on own song (no assignment needed)
     // Round 2 = index 0, Round 3 = index 1, etc.
     return assignments[round - 2];
@@ -195,10 +195,10 @@ export class MultiplayerManager {
    */
   getPlayerSubmission(playerId, round) {
     if (!this.lobbyState || !this.lobbyState.players) return null;
-    
+
     const player = this.lobbyState.players.find((p) => p.id === playerId);
     if (!player || !player.submissions) return null;
-    
+
     // Round 1 = index 0, Round 2 = index 1, etc.
     return player.submissions[round - 1] || null;
   }
@@ -209,7 +209,7 @@ export class MultiplayerManager {
    */
   getMyPlayerData() {
     if (!this.lobbyState || !this.lobbyState.players) return null;
-    
+
     return this.lobbyState.players.find((p) => p.id === this.playerId) || null;
   }
 
@@ -221,10 +221,11 @@ export class MultiplayerManager {
    */
   areAllPlayersAtPhase(round, phase) {
     if (!this.lobbyState || !this.lobbyState.players) return false;
-    
+
     return this.lobbyState.players.every((p) => {
       if (p.round > round) return true;
-      if (p.round === round && this.isPhaseAtOrPast(p.phase, phase)) return true;
+      if (p.round === round && this.isPhaseAtOrPast(p.phase, phase))
+        return true;
       return false;
     });
   }
@@ -242,10 +243,10 @@ export class MultiplayerManager {
       "editing",
       "waiting_for_players",
     ];
-    
+
     const index1 = phaseOrder.indexOf(phase1);
     const index2 = phaseOrder.indexOf(phase2);
-    
+
     return index1 >= index2;
   }
 

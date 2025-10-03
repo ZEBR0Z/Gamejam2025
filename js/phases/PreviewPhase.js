@@ -66,7 +66,8 @@ export class PreviewPhase {
       }
 
       // Get assignment for this round
-      const assignedPlayerId = this.multiplayerManager.getAssignment(currentRound);
+      const assignedPlayerId =
+        this.multiplayerManager.getAssignment(currentRound);
 
       if (!assignedPlayerId) {
         console.warn("No assignment found for round:", currentRound);
@@ -80,12 +81,20 @@ export class PreviewPhase {
       );
 
       // Find the player's name for display
-      const assignedPlayer = state.players.find((p) => p.id === assignedPlayerId);
+      const assignedPlayer = state.players.find(
+        (p) => p.id === assignedPlayerId,
+      );
       const playerName = assignedPlayer ? assignedPlayer.name : "Unknown";
 
       // Handle missing submission (player left or no data)
       if (!submission) {
-        console.warn("No submission found for player:", assignedPlayerId, "round:", currentRound - 1, "- showing empty timeline");
+        console.warn(
+          "No submission found for player:",
+          assignedPlayerId,
+          "round:",
+          currentRound - 1,
+          "- showing empty timeline",
+        );
         this.previousSong = null;
         this.previewEvents = [];
         // Transform state to include currentRound and maxRounds for UIManager

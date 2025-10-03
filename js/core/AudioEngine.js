@@ -249,7 +249,7 @@ export class AudioEngine {
     try {
       this.stopMenuMusic();
 
-      this.menuMusicAudio = new Audio("assets/sfx/menu.mp3");
+      this.menuMusicAudio = new Audio("assets/audio/menu_music.mp3");
       this.menuMusicAudio.loop = true;
       this.menuMusicAudio.volume = 0.3;
 

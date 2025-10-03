@@ -1,29 +1,27 @@
-/* Reset and base styles */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   image-rendering: pixelated;
   user-select: none;
-  cursor: url("./assets/art/cursor.png"), auto !important;
+  cursor: url("./assets/artwork/cursor.png"), auto !important;
 }
 
-/* Custom fonts */
 @font-face {
   font-family: HeatSans;
-  src: url(./assets/heat_sans.ttf);
+  src: url("assets/fonts/heat_sans.ttf");
 }
 
 @font-face {
   font-family: Basis;
-  src: url(./assets/basis33.ttf);
+  src: url("assets/fonts/basis33.ttf");
 }
 
 body {
   font-family: HeatSans, Basis;
   font-size: small;
   text-transform: uppercase;
-  background-image: url("./assets/art/bricks.png");
+  background-image: url("assets/artwork/bricks.png");
   background-size: cover;
   text-shadow:
     rgb(0, 0, 0) 4px 0px 0px,
@@ -96,7 +94,7 @@ body {
 }
 
 #final {
-  background-image: url("./assets/art/performanceScreen.gif");
+  background-image: url("assets/artwork/performanceScreen.gif");
   background-size: cover;
 }
 
@@ -106,7 +104,7 @@ textarea {
   font-family: Basis;
   font-size: 21px;
   color: #000;
-  cursor: url("/assets/art/cursor.png") !important;
+  cursor: url("/assets/artwork/cursor.png") !important;
 }
 
 /* Screen management */
@@ -137,12 +135,12 @@ textarea {
 }
 
 .oven {
-  background-image: url("assets/art/oven.png") !important;
+  background-image: url("assets/artwork/oven.png") !important;
   background-size: cover;
 }
 
 .party {
-  background-image: url("assets/art/performanceScreen.gif") !important;
+  background-image: url("assets/artwork/performanceScreen.gif") !important;
   background-size: cover;
 }
 
@@ -541,7 +539,7 @@ canvas {
 }
 
 .play-pause-btn {
-  background-image: url("./assets/art/play.png");
+  background-image: url("assets/artwork/play.png");
   background-repeat: no-repeat;
   background-position: center center;
   background-size: contain;
@@ -554,11 +552,11 @@ canvas {
 }
 
 .play-pause-btn.playing {
-  background-image: url("./assets/art/pauseButton.png");
+  background-image: url("assets/artwork/pauseButton.png");
 }
 
 .rewind-btn {
-  background-image: url("./assets/art/rewind.png");
+  background-image: url("assets/artwork/rewind.png");
   background-repeat: no-repeat;
   background-position: center center;
   background-size: contain;
@@ -817,7 +815,7 @@ canvas {
 }
 
 .spinner {
-  background-image: url(./assets/art/loading1.png);
+  background-image: url(assets/artwork/loading1.png);
   background-size: cover;
   width: 80px;
   height: 80px;
@@ -870,11 +868,11 @@ canvas {
 }
 
 .nes-btn {
-  cursor: url("./assets/art/cursor.png");
+  cursor: url("assets/artwork/cursor.png");
 }
 
 .nes-btn :hover {
-  cursor: url("./assets/art/cursor.png");
+  cursor: url("assets/artwork/cursor.png");
 }
 
 /* Notification System using Toastify */
@@ -882,7 +880,7 @@ canvas {
   padding: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  cursor: url("./assets/art/cursor.png") !important;
+  cursor: url("assets/artwork/cursor.png") !important;
   font-family: Basis;
 }
 

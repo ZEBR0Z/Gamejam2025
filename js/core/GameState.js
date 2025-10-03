@@ -44,7 +44,7 @@ export class GameState {
 
   async loadSoundList() {
     try {
-      const response = await fetch("./audiomap.json");
+      const response = await fetch("assets/audiomap.json");
       const audioMap = await response.json();
       this.soundList = audioMap.sounds;
       this.backingTracks = audioMap.backing_tracks;

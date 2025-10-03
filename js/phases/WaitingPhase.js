@@ -1,11 +1,17 @@
 /**
  * WaitingPhase - Handles the waiting for players phase
  * Shows a simple waiting screen while everyone completes their songs
- * 
+ *
  * NEW: Doesn't call onComplete - Game.js handles state checking
  */
 export class WaitingPhase {
-  constructor(gameState, uiManager, audioEngine, multiplayerManager, getCurrentRound) {
+  constructor(
+    gameState,
+    uiManager,
+    audioEngine,
+    multiplayerManager,
+    getCurrentRound,
+  ) {
     this.gameState = gameState;
     this.uiManager = uiManager;
     this.audioEngine = audioEngine;
@@ -81,7 +87,7 @@ export class WaitingPhase {
 
   async loadBackgroundMusic() {
     try {
-      this.backgroundMusic = new Audio("assets/sfx/gameshow_presentation.mp3");
+      this.backgroundMusic = new Audio("assets/audio/waiting_music.mp3");
       this.backgroundMusic.loop = true;
       this.backgroundMusic.volume = 0.2;
 

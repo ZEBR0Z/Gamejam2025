@@ -43,7 +43,7 @@ export class PerformancePhase {
   async loadCurrentSongBackingTrack() {
     try {
       const state = this.multiplayerManager.getLobbyState();
-      
+
       if (!state) {
         console.error("No lobby state");
         return;
@@ -60,13 +60,17 @@ export class PerformancePhase {
           const randomIndex = Math.floor(Math.random() * backingTracks.length);
           backingTrack = backingTracks[randomIndex];
         }
-      } 
+      }
       // Round 2+: Use backing track from the song we're working on
       else {
-        const assignedPlayerId = this.multiplayerManager.getAssignment(currentRound);
+        const assignedPlayerId =
+          this.multiplayerManager.getAssignment(currentRound);
         if (assignedPlayerId) {
           // Get the first submission (which has the backing track)
-          const firstSubmission = this.multiplayerManager.getPlayerSubmission(assignedPlayerId, 1);
+          const firstSubmission = this.multiplayerManager.getPlayerSubmission(
+            assignedPlayerId,
+            1,
+          );
           if (firstSubmission && firstSubmission.backingTrack) {
             backingTrack = firstSubmission.backingTrack;
           }

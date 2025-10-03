@@ -5,8 +5,8 @@ from mutagen.mp3 import MP3
 
 
 def main():
-    sound_dir = "sounds"
-    backing_tracks_dir = "assets/backing_tracks"
+    sound_dir = "../assets/sounds"
+    backing_tracks_dir = "../assets/backing_tracks"
 
     filenames = listdir(sound_dir)
     backing_filenames = listdir(backing_tracks_dir)
@@ -22,7 +22,7 @@ def main():
             for extension in ["png", "svg"]:
                 icon_filename = filename.replace(".wav", f"__icon.{extension}")
                 if icon_filename in filenames:
-                    obj["icon"] = f"sounds/{icon_filename}"
+                    obj["icon"] = f"assets/sounds/{icon_filename}"
                     break
 
             soundlist.append(obj)

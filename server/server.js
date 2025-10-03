@@ -115,14 +115,14 @@ class Lobby {
 
     playerIds.forEach((playerId, index) => {
       const assignmentList = [];
-      
+
       // For each round (except round 1 where they work on their own song),
       // assign the previous player's ID
       for (let round = 2; round <= numPlayers; round++) {
         const prevIndex = (index - 1 + numPlayers) % numPlayers;
         assignmentList.push(playerIds[prevIndex]);
       }
-      
+
       this.assignments.set(playerId, assignmentList);
     });
   }
@@ -209,7 +209,7 @@ io.on("connection", (socket) => {
     socket.join(code);
 
     const state = lobby.getState();
-    
+
     callback({
       success: true,
       lobbyCode: code,
@@ -267,7 +267,9 @@ io.on("connection", (socket) => {
     const state = lobby.getState();
     io.to(lobby.code).emit("stateUpdate", { state });
 
-    console.log(`${player.name} ready status: ${isReady} in lobby ${lobby.code}`);
+    console.log(
+      `${player.name} ready status: ${isReady} in lobby ${lobby.code}`,
+    );
   });
 
   socket.on("updatePhase", (data) => {
@@ -284,7 +286,7 @@ io.on("connection", (socket) => {
     io.to(lobby.code).emit("stateUpdate", { state });
 
     console.log(
-      `${player.name} updated to phase: ${phase}, round: ${round} in lobby ${lobby.code}`
+      `${player.name} updated to phase: ${phase}, round: ${round} in lobby ${lobby.code}`,
     );
   });
 
