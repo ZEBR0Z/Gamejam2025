@@ -35,7 +35,7 @@ export class SelectionPhase extends BasePhase {
 
     // Set up confirm button (initially disabled)
     this.input.setupButtonEvents({
-      "confirm-selection-btn": () => this.handleConfirmSelection(),
+      "continue-btn": () => this.handleConfirmSelection(),
     });
 
     this.updateConfirmButton();
@@ -63,22 +63,52 @@ export class SelectionPhase extends BasePhase {
    * Display available sounds as selectable options
    */
   displayAvailableSounds() {
-    const container = document.getElementById("sound-options-container");
+    const container = document.getElementById("sound-grid");
     if (!container) return;
 
     container.innerHTML = "";
 
     this.availableSounds.forEach((sound, index) => {
-      const soundOption = this.ui.createSoundOption(
-        sound,
-        index,
-        this.selectedSounds.includes(index)
-      );
+      const soundOption = this.ui.createSoundOption(sound, index);
 
+      // Add selected class if this sound is selected
+      if (this.selectedSounds.includes(index)) {
+        soundOption.classList.add("selected");
+      }
+
+      // Hover to preview sound
+      soundOption.addEventListener("mouseenter", () => this.handleSoundHover(index));
+      soundOption.addEventListener("mouseleave", () => this.handleSoundLeave());
+
+      // Click to select/deselect
       soundOption.addEventListener("click", () => this.handleSoundClick(index));
 
       container.appendChild(soundOption);
     });
+
+    // Update selected count display
+    this.ui.updateSelectedCount(this.selectedSounds.length);
+  }
+
+  /**
+   * Handle sound hover (preview)
+   */
+  async handleSoundHover(index) {
+    const soundData = this.availableSounds[index];
+    if (soundData && soundData.audio) {
+      try {
+        await this.audio.startPreviewFromUrl(soundData.audio);
+      } catch (error) {
+        console.error("Failed to preview sound:", error);
+      }
+    }
+  }
+
+  /**
+   * Handle sound leave (stop preview)
+   */
+  handleSoundLeave() {
+    this.audio.stopPreview();
   }
 
   /**
@@ -86,17 +116,21 @@ export class SelectionPhase extends BasePhase {
    */
   handleSoundClick(index) {
     const selectedIndex = this.selectedSounds.indexOf(index);
+    const soundOption = document.querySelector(`[data-index="${index}"]`);
+    if (!soundOption) return;
 
     if (selectedIndex !== -1) {
       // Deselect
       this.selectedSounds.splice(selectedIndex, 1);
+      soundOption.classList.remove("selected");
     } else if (this.selectedSounds.length < GameConfig.SOUNDS_TO_SELECT) {
       // Select
       this.selectedSounds.push(index);
+      soundOption.classList.add("selected");
     }
 
-    // Update UI
-    this.displayAvailableSounds();
+    // Update UI elements
+    this.ui.updateSelectedCount(this.selectedSounds.length);
     this.updateConfirmButton();
   }
 
@@ -104,14 +138,16 @@ export class SelectionPhase extends BasePhase {
    * Update confirm button state
    */
   updateConfirmButton() {
-    const confirmBtn = document.getElementById("confirm-selection-btn");
+    const confirmBtn = document.getElementById("continue-btn");
     if (!confirmBtn) return;
 
     if (this.selectedSounds.length === GameConfig.SOUNDS_TO_SELECT) {
       confirmBtn.disabled = false;
-      confirmBtn.textContent = `Confirm (${this.selectedSounds.length}/${GameConfig.SOUNDS_TO_SELECT})`;
+      confirmBtn.classList.remove("is-disabled");
+      confirmBtn.textContent = "Continue";
     } else {
       confirmBtn.disabled = true;
+      confirmBtn.classList.add("is-disabled");
       confirmBtn.textContent = `Select ${GameConfig.SOUNDS_TO_SELECT - this.selectedSounds.length} more`;
     }
   }
