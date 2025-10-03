@@ -1,90 +1,120 @@
+import { BasePhase } from "./BasePhase.js";
+import { PhaseType } from "../Constants.js";
+
 /**
- * WaitingPhase - Handles the waiting for players phase
- * Shows a simple waiting screen while everyone completes their songs
- *
- * NEW: Doesn't call onComplete - Game.js handles state checking
+ * WaitingPhase - Wait for other players to finish
+ * Shows progress of all players and transitions when everyone is ready
  */
-export class WaitingPhase {
-  constructor(
-    gameState,
-    uiManager,
-    audioEngine,
-    multiplayerManager,
-    getCurrentRound,
-  ) {
-    this.gameState = gameState;
-    this.uiManager = uiManager;
-    this.audioEngine = audioEngine;
-    this.multiplayerManager = multiplayerManager;
-    this.getCurrentRound = getCurrentRound;
-    this.onPhaseComplete = null;
+export class WaitingPhase extends BasePhase {
+  constructor(services) {
+    super(services);
+
+    this.stateUpdateHandler = null;
+    this.updateInterval = null;
     this.backgroundMusic = null;
-    this.isActive = false;
   }
 
-  async start(onComplete) {
-    this.onPhaseComplete = onComplete;
-    this.isActive = true;
+  async enter(onComplete, onSecondary = null) {
+    await super.enter(onComplete, onSecondary);
 
-    this.uiManager.showScreen("waiting_for_players");
+    // Show waiting screen
+    this.ui.showScreen("waiting_for_players");
 
-    const state = this.multiplayerManager.getLobbyState();
-    if (state) {
-      this.updateWaitingUI(state);
-    }
+    // Listen for server state updates
+    this.stateUpdateHandler = () => this.handleStateUpdate();
+    this.serverState.observer.on("stateUpdate", this.stateUpdateHandler);
 
-    if (this.isActive) {
-      await this.loadBackgroundMusic();
-    }
+    // Initial UI update
+    this.updateWaitingUI();
 
+    // Start update loop
+    this.updateInterval = setInterval(() => this.update(), 500);
+
+    // Load background music
+    await this.loadBackgroundMusic();
+
+    // Fetch and display random fact
     await this.fetchRandomFact();
   }
 
-  updateWaitingUI(state) {
-    // Transform state to include currentRound and maxRounds for UIManager
-    const transformedState = {
-      ...state,
-      currentRound: this.getCurrentRound() - 1, // UIManager adds 1, so subtract 1 here
-      maxRounds: state.rounds,
-    };
-    this.uiManager.updateWaitingScreen(transformedState);
+  update() {
+    if (!this.isActive) return;
+
+    // Update UI periodically
+    this.updateWaitingUI();
   }
 
-  async fetchRandomFact() {
-    try {
-      const response = await fetch(
-        "https://uselessfacts.jsph.pl/api/v2/facts/random",
-      );
-      if (!this.isActive) return;
+  exit() {
+    // Clean up event listeners
+    if (this.stateUpdateHandler) {
+      this.serverState.observer.off("stateUpdate", this.stateUpdateHandler);
+      this.stateUpdateHandler = null;
+    }
 
-      const data = await response.json();
-      if (!this.isActive) return;
+    // Clean up interval
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+      this.updateInterval = null;
+    }
 
-      const waitingMessage = document.getElementById("waiting-message");
-      if (waitingMessage && data.text) {
-        await this.typeText(waitingMessage, data.text);
-      }
-    } catch (error) {
-      console.error("Failed to fetch random fact:", error);
-      const waitingMessage = document.getElementById("waiting-message");
-      if (waitingMessage) {
-        await this.typeText(
-          waitingMessage,
-          "Sometimes either the internet, API, or JavaScript, just want to... not work!",
-        );
+    // Clean up background music
+    if (this.backgroundMusic) {
+      this.backgroundMusic.pause();
+      this.backgroundMusic.currentTime = 0;
+      this.backgroundMusic = null;
+    }
+
+    super.exit();
+  }
+
+  /**
+   * Handle state updates from server
+   */
+  handleStateUpdate() {
+    this.updateWaitingUI();
+
+    const currentRound = this.serverState.getCurrentRound();
+    const maxRounds = this.serverState.getMaxRounds();
+
+    // Check if all players are at or past waiting phase for current round
+    const allPlayersWaiting = this.serverState.areAllPlayersAtPhase(
+      currentRound,
+      PhaseType.WAITING
+    );
+
+    if (allPlayersWaiting) {
+      // Check if we're done with all rounds
+      if (currentRound >= maxRounds) {
+        // Move to showcase phase
+        this.complete();
+      } else {
+        // Move to next round (preview or performance)
+        this.complete();
       }
     }
   }
 
-  async typeText(element, text, speed = 30) {
-    element.textContent = "";
-    for (let i = 0; i < text.length; i++) {
-      if (!this.isActive) return;
-      element.textContent += text[i];
-      await new Promise((resolve) => setTimeout(resolve, speed));
+  /**
+   * Update waiting UI (show player progress)
+   */
+  updateWaitingUI() {
+    const players = this.serverState.getPlayers();
+    const currentRound = this.serverState.getCurrentRound();
+    const maxRounds = this.serverState.getMaxRounds();
+
+    // Update round info
+    const roundInfo = document.getElementById("waiting-round-info");
+    if (roundInfo) {
+      roundInfo.textContent = `Round ${currentRound} of ${maxRounds}`;
     }
+
+    // Update player list with status
+    this.ui.updateWaitingPlayerList(players, currentRound);
   }
 
+  /**
+   * Load background music for waiting phase
+   */
   async loadBackgroundMusic() {
     try {
       this.backgroundMusic = new Audio("assets/audio/waiting_music.mp3");
@@ -108,13 +138,46 @@ export class WaitingPhase {
     }
   }
 
-  cleanup() {
-    this.isActive = false;
+  /**
+   * Fetch and display a random fact
+   */
+  async fetchRandomFact() {
+    try {
+      const response = await fetch(
+        "https://uselessfacts.jsph.pl/api/v2/facts/random"
+      );
 
-    if (this.backgroundMusic) {
-      this.backgroundMusic.pause();
-      this.backgroundMusic.currentTime = 0;
-      this.backgroundMusic = null;
+      if (!this.isActive) return;
+
+      const data = await response.json();
+
+      if (!this.isActive) return;
+
+      const waitingMessage = document.getElementById("waiting-message");
+      if (waitingMessage && data.text) {
+        await this.typeText(waitingMessage, data.text);
+      }
+    } catch (error) {
+      console.error("Failed to fetch random fact:", error);
+      const waitingMessage = document.getElementById("waiting-message");
+      if (waitingMessage) {
+        await this.typeText(
+          waitingMessage,
+          "Sometimes either the internet, API, or JavaScript, just want to... not work!"
+        );
+      }
+    }
+  }
+
+  /**
+   * Type text with animation
+   */
+  async typeText(element, text, speed = 30) {
+    element.textContent = "";
+    for (let i = 0; i < text.length; i++) {
+      if (!this.isActive) return;
+      element.textContent += text[i];
+      await new Promise((resolve) => setTimeout(resolve, speed));
     }
   }
 }

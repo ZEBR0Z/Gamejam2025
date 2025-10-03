@@ -1,474 +1,509 @@
-/**
- * EditingPhase - Handles the editing phase
- * Players can drag notes vertically to change their pitch
- */
-export class EditingPhase {
-  constructor(
-    gameState,
-    uiManager,
-    audioEngine,
-    canvasRenderer,
-    inputController,
-    multiplayerManager,
-  ) {
-    this.gameState = gameState;
-    this.uiManager = uiManager;
-    this.audioEngine = audioEngine;
-    this.canvasRenderer = canvasRenderer;
-    this.inputController = inputController;
-    this.multiplayerManager = multiplayerManager;
+import { BasePhase } from "./BasePhase.js";
+import { PhaseType, GameConfig } from "../Constants.js";
 
-    this.onPhaseComplete = null;
+/**
+ * EditingPhase - Edit pitch of recorded events
+ * Players can drag notes vertically to change pitch
+ */
+export class EditingPhase extends BasePhase {
+  constructor(services) {
+    super(services);
+
     this.scheduleInterval = null;
     this.animationFrameId = null;
+    this.timeRemaining = GameConfig.EDITING_TIME;
     this.countdownInterval = null;
     this.selectedSoundIndex = 0;
   }
 
-  async start(onComplete) {
-    this.onPhaseComplete = onComplete;
+  async enter(onComplete, onSecondary = null) {
+    await super.enter(onComplete, onSecondary);
 
-    this.uiManager.showScreen("editing");
+    // Show editing screen
+    this.ui.showScreen("editing");
 
-    this.gameState.setPlaybackState(false, 0, 0);
-    await this.loadCurrentSongBackingTrack();
-
-    this.setupUI();
-    this.setupEventHandlers();
-    this.startEditingTimer();
-  }
-
-  setupUI() {
-    this.uiManager.updateEditingSoundIcons(
-      this.gameState.selectedSounds,
-      this.selectedSoundIndex,
-    );
-
-    this.uiManager.updateTransportControls(
-      "editing",
-      false,
-      0,
-      this.gameState.getSegmentLength(),
-    );
-
-    this.draw();
-  }
-
-  setupEventHandlers() {
-    this.inputController.registerHandler(
-      "editingMouseDown",
-      "editing",
-      (mouseX, mouseY) => {
-        return this.handleMouseDown(mouseX, mouseY);
-      },
-    );
-
-    this.inputController.registerHandler(
-      "keyPress",
-      "editing",
-      (soundIndex) => {
-        this.selectSound(soundIndex);
-      },
-    );
-
-    this.inputController.registerHandler(
-      "editingMouseMove",
-      "editing",
-      (draggedNote, dragStartY, dragStartPitch, mouseY) => {
-        this.handleMouseMove(draggedNote, dragStartY, dragStartPitch, mouseY);
-      },
-    );
-
-    this.inputController.registerHandler(
-      "editingMouseUp",
-      "editing",
-      (draggedNote) => {
-        this.handleMouseUp(draggedNote);
-      },
-    );
-
-    const editingCanvas = this.uiManager.getCanvas("editingTimelineCanvas");
-    if (editingCanvas) {
-      this.inputController.setupCanvasEvents(editingCanvas, "editing");
+    // Load backing track (should already be in local state)
+    const backingTrack = this.localState.getBackingTrack();
+    if (backingTrack) {
+      await this.audio.loadBackingTrack(backingTrack.audio);
     }
 
-    // Setup click handlers for sound selection buttons
-    for (let i = 0; i < 3; i++) {
-      const soundButton = document.getElementById(`editing-sound-${i}`);
-      if (soundButton) {
-        soundButton.addEventListener("click", () => {
-          this.selectSound(i);
-        });
-      }
+    // Set up sound selector buttons
+    this.setupSoundSelector();
+
+    // Set up transport controls
+    this.input.setupTransportEvents({
+      "editing-play-pause-btn": () => this.togglePlayback(),
+      "editing-restart-btn": () => this.restart(),
+      "editing-progress-bar": (value) => this.seekTo(value),
+    });
+
+    // Set up canvas for dragging
+    const canvas = document.getElementById("editing-timeline-canvas");
+    if (canvas) {
+      this.input.setupCanvasEvents(canvas, "editing", null, {
+        onMouseDown: (mouseX, mouseY) => this.handleMouseDown(mouseX, mouseY),
+        onMouseMove: (note, startY, startPitch, mouseY) =>
+          this.handleMouseMove(note, startY, startPitch, mouseY),
+        onMouseUp: (note) => this.handleMouseUp(note),
+      });
     }
 
-    const transportHandlers = {
-      "edit-play-pause-btn": () => this.togglePlayback(),
-      "edit-restart-btn": () => this.restart(),
-      "edit-progress-bar": (value) => this.seekTo(value),
-      "editing-continue-btn": () => this.complete(),
-    };
+    // Set up continue button
+    this.input.setupButtonEvents({
+      "editing-continue-btn": () => this.handleContinue(),
+    });
 
-    this.inputController.setupTransportEvents(transportHandlers);
-  }
+    // Start playback loop
+    this.startPlayback();
 
-  startEditingTimer() {
-    this.draw();
-
-    this.gameState.setPlaybackState(true, 0, this.audioEngine.getCurrentTime());
-    this.uiManager.updateTransportControls(
-      "editing",
-      true,
-      0,
-      this.gameState.getSegmentLength(),
-    );
-
-    this.audioEngine.startBackingTrack();
-    this.startScheduling();
-    this.startAnimation();
+    // Start countdown
     this.startCountdown();
   }
 
-  startCountdown() {
-    let timeLeft = this.gameState.config.editingTime;
-    const countdownElement = this.uiManager.elements.editingCountdown;
+  exit() {
+    // Clean up intervals
+    if (this.scheduleInterval) {
+      clearInterval(this.scheduleInterval);
+      this.scheduleInterval = null;
+    }
 
-    const updateCountdown = () => {
-      if (countdownElement) {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        countdownElement.textContent = `${minutes}:${seconds.toString().padStart(2, "0")}`;
-      }
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
 
-      timeLeft--;
-
-      if (timeLeft < 0) {
-        this.stopCountdown();
-        this.complete();
-      }
-    };
-
-    updateCountdown();
-    this.countdownInterval = setInterval(updateCountdown, 1000);
-  }
-
-  stopCountdown() {
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
       this.countdownInterval = null;
     }
+
+    // Clean up input handlers
+    this.input.cleanupTransportEvents();
+    this.input.cleanupButtonEvents();
+    this.input.cleanupCanvasEvents(
+      document.getElementById("editing-timeline-canvas")
+    );
+
+    // Stop audio
+    this.audio.stopBackingTrack();
+
+    super.exit();
   }
 
-  async loadCurrentSongBackingTrack() {
-    if (
-      this.gameState.backingTrack.path &&
-      !this.audioEngine.isBackingTrackLoaded
-    ) {
-      try {
-        await this.audioEngine.loadBackingTrack(
-          this.gameState.backingTrack.path,
-        );
-      } catch (error) {
-        console.error("Failed to load backing track in editing phase:", error);
+  /**
+   * Set up sound selector buttons
+   */
+  setupSoundSelector() {
+    const selectedSounds = this.localState.getSelectedSounds();
+
+    for (let i = 0; i < selectedSounds.length; i++) {
+      const button = document.getElementById(`editing-sound-${i}`);
+      if (button) {
+        button.onclick = () => this.selectSound(i);
+        this.updateSoundButton(i);
       }
+    }
+
+    this.selectSound(0);
+  }
+
+  /**
+   * Update sound button appearance
+   */
+  updateSoundButton(index) {
+    const button = document.getElementById(`editing-sound-${index}`);
+    if (!button) return;
+
+    if (index === this.selectedSoundIndex) {
+      button.classList.add("selected");
+    } else {
+      button.classList.remove("selected");
     }
   }
 
-  handleMouseDown(mouseX, mouseY) {
-    const canvas = this.uiManager.getCanvas("editingTimelineCanvas");
-    if (!canvas) return null;
+  /**
+   * Select a sound for editing
+   */
+  selectSound(index) {
+    this.selectedSoundIndex = index;
 
-    const clickedEvent = this.canvasRenderer.getEventAtPosition(
-      this.gameState.events,
+    // Update button states
+    const selectedSounds = this.localState.getSelectedSounds();
+    for (let i = 0; i < selectedSounds.length; i++) {
+      this.updateSoundButton(i);
+    }
+
+    // Redraw canvas
+    this.drawCanvas();
+  }
+
+  /**
+   * Handle mouse down on editing canvas
+   */
+  handleMouseDown(mouseX, mouseY) {
+    const events = this.localState.getEvents();
+    const currentTime = this.localState.getCurrentTime();
+
+    // Filter events by selected sound
+    const filteredEvents = events.filter(
+      (e) => e.soundIndex === this.selectedSoundIndex
+    );
+
+    // Find event at click position
+    const clickedEvent = this.canvas.findEventAtPosition(
       mouseX,
       mouseY,
-      canvas,
-      this.gameState.getSegmentLength(),
-      this.selectedSoundIndex,
-      this.gameState.playback.currentTime,
+      filteredEvents,
+      currentTime,
+      GameConfig.SEGMENT_LENGTH
     );
 
     if (clickedEvent) {
-      // Play the note immediately on mousedown
-      const selectedSound =
-        this.gameState.selectedSounds[clickedEvent.soundIndex];
-      if (selectedSound) {
-        this.audioEngine.startEditPreviewFromUrl(
-          selectedSound.audio,
-          clickedEvent.pitchSemitones,
-        );
-      }
-
-      return { draggedNote: clickedEvent };
+      return {
+        draggedNote: clickedEvent,
+      };
     }
 
     return null;
   }
 
-  handleMouseMove(draggedNote, dragStartY, dragStartPitch, mouseY) {
-    const deltaY = dragStartY - mouseY;
-    const pitchChange = this.canvasRenderer.calculatePitchChange(deltaY);
-    const newPitch = this.canvasRenderer.constrainPitch(
-      dragStartPitch + pitchChange,
+  /**
+   * Handle mouse move (dragging note)
+   */
+  handleMouseMove(note, startY, startPitch, mouseY) {
+    if (!note) return;
+
+    // Calculate pitch change (every 10 pixels = 1 semitone)
+    const deltaY = startY - mouseY;
+    const semitoneChange = Math.round(deltaY / 10);
+
+    // Clamp pitch to reasonable range (-12 to +12 semitones)
+    note.pitchSemitones = Math.max(
       -12,
-      12,
+      Math.min(12, startPitch + semitoneChange)
     );
 
-    if (newPitch !== draggedNote.pitchSemitones) {
-      draggedNote.pitchSemitones = newPitch;
-
-      // Play preview when pitch changes (responsive feedback)
-      const selectedSound =
-        this.gameState.selectedSounds[draggedNote.soundIndex];
-      if (selectedSound) {
-        this.audioEngine.startEditPreviewFromUrl(selectedSound.audio, newPitch);
-      }
-    }
-
-    this.draw();
+    // Redraw canvas
+    this.drawCanvas();
   }
 
-  handleMouseUp(draggedNote) {
-    // Stop any current edit preview when dragging ends
-    this.audioEngine.stopEditPreview();
+  /**
+   * Handle mouse up (finish dragging)
+   */
+  handleMouseUp(note) {
+    // Nothing special needed, pitch is already updated
   }
 
-  draw() {
-    const canvas = this.uiManager.getCanvas("editingTimelineCanvas");
-    if (canvas) {
-      this.canvasRenderer.drawEditingTimeline(
-        canvas,
-        this.gameState.events,
-        this.gameState.playback.currentTime,
-        this.gameState.getSegmentLength(),
-        this.selectedSoundIndex,
-        this.gameState.playback.isPlaying,
-        this.gameState.selectedSounds,
-      );
-    }
+  /**
+   * Start playback loop
+   */
+  startPlayback() {
+    this.localState.setPlaybackState(
+      true,
+      0,
+      this.audio.getCurrentTime()
+    );
+
+    this.audio.startBackingTrack();
+    this.startScheduling();
+    this.startAnimation();
+
+    this.ui.updateTransportControls(
+      "editing-play-pause-btn",
+      "editing-progress-bar",
+      true,
+      0,
+      GameConfig.SEGMENT_LENGTH
+    );
   }
 
+  /**
+   * Start scheduling events
+   */
   startScheduling() {
     if (this.scheduleInterval) {
       clearInterval(this.scheduleInterval);
     }
 
     this.scheduleInterval = setInterval(() => {
-      if (this.gameState.playback.isPlaying) {
+      if (this.localState.isPlaying()) {
         this.scheduleEvents();
       }
     }, 50);
   }
 
+  /**
+   * Schedule events for playback
+   */
   scheduleEvents() {
-    if (!this.gameState.playback.isPlaying) return;
+    if (!this.localState.isPlaying()) return;
 
-    const currentTime = this.audioEngine.getCurrentTime();
-    const playbackTime =
-      (currentTime - this.gameState.playback.startTime) %
-      this.gameState.getSegmentLength();
+    const currentTime = this.audio.getCurrentTime();
+    const playbackTime = currentTime - this.localState.getStartTime();
+    const events = this.localState.getEvents();
+    const selectedSounds = this.localState.getSelectedSounds();
 
-    this.gameState.events.forEach((event) => {
+    // Loop back if we reached the end
+    if (playbackTime >= GameConfig.SEGMENT_LENGTH) {
+      this.restart();
+      return;
+    }
+
+    // Schedule unscheduled events
+    events.forEach((event) => {
       if (!event.scheduled) {
         const eventTime = event.startTimeSec;
-        let nextEventTime = eventTime;
 
-        if (eventTime < playbackTime) {
-          nextEventTime = eventTime + this.gameState.getSegmentLength();
-        }
+        if (
+          eventTime >= playbackTime &&
+          eventTime <= playbackTime + 0.1 // 100ms lookahead
+        ) {
+          const scheduleTime = currentTime + (eventTime - playbackTime);
+          const sound = selectedSounds[event.soundIndex];
 
-        const scheduleTime = currentTime + (nextEventTime - playbackTime);
+          if (sound) {
+            this.audio.playSoundFromUrl(
+              sound.audio,
+              event.pitchSemitones,
+              scheduleTime
+            );
+          }
 
-        if (scheduleTime <= currentTime + this.audioEngine.lookaheadTime) {
-          this.playEvent(event, scheduleTime);
           event.scheduled = true;
-
-          setTimeout(
-            () => {
-              event.scheduled = false;
-            },
-            (this.gameState.getSegmentLength() - eventTime + 0.1) * 1000,
-          );
         }
       }
     });
   }
 
-  async playEvent(event, scheduleTime) {
-    const selectedSound = this.gameState.selectedSounds[event.soundIndex];
-    if (selectedSound) {
-      await this.audioEngine.playSoundFromUrl(
-        selectedSound.audio,
-        event.pitchSemitones,
-        scheduleTime,
-      );
-    }
-  }
-
+  /**
+   * Start animation loop
+   */
   startAnimation() {
     const animate = () => {
-      if (
-        this.gameState.getState() === "editing" &&
-        this.gameState.playback.isPlaying
-      ) {
-        this.updateCurrentTime();
-        this.draw();
+      if (this.isActive && this.localState.isPlaying()) {
+        this.updateDisplay();
         this.animationFrameId = requestAnimationFrame(animate);
       }
     };
     animate();
   }
 
-  updateCurrentTime() {
-    this.gameState.updateCurrentTime(this.audioEngine.getCurrentTime());
-    this.uiManager.updateTransportControls(
-      "editing",
-      this.gameState.playback.isPlaying,
-      this.gameState.playback.currentTime,
-      this.gameState.getSegmentLength(),
+  /**
+   * Update display
+   */
+  updateDisplay() {
+    const currentTime = this.audio.getCurrentTime();
+    const playbackTime = currentTime - this.localState.getStartTime();
+
+    this.localState.setCurrentTime(playbackTime);
+
+    this.ui.updateTransportControls(
+      "editing-play-pause-btn",
+      "editing-progress-bar",
+      true,
+      playbackTime,
+      GameConfig.SEGMENT_LENGTH
+    );
+
+    this.drawCanvas();
+  }
+
+  /**
+   * Draw canvas
+   */
+  drawCanvas() {
+    const canvas = document.getElementById("editing-timeline-canvas");
+    if (!canvas) return;
+
+    const events = this.localState.getEvents();
+    const currentTime = this.localState.getCurrentTime();
+
+    // Filter events by selected sound
+    const filteredEvents = events.filter(
+      (e) => e.soundIndex === this.selectedSoundIndex
+    );
+
+    this.canvas.drawEditingTrack(
+      canvas,
+      filteredEvents,
+      currentTime,
+      GameConfig.SEGMENT_LENGTH
     );
   }
 
+  /**
+   * Toggle playback
+   */
   togglePlayback() {
-    if (this.gameState.playback.isPlaying) {
+    if (this.localState.isPlaying()) {
       this.pause();
     } else {
       this.play();
     }
   }
 
+  /**
+   * Play
+   */
   play() {
-    this.gameState.setPlaybackState(
+    const currentTime = this.localState.getCurrentTime();
+
+    this.localState.setPlaybackState(
       true,
-      this.gameState.playback.currentTime,
-      this.audioEngine.getCurrentTime() - this.gameState.playback.currentTime,
+      currentTime,
+      this.audio.getCurrentTime() - currentTime
     );
 
-    this.gameState.events.forEach((event) => {
-      event.scheduled = false;
-    });
+    // Reset scheduled flags
+    this.localState.getEvents().forEach((e) => (e.scheduled = false));
 
+    this.audio.resumeBackingTrack();
     this.startScheduling();
     this.startAnimation();
 
-    this.uiManager.updateTransportControls(
-      "editing",
+    this.ui.updateTransportControls(
+      "editing-play-pause-btn",
+      "editing-progress-bar",
       true,
-      this.gameState.playback.currentTime,
-      this.gameState.getSegmentLength(),
+      currentTime,
+      GameConfig.SEGMENT_LENGTH
     );
-
-    this.audioEngine.resumeBackingTrack();
   }
 
+  /**
+   * Pause
+   */
   pause() {
-    this.gameState.setPlaybackState(false);
+    this.localState.setPlaybackState(false);
+
     if (this.scheduleInterval) {
       clearInterval(this.scheduleInterval);
+      this.scheduleInterval = null;
     }
 
-    this.uiManager.updateTransportControls(
-      "editing",
+    this.audio.pauseBackingTrack();
+
+    this.ui.updateTransportControls(
+      "editing-play-pause-btn",
+      "editing-progress-bar",
       false,
-      this.gameState.playback.currentTime,
-      this.gameState.getSegmentLength(),
+      this.localState.getCurrentTime(),
+      GameConfig.SEGMENT_LENGTH
     );
-
-    this.audioEngine.pauseBackingTrack();
   }
 
+  /**
+   * Restart playback
+   */
   restart() {
-    this.gameState.setPlaybackState(
-      this.gameState.playback.isPlaying,
+    this.localState.setPlaybackState(
+      this.localState.isPlaying(),
       0,
-      this.audioEngine.getCurrentTime(),
+      this.audio.getCurrentTime()
     );
 
-    this.gameState.events.forEach((event) => {
-      event.scheduled = false;
-    });
+    // Reset scheduled flags
+    this.localState.getEvents().forEach((e) => (e.scheduled = false));
 
-    this.uiManager.updateTransportControls(
-      "editing",
-      this.gameState.playback.isPlaying,
-      0,
-      this.gameState.getSegmentLength(),
-    );
-
-    if (this.gameState.playback.isPlaying) {
-      this.audioEngine.startBackingTrack();
+    if (this.localState.isPlaying()) {
+      this.audio.startBackingTrack();
     }
+
+    this.ui.updateTransportControls(
+      "editing-play-pause-btn",
+      "editing-progress-bar",
+      this.localState.isPlaying(),
+      0,
+      GameConfig.SEGMENT_LENGTH
+    );
   }
 
+  /**
+   * Seek to time
+   */
   seekTo(time) {
-    this.gameState.setPlaybackState(
-      this.gameState.playback.isPlaying,
+    this.localState.setPlaybackState(
+      this.localState.isPlaying(),
       time,
-      this.audioEngine.getCurrentTime() - time,
+      this.audio.getCurrentTime() - time
     );
 
-    this.gameState.events.forEach((event) => {
-      event.scheduled = false;
-    });
+    // Reset scheduled flags
+    this.localState.getEvents().forEach((e) => (e.scheduled = false));
 
-    this.uiManager.updateTransportControls(
-      "editing",
-      this.gameState.playback.isPlaying,
+    this.audio.seekBackingTrack(time);
+
+    this.ui.updateTransportControls(
+      "editing-play-pause-btn",
+      "editing-progress-bar",
+      this.localState.isPlaying(),
       time,
-      this.gameState.getSegmentLength(),
+      GameConfig.SEGMENT_LENGTH
     );
 
-    this.audioEngine.seekBackingTrack(time);
-    this.draw();
+    this.drawCanvas();
   }
 
-  selectSound(soundIndex) {
-    if (soundIndex >= 0 && soundIndex < 3) {
-      this.selectedSoundIndex = soundIndex;
-      this.uiManager.updateEditingSoundIcons(
-        this.gameState.selectedSounds,
-        this.selectedSoundIndex,
-      );
-      this.draw();
-    }
-  }
+  /**
+   * Start countdown
+   */
+  startCountdown() {
+    this.updateCountdownDisplay();
 
-  complete() {
-    this.pause();
-    this.audioEngine.stopEditPreview();
-    this.audioEngine.stopBackingTrack();
-    this.stopCountdown();
+    this.countdownInterval = setInterval(() => {
+      this.timeRemaining--;
 
-    if (this.onPhaseComplete) {
-      this.onPhaseComplete();
-    }
-  }
-
-  cleanup() {
-    this.inputController.unregisterHandler("editingMouseDown", "editing");
-    this.inputController.unregisterHandler("editingMouseMove", "editing");
-    this.inputController.unregisterHandler("editingMouseUp", "editing");
-    this.inputController.unregisterHandler("keyPress", "editing");
-
-    // Clean up sound selection button listeners
-    for (let i = 0; i < 3; i++) {
-      const soundButton = document.getElementById(`editing-sound-${i}`);
-      if (soundButton) {
-        soundButton.replaceWith(soundButton.cloneNode(true)); // Remove all event listeners
+      if (this.timeRemaining <= 0) {
+        this.handleTimeExpired();
+      } else {
+        this.updateCountdownDisplay();
       }
+    }, 1000);
+  }
+
+  /**
+   * Update countdown display
+   */
+  updateCountdownDisplay() {
+    const element = document.getElementById("editing-countdown");
+    if (element) {
+      const minutes = Math.floor(this.timeRemaining / 60);
+      const seconds = this.timeRemaining % 60;
+      element.textContent = `Time: ${minutes}:${seconds.toString().padStart(2, "0")}`;
+    }
+  }
+
+  /**
+   * Handle time expired
+   */
+  handleTimeExpired() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
     }
 
-    this.inputController.cleanupTransportEvents();
+    this.handleContinue();
+  }
 
-    if (this.scheduleInterval) {
-      clearInterval(this.scheduleInterval);
-    }
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
-    }
+  /**
+   * Handle continue button
+   */
+  handleContinue() {
+    const currentRound = this.serverState.getCurrentRound();
 
-    this.audioEngine.stopEditPreview();
-    this.audioEngine.stopBackingTrack();
-    this.stopCountdown();
+    // Stop playback
+    this.pause();
+    this.audio.stopBackingTrack();
+
+    // Submit work to server
+    const submission = this.localState.toSubmission();
+    this.network.submitWork(submission, currentRound);
+
+    // Update server - move to waiting phase
+    this.network.updatePhase(PhaseType.WAITING, currentRound);
+
+    // Complete phase
+    this.complete();
   }
 }

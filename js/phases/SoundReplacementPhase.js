@@ -1,248 +1,195 @@
+import { BasePhase } from "./BasePhase.js";
+import { PhaseType, GameConfig } from "../Constants.js";
+
 /**
- * SoundReplacementPhase - Handles the sound replacement phase
- * Players choose 1 sound from 3 random options to replace a random existing sound
- * This adds evolution to the sound palette across rounds
+ * SoundReplacementPhase - Replace one random sound with a new option
+ * Adds evolution to the sound palette across rounds
  */
-export class SoundReplacementPhase {
-  constructor(gameState, uiManager, audioEngine) {
-    this.gameState = gameState;
-    this.uiManager = uiManager;
-    this.audioEngine = audioEngine;
-    this.onPhaseComplete = null;
+export class SoundReplacementPhase extends BasePhase {
+  constructor(services) {
+    super(services);
+
     this.replacementOptions = [];
-    this.selectedReplacementIndex = -1;
-    this.replacementSoundIndex = -1;
-    this.continueHandler = null;
+    this.selectedIndex = -1;
+    this.soundToReplaceIndex = -1;
+    this.timeRemaining = GameConfig.REPLACEMENT_TIME;
     this.countdownInterval = null;
   }
 
-  async start(onComplete) {
-    this.onPhaseComplete = onComplete;
+  async enter(onComplete, onSecondary = null) {
+    await super.enter(onComplete, onSecondary);
 
-    this.uiManager.showScreen("sound_replacement");
+    // Show replacement screen
+    this.ui.showScreen("sound_replacement");
 
-    this.selectedReplacementIndex = -1;
-    this.replacementOptions = [];
+    // Pick random sound to replace
+    const currentSounds = this.localState.getSelectedSounds();
+    this.soundToReplaceIndex = Math.floor(Math.random() * currentSounds.length);
 
-    this.replacementSoundIndex = Math.floor(Math.random() * 3);
+    // Generate 3 replacement options (excluding current sounds)
+    this.replacementOptions = this.localState.getRandomSounds(
+      3,
+      currentSounds.map((s) => s.audio)
+    );
 
-    this.selectReplacementOptions();
+    // Display replacement UI
+    this.displayReplacementOptions();
 
-    await this.populateReplacementGrid();
-    this.updateUI();
+    // Set up continue button
+    this.input.setupButtonEvents({
+      "confirm-replacement-btn": () => this.handleConfirmReplacement(),
+    });
+
+    this.updateConfirmButton();
+
+    // Start countdown
     this.startCountdown();
-    this.setupEventHandlers();
   }
 
-  startCountdown() {
-    let timeLeft = this.gameState.config.replacementTime;
-    const countdownElement = this.uiManager.elements.replacementCountdown;
-
-    const updateCountdown = () => {
-      if (countdownElement) {
-        countdownElement.textContent = timeLeft;
-      }
-
-      timeLeft--;
-
-      if (timeLeft < 0) {
-        this.stopCountdown();
-        this.complete();
-      }
-    };
-
-    updateCountdown();
-    this.countdownInterval = setInterval(updateCountdown, 1000);
-  }
-
-  stopCountdown() {
+  exit() {
+    // Clean up countdown
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
       this.countdownInterval = null;
     }
+
+    // Clean up input handlers
+    this.input.cleanupButtonEvents();
+
+    super.exit();
   }
 
-  selectReplacementOptions() {
-    if (!this.gameState.soundList || this.gameState.soundList.length === 0) {
-      console.error("No sound list available for replacement");
-      return;
-    }
+  /**
+   * Display replacement options
+   */
+  displayReplacementOptions() {
+    const container = document.getElementById("replacement-options-container");
+    if (!container) return;
 
-    // Get current sound URLs to exclude them
-    const currentSoundUrls = this.gameState.selectedSounds.map(
-      (sound) => sound.audio,
-    );
+    container.innerHTML = "";
 
-    // Filter out current sounds
-    const availableForReplacement = this.gameState.soundList.filter(
-      (sound) => !currentSoundUrls.includes(sound.audio),
-    );
-
-    if (availableForReplacement.length < 3) {
-      console.warn("Not enough sounds available for replacement");
-      // Use whatever we have available
-      this.replacementOptions = [...availableForReplacement];
-      return;
-    }
-
-    // Randomly select 3 options
-    const shuffled = [...availableForReplacement].sort(
-      () => Math.random() - 0.5,
-    );
-    this.replacementOptions = shuffled.slice(0, 3);
-  }
-
-  async populateReplacementGrid() {
-    this.uiManager.clearReplacementGrid();
-
-    for (let i = 0; i < this.replacementOptions.length; i++) {
-      const soundData = this.replacementOptions[i];
-      const soundOption = this.uiManager.createReplacementSoundOption(
-        soundData,
-        i,
-      );
-
-      soundOption.addEventListener("mouseenter", () => this.previewSound(i));
-      soundOption.addEventListener("mouseleave", () => this.stopPreview());
-      soundOption.addEventListener("click", () => this.selectReplacement(i));
-
-      const replacementGrid = this.uiManager.getElement("replacementGrid");
-      if (replacementGrid) {
-        replacementGrid.appendChild(soundOption);
-      }
-    }
-  }
-
-  async previewSound(index) {
-    this.stopPreview();
-
-    try {
-      const soundData = this.replacementOptions[index];
-      await this.audioEngine.startPreviewFromUrl(soundData.audio);
-    } catch (error) {
-      console.error("Failed to preview replacement sound:", error);
-    }
-  }
-
-  stopPreview() {
-    this.audioEngine.stopPreview();
-  }
-
-  async selectReplacement(index) {
-    const soundOption = document.querySelector(
-      `[data-replacement-index="${index}"]`,
-    );
-    if (!soundOption) return;
-
-    try {
-      // Check if this replacement is already selected
-      if (this.selectedReplacementIndex === index) {
-        this.selectedReplacementIndex = -1;
-        soundOption.classList.remove("selected");
-        this.updateUI();
-
-        this.uiManager.updateReplacementContinueButton(false);
-        this.uiManager.enableAllReplacements();
-      } else {
-        if (this.selectedReplacementIndex !== -1) {
-          const previousOption = document.querySelector(
-            `[data-replacement-index="${this.selectedReplacementIndex}"]`,
-          );
-          if (previousOption) {
-            previousOption.classList.remove("selected");
-          }
-        }
-
-        this.selectedReplacementIndex = index;
-        soundOption.classList.add("selected");
-        this.updateUI();
-
-        this.uiManager.updateReplacementContinueButton(true);
-        this.uiManager.disableNonSelectedReplacements();
-      }
-    } catch (error) {
-      console.error("Failed to select/unselect replacement sound:", error);
-    }
-  }
-
-  autoSelectReplacement() {
-    if (
-      this.selectedReplacementIndex === -1 &&
-      this.replacementOptions.length > 0
-    ) {
-      const randomIndex = Math.floor(
-        Math.random() * this.replacementOptions.length,
-      );
-      this.selectReplacement(randomIndex);
-    }
-  }
-
-  updateUI() {
+    // Show which sound is being replaced
     const soundToReplace =
-      this.gameState.selectedSounds[this.replacementSoundIndex];
-    this.uiManager.updateReplacementInfo(
-      soundToReplace,
-      this.replacementSoundIndex,
-    );
+      this.localState.getSelectedSounds()[this.soundToReplaceIndex];
+    const infoElement = document.getElementById("replacement-info");
+    if (infoElement) {
+      infoElement.textContent = `Replacing Sound ${this.soundToReplaceIndex + 1}`;
+    }
 
-    this.uiManager.updateReplacementContinueButton(
-      this.selectedReplacementIndex !== -1,
-    );
+    // Show replacement options
+    this.replacementOptions.forEach((sound, index) => {
+      const soundOption = this.ui.createSoundOption(
+        sound,
+        index,
+        this.selectedIndex === index
+      );
+
+      soundOption.addEventListener("click", () =>
+        this.handleReplacementClick(index)
+      );
+
+      container.appendChild(soundOption);
+    });
   }
 
-  setupEventHandlers() {
-    const continueBtn = this.uiManager.getElement("replacementContinueBtn");
-    if (continueBtn) {
-      this.continueHandler = () => this.complete();
-      continueBtn.addEventListener("click", this.continueHandler);
+  /**
+   * Handle replacement option click
+   */
+  handleReplacementClick(index) {
+    if (this.selectedIndex === index) {
+      // Deselect
+      this.selectedIndex = -1;
+    } else {
+      // Select
+      this.selectedIndex = index;
+    }
+
+    // Update UI
+    this.displayReplacementOptions();
+    this.updateConfirmButton();
+  }
+
+  /**
+   * Update confirm button state
+   */
+  updateConfirmButton() {
+    const confirmBtn = document.getElementById("confirm-replacement-btn");
+    if (!confirmBtn) return;
+
+    if (this.selectedIndex !== -1) {
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = "Confirm Replacement";
+    } else {
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = "Select a Replacement";
     }
   }
 
-  complete() {
-    if (this.selectedReplacementIndex === -1) {
-      this.autoSelectReplacement();
-    }
+  /**
+   * Start countdown
+   */
+  startCountdown() {
+    this.updateCountdownDisplay();
 
-    setTimeout(() => this.finishPhase(), 500);
-  }
+    this.countdownInterval = setInterval(() => {
+      this.timeRemaining--;
 
-  finishPhase() {
-    this.stopPreview();
-    this.stopCountdown();
-
-    if (
-      this.selectedReplacementIndex !== -1 &&
-      this.replacementSoundIndex !== -1
-    ) {
-      const newSound = this.replacementOptions[this.selectedReplacementIndex];
-
-      this.gameState.selectedSounds[this.replacementSoundIndex] = {
-        originalIndex: this.replacementSoundIndex,
-        icon: newSound.icon,
-        audio: newSound.audio,
-      };
-
-      if (this.gameState.onIconPreload && newSound.icon) {
-        this.gameState.onIconPreload(newSound.icon);
+      if (this.timeRemaining <= 0) {
+        this.handleTimeExpired();
+      } else {
+        this.updateCountdownDisplay();
       }
+    }, 1000);
+  }
 
-      console.log(
-        `Replaced sound ${this.replacementSoundIndex + 1} with ${newSound.audio}`,
+  /**
+   * Update countdown display
+   */
+  updateCountdownDisplay() {
+    const element = document.getElementById("replacement-countdown");
+    if (element) {
+      element.textContent = `Time: ${this.timeRemaining}s`;
+    }
+  }
+
+  /**
+   * Handle time expired (auto-select random)
+   */
+  handleTimeExpired() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
+
+    // Auto-select if not selected
+    if (this.selectedIndex === -1 && this.replacementOptions.length > 0) {
+      this.selectedIndex = Math.floor(
+        Math.random() * this.replacementOptions.length
       );
     }
 
-    if (this.onPhaseComplete) {
-      this.onPhaseComplete();
-    }
+    this.handleConfirmReplacement();
   }
 
-  cleanup() {
-    const continueBtn = this.uiManager.getElement("replacementContinueBtn");
-    if (continueBtn && this.continueHandler) {
-      continueBtn.removeEventListener("click", this.continueHandler);
+  /**
+   * Handle confirm replacement
+   */
+  handleConfirmReplacement() {
+    if (this.selectedIndex === -1) {
+      return;
     }
 
-    this.stopPreview();
-    this.stopCountdown();
+    // Replace the sound in local state
+    const newSound = this.replacementOptions[this.selectedIndex];
+    const currentSounds = this.localState.getSelectedSounds();
+    currentSounds[this.soundToReplaceIndex] = newSound;
+    this.localState.setSelectedSounds(currentSounds);
+
+    // Update server
+    const currentRound = this.serverState.getCurrentRound();
+    this.network.updatePhase(PhaseType.PERFORMANCE, currentRound);
+
+    // Complete phase
+    this.complete();
   }
 }
