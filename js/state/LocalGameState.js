@@ -335,11 +335,36 @@ export class LocalGameState {
   }
 
   /**
+   * Get all backing tracks
+   * @returns {Array}
+   */
+  getBackingTracks() {
+    return this.backingTracks;
+  }
+
+  /**
    * Get current playback time
    * @returns {number}
    */
   getCurrentTime() {
     return this.playback.currentTime;
+  }
+
+  /**
+   * Get playback start time
+   * @returns {number}
+   */
+  getStartTime() {
+    return this.playback.startTime;
+  }
+
+  /**
+   * Set current playback time
+   * @param {number} time
+   */
+  setCurrentTime(time) {
+    this.playback.currentTime = time;
+    this.emit(StateEvent.LOCAL_STATE_CHANGED);
   }
 
   /**
