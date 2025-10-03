@@ -134,7 +134,7 @@ export class Game {
       // Listen for state updates
       this.setupStateUpdateHandler();
 
-      // Start lobby phase
+      // Start lobby phase (state is already populated from createLobby response)
       this.startPhase(PhaseType.LOBBY);
     } catch (error) {
       console.error("Failed to create lobby:", error);
@@ -169,7 +169,7 @@ export class Game {
       // Listen for state updates
       this.setupStateUpdateHandler();
 
-      // Start lobby phase
+      // Start lobby phase (state is already populated from joinLobby response)
       this.startPhase(PhaseType.LOBBY);
     } catch (error) {
       console.error("Failed to join lobby:", error);
@@ -336,6 +336,15 @@ export class Game {
     // Update services with new states
     this.services.serverState = this.serverState;
     this.services.localState = this.localState;
+
+    // Update network service with new server state
+    this.network.serverState = this.serverState;
+
+    // Update all phase instances with new state references
+    Object.values(this.phases).forEach((phase) => {
+      phase.serverState = this.serverState;
+      phase.localState = this.localState;
+    });
 
     // Show main menu
     this.ui.showScreen("main_menu");

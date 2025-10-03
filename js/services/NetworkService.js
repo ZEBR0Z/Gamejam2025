@@ -117,6 +117,12 @@ export class NetworkService {
           this.playerId = response.playerId;
           this.lobbyCode = response.lobbyCode;
           this.serverState.setLocalPlayerId(response.playerId);
+
+          // Immediately update server state with initial state from response
+          if (response.state) {
+            this.serverState.update(response.state);
+          }
+
           console.log(`Lobby created: ${this.lobbyCode}, Player ID: ${this.playerId}`);
         }
         resolve(response);
@@ -144,6 +150,12 @@ export class NetworkService {
             this.playerId = response.playerId;
             this.lobbyCode = lobbyCode.toUpperCase();
             this.serverState.setLocalPlayerId(response.playerId);
+
+            // Immediately update server state with initial state from response
+            if (response.state) {
+              this.serverState.update(response.state);
+            }
+
             console.log(`Joined lobby: ${this.lobbyCode}, Player ID: ${this.playerId}`);
           }
           resolve(response);

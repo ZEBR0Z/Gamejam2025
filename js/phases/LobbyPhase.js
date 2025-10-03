@@ -21,8 +21,8 @@ export class LobbyPhase extends BasePhase {
     // Show lobby screen
     this.ui.showScreen("lobby_waiting");
 
-    // Display lobby code
-    const lobbyCode = this.serverState.getLobbyCode();
+    // Display lobby code (get from network service since server state may not be populated yet)
+    const lobbyCode = this.network.getLobbyCode() || this.serverState.getLobbyCode();
     if (lobbyCode) {
       this.ui.updateLobbyCode(lobbyCode);
     }
