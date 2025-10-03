@@ -88,7 +88,13 @@ export class PreviewPhase {
         console.warn("No submission found for player:", assignedPlayerId, "round:", currentRound - 1, "- showing empty timeline");
         this.previousSong = null;
         this.previewEvents = [];
-        this.uiManager.updatePreviewScreen(state, playerName);
+        // Transform state to include currentRound and maxRounds for UIManager
+        const transformedState = {
+          ...state,
+          currentRound: this.getCurrentRound() - 1, // UIManager adds 1, so subtract 1 here
+          maxRounds: state.rounds,
+        };
+        this.uiManager.updatePreviewScreen(transformedState, playerName);
         return;
       }
 
@@ -100,7 +106,13 @@ export class PreviewPhase {
         await this.audioEngine.loadBackingTrack(submission.backingTrack.audio);
       }
 
-      this.uiManager.updatePreviewScreen(state, playerName);
+      // Transform state to include currentRound and maxRounds for UIManager
+      const transformedState = {
+        ...state,
+        currentRound: this.getCurrentRound() - 1, // UIManager adds 1, so subtract 1 here
+        maxRounds: state.rounds,
+      };
+      this.uiManager.updatePreviewScreen(transformedState, playerName);
 
       await this.convertSongToEvents();
     } catch (error) {
