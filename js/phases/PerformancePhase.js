@@ -29,18 +29,21 @@ export class PerformancePhase extends BasePhase {
     // Clear events (fresh start)
     this.localState.clearEvents();
 
+    // Update sound icons
+    this.ui.updateSoundIcons(this.localState.getSelectedSounds());
+
     // Set up key handlers for sounds 1, 2, 3
     this.setupKeyHandlers();
 
     // Set up transport controls
     this.input.setupTransportEvents({
-      "performance-play-pause-btn": () => this.togglePlayback(),
-      "performance-restart-btn": () => this.restart(),
-      "performance-progress-bar": (value) => this.seekTo(value),
+      "play-pause-btn": () => this.togglePlayback(),
+      "restart-btn": () => this.restart(),
+      "progress-bar": (value) => this.seekTo(value),
     });
 
     // Set up canvas for right-click deletion
-    const canvas = document.getElementById("performance-timeline-canvas");
+    const canvas = document.getElementById("timeline-canvas");
     if (canvas) {
       this.input.setupCanvasEvents(canvas, "timeline", null, {
         onRightClick: (mouseX, mouseY) => this.handleTimelineRightClick(mouseX, mouseY),
@@ -83,7 +86,7 @@ export class PerformancePhase extends BasePhase {
     this.input.cleanupTransportEvents();
     this.input.cleanupButtonEvents();
     this.input.cleanupCanvasEvents(
-      document.getElementById("performance-timeline-canvas")
+      document.getElementById("timeline-canvas")
     );
 
     // Stop audio
@@ -133,15 +136,26 @@ export class PerformancePhase extends BasePhase {
    * Set up key handlers for sounds
    */
   setupKeyHandlers() {
-    const handleKey = (e) => {
+    const handleKeyDown = (e) => {
       if (e.key >= "1" && e.key <= "3") {
         const soundIndex = parseInt(e.key) - 1;
+        e.preventDefault();
+        this.ui.showKeyPress(soundIndex);
         this.handleKeyPress(soundIndex);
       }
     };
 
-    this.keyHandlers.keydown = handleKey;
-    document.addEventListener("keydown", handleKey);
+    const handleKeyUp = (e) => {
+      if (e.key >= "1" && e.key <= "3") {
+        const soundIndex = parseInt(e.key) - 1;
+        this.ui.hideKeyPress(soundIndex);
+      }
+    };
+
+    this.keyHandlers.keydown = handleKeyDown;
+    this.keyHandlers.keyup = handleKeyUp;
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
   }
 
   /**
@@ -150,8 +164,11 @@ export class PerformancePhase extends BasePhase {
   cleanupKeyHandlers() {
     if (this.keyHandlers.keydown) {
       document.removeEventListener("keydown", this.keyHandlers.keydown);
-      this.keyHandlers = {};
     }
+    if (this.keyHandlers.keyup) {
+      document.removeEventListener("keyup", this.keyHandlers.keyup);
+    }
+    this.keyHandlers = {};
   }
 
   /**
@@ -179,18 +196,29 @@ export class PerformancePhase extends BasePhase {
   handleTimelineRightClick(mouseX, mouseY) {
     const events = this.localState.getEvents();
     const currentTime = this.localState.getCurrentTime();
+    const canvas = document.getElementById("timeline-canvas");
 
     // Find event at click position
-    const clickedEvent = this.canvas.findEventAtPosition(
+    const clickedEvent = this.canvas.getEventAtPosition(
+      events,
       mouseX,
       mouseY,
-      events,
-      currentTime,
-      GameConfig.SEGMENT_LENGTH
+      canvas,
+      this.localState.getSegmentLength(),
+      null,
+      currentTime
     );
 
     if (clickedEvent) {
       this.localState.removeEvent(clickedEvent.id);
+      // Immediately redraw to show deletion
+      this.canvas.drawTimeline(
+        canvas,
+        this.localState.getEvents(),
+        currentTime,
+        this.localState.getSegmentLength(),
+        this.localState.getSelectedSounds()
+      );
     }
   }
 
@@ -209,11 +237,10 @@ export class PerformancePhase extends BasePhase {
     this.startAnimation();
 
     this.ui.updateTransportControls(
-      "performance-play-pause-btn",
-      "performance-progress-bar",
+      "performance",
       true,
       0,
-      GameConfig.SEGMENT_LENGTH
+      this.localState.getSegmentLength()
     );
   }
 
@@ -244,7 +271,7 @@ export class PerformancePhase extends BasePhase {
     const selectedSounds = this.localState.getSelectedSounds();
 
     // Loop back if we reached the end
-    if (playbackTime >= GameConfig.SEGMENT_LENGTH) {
+    if (playbackTime >= this.localState.getSegmentLength()) {
       this.restart();
       return;
     }
@@ -280,7 +307,7 @@ export class PerformancePhase extends BasePhase {
    */
   startAnimation() {
     const animate = () => {
-      if (this.isActive && this.localState.isPlaying()) {
+      if (this.isActive) {
         this.updateDisplay();
         this.animationFrameId = requestAnimationFrame(animate);
       }
@@ -292,27 +319,32 @@ export class PerformancePhase extends BasePhase {
    * Update display
    */
   updateDisplay() {
-    const currentTime = this.audio.getCurrentTime();
-    const playbackTime = currentTime - this.localState.getStartTime();
+    let playbackTime;
 
-    this.localState.setCurrentTime(playbackTime);
+    if (this.localState.isPlaying()) {
+      const currentTime = this.audio.getCurrentTime();
+      playbackTime = currentTime - this.localState.getStartTime();
+      this.localState.setCurrentTime(playbackTime);
+    } else {
+      playbackTime = this.localState.getCurrentTime();
+    }
 
     this.ui.updateTransportControls(
-      "performance-play-pause-btn",
-      "performance-progress-bar",
-      true,
+      "performance",
+      this.localState.isPlaying(),
       playbackTime,
-      GameConfig.SEGMENT_LENGTH
+      this.localState.getSegmentLength()
     );
 
     // Draw canvas
-    const canvas = document.getElementById("performance-timeline-canvas");
+    const canvas = document.getElementById("timeline-canvas");
     if (canvas) {
       this.canvas.drawTimeline(
         canvas,
         this.localState.getEvents(),
         playbackTime,
-        GameConfig.SEGMENT_LENGTH
+        this.localState.getSegmentLength(),
+        this.localState.getSelectedSounds()
       );
     }
   }
@@ -348,11 +380,10 @@ export class PerformancePhase extends BasePhase {
     this.startAnimation();
 
     this.ui.updateTransportControls(
-      "performance-play-pause-btn",
-      "performance-progress-bar",
+      "performance",
       true,
       currentTime,
-      GameConfig.SEGMENT_LENGTH
+      this.localState.getSegmentLength()
     );
   }
 
@@ -370,11 +401,10 @@ export class PerformancePhase extends BasePhase {
     this.audio.pauseBackingTrack();
 
     this.ui.updateTransportControls(
-      "performance-play-pause-btn",
-      "performance-progress-bar",
+      "performance",
       false,
       this.localState.getCurrentTime(),
-      GameConfig.SEGMENT_LENGTH
+      this.localState.getSegmentLength()
     );
   }
 
@@ -396,11 +426,10 @@ export class PerformancePhase extends BasePhase {
     }
 
     this.ui.updateTransportControls(
-      "performance-play-pause-btn",
-      "performance-progress-bar",
+      "performance",
       this.localState.isPlaying(),
       0,
-      GameConfig.SEGMENT_LENGTH
+      this.localState.getSegmentLength()
     );
   }
 
@@ -420,21 +449,21 @@ export class PerformancePhase extends BasePhase {
     this.audio.seekBackingTrack(time);
 
     this.ui.updateTransportControls(
-      "performance-play-pause-btn",
-      "performance-progress-bar",
+      "performance",
       this.localState.isPlaying(),
       time,
-      GameConfig.SEGMENT_LENGTH
+      this.localState.getSegmentLength()
     );
 
     // Update canvas
-    const canvas = document.getElementById("performance-timeline-canvas");
+    const canvas = document.getElementById("timeline-canvas");
     if (canvas) {
       this.canvas.drawTimeline(
         canvas,
         this.localState.getEvents(),
         time,
-        GameConfig.SEGMENT_LENGTH
+        this.localState.getSegmentLength(),
+        this.localState.getSelectedSounds()
       );
     }
   }
@@ -464,7 +493,7 @@ export class PerformancePhase extends BasePhase {
     if (element) {
       const minutes = Math.floor(this.timeRemaining / 60);
       const seconds = this.timeRemaining % 60;
-      element.textContent = `Time: ${minutes}:${seconds.toString().padStart(2, "0")}`;
+      element.textContent = `${minutes}:${seconds.toString().padStart(2, "0")}`;
     }
   }
 

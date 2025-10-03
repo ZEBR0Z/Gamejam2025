@@ -15,7 +15,7 @@ export const PhaseType = {
 
 export const GameConfig = {
   SERVER_URL: "http://localhost:8000",
-  SEGMENT_LENGTH: 8, // seconds (overridden by backing track)
+  DEFAULT_SEGMENT_LENGTH: 8, // seconds (overridden by backing track)
   SELECTION_TIME: 30, // seconds
   PERFORMANCE_TIME: 90, // seconds
   EDITING_TIME: 60, // seconds

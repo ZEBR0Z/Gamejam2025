@@ -218,7 +218,7 @@ export class LocalGameState {
    * @returns {number} Segment length in seconds
    */
   getSegmentLength() {
-    return this.backingTrack?.duration || GameConfig.SEGMENT_LENGTH;
+    return this.backingTrack?.duration || GameConfig.DEFAULT_SEGMENT_LENGTH;
   }
 
   /**

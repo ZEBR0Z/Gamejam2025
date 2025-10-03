@@ -531,7 +531,6 @@ canvas {
   border: none;
   padding: 12px;
   font-size: 19.2px;
-  transition: all 0.3s ease;
 }
 
 .control-button:hover {

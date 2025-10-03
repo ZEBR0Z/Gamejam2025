@@ -153,7 +153,7 @@ export class PreviewPhase extends BasePhase {
       "preview-progress-bar",
       true,
       0,
-      GameConfig.SEGMENT_LENGTH
+      GameConfig.DEFAULT_SEGMENT_LENGTH
     );
   }
 
@@ -184,7 +184,7 @@ export class PreviewPhase extends BasePhase {
     const playbackTime = currentTime - this.localState.getStartTime();
 
     // Loop back if we reached the end
-    if (playbackTime >= GameConfig.SEGMENT_LENGTH) {
+    if (playbackTime >= GameConfig.DEFAULT_SEGMENT_LENGTH) {
       this.restart();
       return;
     }
@@ -234,7 +234,7 @@ export class PreviewPhase extends BasePhase {
       "preview-progress-bar",
       true,
       playbackTime,
-      GameConfig.SEGMENT_LENGTH
+      GameConfig.DEFAULT_SEGMENT_LENGTH
     );
 
     // Draw canvas
@@ -244,7 +244,7 @@ export class PreviewPhase extends BasePhase {
         canvas,
         this.previewEvents,
         playbackTime,
-        GameConfig.SEGMENT_LENGTH
+        GameConfig.DEFAULT_SEGMENT_LENGTH
       );
     }
   }
@@ -284,7 +284,7 @@ export class PreviewPhase extends BasePhase {
       "preview-progress-bar",
       true,
       currentTime,
-      GameConfig.SEGMENT_LENGTH
+      GameConfig.DEFAULT_SEGMENT_LENGTH
     );
   }
 
@@ -306,7 +306,7 @@ export class PreviewPhase extends BasePhase {
       "preview-progress-bar",
       false,
       this.localState.getCurrentTime(),
-      GameConfig.SEGMENT_LENGTH
+      GameConfig.DEFAULT_SEGMENT_LENGTH
     );
   }
 
@@ -332,7 +332,7 @@ export class PreviewPhase extends BasePhase {
       "preview-progress-bar",
       this.localState.isPlaying(),
       0,
-      GameConfig.SEGMENT_LENGTH
+      GameConfig.DEFAULT_SEGMENT_LENGTH
     );
   }
 
@@ -356,7 +356,7 @@ export class PreviewPhase extends BasePhase {
       "preview-progress-bar",
       this.localState.isPlaying(),
       time,
-      GameConfig.SEGMENT_LENGTH
+      GameConfig.DEFAULT_SEGMENT_LENGTH
     );
 
     // Update canvas
@@ -366,7 +366,7 @@ export class PreviewPhase extends BasePhase {
         canvas,
         this.previewEvents,
         time,
-        GameConfig.SEGMENT_LENGTH
+        GameConfig.DEFAULT_SEGMENT_LENGTH
       );
     }
   }

@@ -168,7 +168,7 @@ export class ShowcasePhase extends BasePhase {
 
     if (!song.segments || song.segments.length === 0) return;
 
-    const segmentLength = GameConfig.SEGMENT_LENGTH;
+    const segmentLength = GameConfig.DEFAULT_SEGMENT_LENGTH;
 
     song.segments.forEach((submission, segmentIndex) => {
       if (!submission.songData) return;
@@ -192,7 +192,7 @@ export class ShowcasePhase extends BasePhase {
    */
   startPlayback() {
     const song = this.finalSongs[this.currentSongIndex];
-    const totalTime = song.segments.length * GameConfig.SEGMENT_LENGTH;
+    const totalTime = song.segments.length * GameConfig.DEFAULT_SEGMENT_LENGTH;
 
     this.localState.setPlaybackState(
       true,
@@ -237,7 +237,7 @@ export class ShowcasePhase extends BasePhase {
     const currentTime = this.audio.getCurrentTime();
     const playbackTime = currentTime - this.localState.getStartTime();
     const song = this.finalSongs[this.currentSongIndex];
-    const totalTime = song.segments.length * GameConfig.SEGMENT_LENGTH;
+    const totalTime = song.segments.length * GameConfig.DEFAULT_SEGMENT_LENGTH;
 
     // Check if song finished
     if (playbackTime >= totalTime) {
@@ -290,7 +290,7 @@ export class ShowcasePhase extends BasePhase {
     const currentTime = this.audio.getCurrentTime();
     const playbackTime = currentTime - this.localState.getStartTime();
     const song = this.finalSongs[this.currentSongIndex];
-    const totalTime = song.segments.length * GameConfig.SEGMENT_LENGTH;
+    const totalTime = song.segments.length * GameConfig.DEFAULT_SEGMENT_LENGTH;
 
     this.localState.setCurrentTime(playbackTime);
 
@@ -355,7 +355,7 @@ export class ShowcasePhase extends BasePhase {
   play() {
     const currentTime = this.localState.getCurrentTime();
     const song = this.finalSongs[this.currentSongIndex];
-    const totalTime = song.segments.length * GameConfig.SEGMENT_LENGTH;
+    const totalTime = song.segments.length * GameConfig.DEFAULT_SEGMENT_LENGTH;
 
     this.localState.setPlaybackState(
       true,
@@ -393,7 +393,7 @@ export class ShowcasePhase extends BasePhase {
     this.audio.pauseBackingTrack();
 
     const song = this.finalSongs[this.currentSongIndex];
-    const totalTime = song.segments.length * GameConfig.SEGMENT_LENGTH;
+    const totalTime = song.segments.length * GameConfig.DEFAULT_SEGMENT_LENGTH;
 
     this.ui.updateTransportControls(
       "showcase-play-pause-btn",
@@ -409,7 +409,7 @@ export class ShowcasePhase extends BasePhase {
    */
   restart() {
     const song = this.finalSongs[this.currentSongIndex];
-    const totalTime = song.segments.length * GameConfig.SEGMENT_LENGTH;
+    const totalTime = song.segments.length * GameConfig.DEFAULT_SEGMENT_LENGTH;
 
     this.localState.setPlaybackState(
       this.localState.isPlaying(),
@@ -438,7 +438,7 @@ export class ShowcasePhase extends BasePhase {
    */
   seekTo(time) {
     const song = this.finalSongs[this.currentSongIndex];
-    const totalTime = song.segments.length * GameConfig.SEGMENT_LENGTH;
+    const totalTime = song.segments.length * GameConfig.DEFAULT_SEGMENT_LENGTH;
 
     this.localState.setPlaybackState(
       this.localState.isPlaying(),
@@ -449,7 +449,7 @@ export class ShowcasePhase extends BasePhase {
     // Reset scheduled flags
     this.currentSongEvents.forEach((e) => (e.scheduled = false));
 
-    this.audio.seekBackingTrack(time % GameConfig.SEGMENT_LENGTH);
+    this.audio.seekBackingTrack(time % GameConfig.DEFAULT_SEGMENT_LENGTH);
 
     this.ui.updateTransportControls(
       "showcase-play-pause-btn",
