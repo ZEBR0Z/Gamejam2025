@@ -217,8 +217,8 @@ export class SelectionPhase extends BasePhase {
     // Clear events (fresh start)
     this.localState.clearEvents();
 
-    // Update server
-    this.network.updatePhase(PhaseType.PREVIEW, 1);
+    // Update server - selection is always round 1, go straight to performance
+    this.network.updatePhase(PhaseType.PERFORMANCE, 1);
 
     // Complete phase
     this.complete();
