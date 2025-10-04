@@ -394,10 +394,8 @@ export class CanvasService {
       event.displayY = y;
     });
 
-    // Playhead
-    if (isPlaying) {
-      this.drawScrollablePlayhead(ctx, currentTime, viewport, width, height);
-    }
+    // Playhead - always show in editing mode
+    this.drawScrollablePlayhead(ctx, currentTime, viewport, width, height);
   }
 
   /**

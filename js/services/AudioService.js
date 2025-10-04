@@ -9,9 +9,8 @@ export class AudioService {
     this.audioBufferCache = new Map();
     this.loadingPromises = new Map();
 
-    // Preview playback tracking
+    // Preview playback tracking (unified - only one preview at a time)
     this.currentPreview = null;
-    this.currentEditPreview = null;
 
     // Backing track (HTML5 Audio for looping)
     this.backingTrackAudio = null;
@@ -142,25 +141,42 @@ export class AudioService {
   // ===== PREVIEW PLAYBACK =====
 
   /**
-   * Start preview playback from audio buffer
-   * @param {AudioBuffer} audioBuffer
-   */
-  startPreview(audioBuffer) {
-    this.stopPreview();
-    this.currentPreview = this.playSound(audioBuffer);
-  }
-
-  /**
-   * Start preview playback from URL
+   * Play a preview sound (only one at a time, automatically stops previous)
    * @param {string} audioUrl
+   * @param {number} pitchSemitones
    */
-  async startPreviewFromUrl(audioUrl) {
-    this.stopPreview();
+  async playPreviewSound(audioUrl, pitchSemitones = 0) {
     try {
+      // Stop any currently playing preview
+      if (this.currentPreview) {
+        try {
+          this.currentPreview.stop(0);
+          this.currentPreview.disconnect();
+        } catch (e) {
+          // Already stopped
+        }
+        this.currentPreview = null;
+      }
+
+      // Load and play new preview
       const audioBuffer = await this.getAudioBuffer(audioUrl);
-      this.currentPreview = this.playSound(audioBuffer);
+
+      const source = this.context.createBufferSource();
+      source.buffer = audioBuffer;
+      source.detune.value = pitchSemitones * 100;
+      source.connect(this.context.destination);
+      source.start(0);
+
+      this.currentPreview = source;
+
+      // Auto-cleanup when finished
+      source.onended = () => {
+        if (this.currentPreview === source) {
+          this.currentPreview = null;
+        }
+      };
     } catch (error) {
-      console.error("Failed to start preview from URL:", audioUrl, error);
+      console.error("Failed to play preview sound:", audioUrl, error);
     }
   }
 
@@ -170,64 +186,12 @@ export class AudioService {
   stopPreview() {
     if (this.currentPreview) {
       try {
-        this.currentPreview.stop();
+        this.currentPreview.stop(0);
+        this.currentPreview.disconnect();
       } catch (e) {
         // Ignore errors (already stopped)
       }
       this.currentPreview = null;
-    }
-  }
-
-  // ===== EDIT PREVIEW PLAYBACK =====
-
-  /**
-   * Start edit preview playback from audio buffer
-   * @param {AudioBuffer} audioBuffer
-   * @param {number} pitchSemitones
-   */
-  startEditPreview(audioBuffer, pitchSemitones = 0) {
-    this.stopEditPreview();
-    this.currentEditPreview = this.playSound(audioBuffer, pitchSemitones);
-
-    if (this.currentEditPreview) {
-      this.currentEditPreview.onended = () => {
-        this.currentEditPreview = null;
-      };
-    }
-  }
-
-  /**
-   * Start edit preview playback from URL
-   * @param {string} audioUrl
-   * @param {number} pitchSemitones
-   */
-  async startEditPreviewFromUrl(audioUrl, pitchSemitones = 0) {
-    this.stopEditPreview();
-    try {
-      const audioBuffer = await this.getAudioBuffer(audioUrl);
-      this.currentEditPreview = this.playSound(audioBuffer, pitchSemitones);
-
-      if (this.currentEditPreview) {
-        this.currentEditPreview.onended = () => {
-          this.currentEditPreview = null;
-        };
-      }
-    } catch (error) {
-      console.error("Failed to start edit preview from URL:", audioUrl, error);
-    }
-  }
-
-  /**
-   * Stop edit preview playback
-   */
-  stopEditPreview() {
-    if (this.currentEditPreview) {
-      try {
-        this.currentEditPreview.stop();
-      } catch (e) {
-        // Ignore errors (already stopped)
-      }
-      this.currentEditPreview = null;
     }
   }
 

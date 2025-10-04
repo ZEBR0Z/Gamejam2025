@@ -14,6 +14,7 @@ export class EditingPhase extends BasePhase {
     this.timeRemaining = GameConfig.EDITING_TIME;
     this.countdownInterval = null;
     this.selectedSoundIndex = 0;
+    this.keyHandlers = { keydown: null, keyup: null };
   }
 
   async enter(onComplete, onSecondary = null) {
@@ -25,17 +26,24 @@ export class EditingPhase extends BasePhase {
     // Load backing track (should already be in local state)
     const backingTrack = this.localState.getBackingTrack();
     if (backingTrack) {
-      await this.audio.loadBackingTrack(backingTrack.audio);
+      await this.audio.loadBackingTrack(backingTrack.path);
     }
 
     // Set up sound selector buttons
     this.setupSoundSelector();
 
+    // Set up keyboard handlers for sound selection
+    this.setupKeyHandlers();
+
+    // Update sound icons in UI
+    const selectedSounds = this.localState.getSelectedSounds();
+    this.ui.updateEditingSoundIcons(selectedSounds, this.selectedSoundIndex);
+
     // Set up transport controls
     this.input.setupTransportEvents({
-      "editing-play-pause-btn": () => this.togglePlayback(),
-      "editing-restart-btn": () => this.restart(),
-      "editing-progress-bar": (value) => this.seekTo(value),
+      "edit-play-pause-btn": () => this.togglePlayback(),
+      "edit-restart-btn": () => this.restart(),
+      "edit-progress-bar": (value) => this.seekTo(value),
     });
 
     // Set up canvas for dragging
@@ -78,6 +86,14 @@ export class EditingPhase extends BasePhase {
       this.countdownInterval = null;
     }
 
+    // Clean up keyboard handlers
+    if (this.keyHandlers.keydown) {
+      document.removeEventListener("keydown", this.keyHandlers.keydown);
+    }
+    if (this.keyHandlers.keyup) {
+      document.removeEventListener("keyup", this.keyHandlers.keyup);
+    }
+
     // Clean up input handlers
     this.input.cleanupTransportEvents();
     this.input.cleanupButtonEvents();
@@ -86,6 +102,7 @@ export class EditingPhase extends BasePhase {
     );
 
     // Stop audio
+    this.audio.stopPreview();
     this.audio.stopBackingTrack();
 
     super.exit();
@@ -134,8 +151,27 @@ export class EditingPhase extends BasePhase {
       this.updateSoundButton(i);
     }
 
+    // Update UI icons
+    this.ui.updateEditingSoundIcons(selectedSounds, this.selectedSoundIndex);
+
     // Redraw canvas
     this.drawCanvas();
+  }
+
+  /**
+   * Set up keyboard handlers for sound selection
+   */
+  setupKeyHandlers() {
+    const handleKeyDown = (e) => {
+      if (e.key >= "1" && e.key <= "3") {
+        const soundIndex = parseInt(e.key) - 1;
+        e.preventDefault();
+        this.selectSound(soundIndex);
+      }
+    };
+
+    this.keyHandlers.keydown = handleKeyDown;
+    document.addEventListener("keydown", handleKeyDown);
   }
 
   /**
@@ -144,22 +180,26 @@ export class EditingPhase extends BasePhase {
   handleMouseDown(mouseX, mouseY) {
     const events = this.localState.getEvents();
     const currentTime = this.localState.getCurrentTime();
+    const canvas = document.getElementById("editing-timeline-canvas");
 
-    // Filter events by selected sound
-    const filteredEvents = events.filter(
-      (e) => e.soundIndex === this.selectedSoundIndex
-    );
-
-    // Find event at click position
-    const clickedEvent = this.canvas.findEventAtPosition(
+    // Find event at click position - only allow selecting from current sound
+    const clickedEvent = this.canvas.getEventAtPosition(
+      events,
       mouseX,
       mouseY,
-      filteredEvents,
-      currentTime,
-      GameConfig.DEFAULT_SEGMENT_LENGTH
+      canvas,
+      this.localState.getSegmentLength(),
+      this.selectedSoundIndex, // Only allow selecting events from the selected sound
+      currentTime
     );
 
     if (clickedEvent) {
+      // Play the note immediately on mousedown
+      const selectedSound = this.localState.getSelectedSounds()[clickedEvent.soundIndex];
+      if (selectedSound) {
+        this.audio.playPreviewSound(selectedSound.audio, clickedEvent.pitchSemitones);
+      }
+
       return {
         draggedNote: clickedEvent,
       };
@@ -174,15 +214,20 @@ export class EditingPhase extends BasePhase {
   handleMouseMove(note, startY, startPitch, mouseY) {
     if (!note) return;
 
-    // Calculate pitch change (every 10 pixels = 1 semitone)
+    // Calculate pitch change using canvas renderer
     const deltaY = startY - mouseY;
-    const semitoneChange = Math.round(deltaY / 10);
+    const pitchChange = this.canvas.calculatePitchChange(deltaY);
+    const newPitch = this.canvas.constrainPitch(startPitch + pitchChange, -12, 12);
 
-    // Clamp pitch to reasonable range (-12 to +12 semitones)
-    note.pitchSemitones = Math.max(
-      -12,
-      Math.min(12, startPitch + semitoneChange)
-    );
+    if (newPitch !== note.pitchSemitones) {
+      note.pitchSemitones = newPitch;
+
+      // Play preview when pitch changes (responsive feedback)
+      const selectedSound = this.localState.getSelectedSounds()[note.soundIndex];
+      if (selectedSound) {
+        this.audio.playPreviewSound(selectedSound.audio, newPitch);
+      }
+    }
 
     // Redraw canvas
     this.drawCanvas();
@@ -192,7 +237,8 @@ export class EditingPhase extends BasePhase {
    * Handle mouse up (finish dragging)
    */
   handleMouseUp(note) {
-    // Nothing special needed, pitch is already updated
+    // Stop preview when releasing the mouse
+    this.audio.stopPreview();
   }
 
   /**
@@ -210,11 +256,10 @@ export class EditingPhase extends BasePhase {
     this.startAnimation();
 
     this.ui.updateTransportControls(
-      "editing-play-pause-btn",
-      "editing-progress-bar",
+      "editing",
       true,
       0,
-      GameConfig.DEFAULT_SEGMENT_LENGTH
+      this.localState.getSegmentLength()
     );
   }
 
@@ -245,7 +290,7 @@ export class EditingPhase extends BasePhase {
     const selectedSounds = this.localState.getSelectedSounds();
 
     // Loop back if we reached the end
-    if (playbackTime >= GameConfig.DEFAULT_SEGMENT_LENGTH) {
+    if (playbackTime >= this.localState.getSegmentLength()) {
       this.restart();
       return;
     }
@@ -299,11 +344,10 @@ export class EditingPhase extends BasePhase {
     this.localState.setCurrentTime(playbackTime);
 
     this.ui.updateTransportControls(
-      "editing-play-pause-btn",
-      "editing-progress-bar",
-      true,
+      "editing",
+      this.localState.isPlaying(),
       playbackTime,
-      GameConfig.DEFAULT_SEGMENT_LENGTH
+      this.localState.getSegmentLength()
     );
 
     this.drawCanvas();
@@ -318,17 +362,18 @@ export class EditingPhase extends BasePhase {
 
     const events = this.localState.getEvents();
     const currentTime = this.localState.getCurrentTime();
+    const selectedSounds = this.localState.getSelectedSounds();
+    const isPlaying = this.localState.isPlaying();
 
-    // Filter events by selected sound
-    const filteredEvents = events.filter(
-      (e) => e.soundIndex === this.selectedSoundIndex
-    );
-
-    this.canvas.drawEditingTrack(
+    // Draw all events with transparency - selected sound is opaque, others are transparent
+    this.canvas.drawEditingTimeline(
       canvas,
-      filteredEvents,
+      events,
       currentTime,
-      GameConfig.DEFAULT_SEGMENT_LENGTH
+      this.localState.getSegmentLength(),
+      this.selectedSoundIndex,
+      isPlaying,
+      selectedSounds
     );
   }
 
@@ -363,11 +408,10 @@ export class EditingPhase extends BasePhase {
     this.startAnimation();
 
     this.ui.updateTransportControls(
-      "editing-play-pause-btn",
-      "editing-progress-bar",
+      "editing",
       true,
       currentTime,
-      GameConfig.DEFAULT_SEGMENT_LENGTH
+      this.localState.getSegmentLength()
     );
   }
 
@@ -385,11 +429,10 @@ export class EditingPhase extends BasePhase {
     this.audio.pauseBackingTrack();
 
     this.ui.updateTransportControls(
-      "editing-play-pause-btn",
-      "editing-progress-bar",
+      "editing",
       false,
       this.localState.getCurrentTime(),
-      GameConfig.DEFAULT_SEGMENT_LENGTH
+      this.localState.getSegmentLength()
     );
   }
 
@@ -411,11 +454,10 @@ export class EditingPhase extends BasePhase {
     }
 
     this.ui.updateTransportControls(
-      "editing-play-pause-btn",
-      "editing-progress-bar",
+      "editing",
       this.localState.isPlaying(),
       0,
-      GameConfig.DEFAULT_SEGMENT_LENGTH
+      this.localState.getSegmentLength()
     );
   }
 
@@ -435,11 +477,10 @@ export class EditingPhase extends BasePhase {
     this.audio.seekBackingTrack(time);
 
     this.ui.updateTransportControls(
-      "editing-play-pause-btn",
-      "editing-progress-bar",
+      "editing",
       this.localState.isPlaying(),
       time,
-      GameConfig.DEFAULT_SEGMENT_LENGTH
+      this.localState.getSegmentLength()
     );
 
     this.drawCanvas();
@@ -470,7 +511,7 @@ export class EditingPhase extends BasePhase {
     if (element) {
       const minutes = Math.floor(this.timeRemaining / 60);
       const seconds = this.timeRemaining % 60;
-      element.textContent = `Time: ${minutes}:${seconds.toString().padStart(2, "0")}`;
+      element.textContent = `${minutes}:${seconds.toString().padStart(2, "0")}`;
     }
   }
 
@@ -496,12 +537,9 @@ export class EditingPhase extends BasePhase {
     this.pause();
     this.audio.stopBackingTrack();
 
-    // Submit work to server
+    // Submit work to server and move to waiting phase
     const submission = this.localState.toSubmission();
-    this.network.submitWork(submission, currentRound);
-
-    // Update server - move to waiting phase
-    this.network.updatePhase(PhaseType.WAITING, currentRound);
+    this.network.updatePhase(PhaseType.WAITING, currentRound, submission);
 
     // Complete phase
     this.complete();

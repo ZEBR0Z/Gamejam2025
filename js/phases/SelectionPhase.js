@@ -97,7 +97,7 @@ export class SelectionPhase extends BasePhase {
     const soundData = this.availableSounds[index];
     if (soundData && soundData.audio) {
       try {
-        await this.audio.startPreviewFromUrl(soundData.audio);
+        await this.audio.playPreviewSound(soundData.audio);
       } catch (error) {
         console.error("Failed to preview sound:", error);
       }
