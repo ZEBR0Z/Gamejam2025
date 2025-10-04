@@ -1,7 +1,6 @@
-import { PhaseType, StateEvent, NetworkEvent, GameConfig } from "./Constants.js";
+import { PhaseType, GameConfig } from "./Constants.js";
 import { ServerState } from "./state/ServerState.js";
 import { LocalGameState } from "./state/LocalGameState.js";
-import { StateObserver } from "./state/StateObserver.js";
 import { AudioService } from "./services/AudioService.js";
 import { NetworkService } from "./services/NetworkService.js";
 import { UIService } from "./services/UIService.js";
@@ -98,7 +97,33 @@ export class Game {
       "join-lobby-confirm-btn": () => this.handleJoinLobby(),
       "back-to-menu-btn": () => this.ui.showScreen("main_menu"),
       "back-to-menu-from-join-btn": () => this.ui.showScreen("main_menu"),
+      "skip-tutorial-btn": () => this.ui.showScreen("main_menu"),
     });
+
+    // Set up input validation for name fields
+    this.setupNameInputValidation();
+  }
+
+  /**
+   * Set up name input validation event listeners
+   */
+  setupNameInputValidation() {
+    const playerNameInput = document.getElementById("player-name");
+    const joinPlayerNameInput = document.getElementById("join-player-name");
+    const lobbyCodeInput = document.getElementById("lobby-code");
+
+    // Set up event listeners for create lobby
+    if (playerNameInput) {
+      playerNameInput.addEventListener("input", () => this.validateCreateLobbyInputs());
+    }
+
+    // Set up event listeners for join lobby
+    if (joinPlayerNameInput) {
+      joinPlayerNameInput.addEventListener("input", () => this.validateJoinLobbyInputs());
+    }
+    if (lobbyCodeInput) {
+      lobbyCodeInput.addEventListener("input", () => this.validateJoinLobbyInputs());
+    }
   }
 
   /**
@@ -106,6 +131,7 @@ export class Game {
    */
   showCreateLobbyScreen() {
     this.ui.showScreen("create_lobby");
+    this.validateCreateLobbyInputs();
   }
 
   /**
@@ -113,6 +139,49 @@ export class Game {
    */
   showJoinLobbyScreen() {
     this.ui.showScreen("join_lobby");
+    this.validateJoinLobbyInputs();
+  }
+
+  /**
+   * Validate create lobby inputs and update button state
+   */
+  validateCreateLobbyInputs() {
+    const playerNameInput = document.getElementById("player-name");
+    const createLobbyBtn = document.getElementById("create-lobby-confirm-btn");
+
+    if (!playerNameInput || !createLobbyBtn) return;
+
+    const name = playerNameInput.value.trim();
+    const isValid = name.length > 0;
+
+    createLobbyBtn.disabled = !isValid;
+    if (isValid) {
+      createLobbyBtn.classList.remove("is-disabled");
+    } else {
+      createLobbyBtn.classList.add("is-disabled");
+    }
+  }
+
+  /**
+   * Validate join lobby inputs and update button state
+   */
+  validateJoinLobbyInputs() {
+    const joinPlayerNameInput = document.getElementById("join-player-name");
+    const joinLobbyBtn = document.getElementById("join-lobby-confirm-btn");
+    const lobbyCodeInput = document.getElementById("lobby-code");
+
+    if (!joinPlayerNameInput || !joinLobbyBtn || !lobbyCodeInput) return;
+
+    const name = joinPlayerNameInput.value.trim();
+    const code = lobbyCodeInput.value.trim();
+    const isValid = name.length > 0 && code.length > 0;
+
+    joinLobbyBtn.disabled = !isValid;
+    if (isValid) {
+      joinLobbyBtn.classList.remove("is-disabled");
+    } else {
+      joinLobbyBtn.classList.add("is-disabled");
+    }
   }
 
   /**
@@ -120,7 +189,12 @@ export class Game {
    */
   async handleCreateLobby() {
     const nameInput = document.getElementById("player-name");
-    const playerName = nameInput?.value.trim() || "Player";
+    const playerName = nameInput?.value.trim();
+
+    if (!playerName) {
+      this.ui.showError("Please enter your name.");
+      return;
+    }
 
     try {
       await this.network.connect(GameConfig.SERVER_URL);
@@ -149,8 +223,13 @@ export class Game {
     const nameInput = document.getElementById("join-player-name");
     const codeInput = document.getElementById("lobby-code");
 
-    const playerName = nameInput?.value.trim() || "Player";
+    const playerName = nameInput?.value.trim();
     const lobbyCode = codeInput?.value.trim().toUpperCase();
+
+    if (!playerName) {
+      this.ui.showError("Please enter your name.");
+      return;
+    }
 
     if (!lobbyCode) {
       this.ui.showError("Please enter a lobby code.");
