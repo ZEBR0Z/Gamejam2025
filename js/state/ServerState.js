@@ -76,14 +76,6 @@ export class ServerState {
   }
 
   /**
-   * Get current round number
-   * @returns {number}
-   */
-  getCurrentRound() {
-    return this.state?.currentRound || 1;
-  }
-
-  /**
    * Get max rounds
    * @returns {number}
    */

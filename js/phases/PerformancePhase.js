@@ -99,7 +99,7 @@ export class PerformancePhase extends BasePhase {
    * Load backing track
    */
   async loadBackingTrack() {
-    const currentRound = this.serverState.getCurrentRound();
+    const currentRound = this.localState.getCurrentRound();
     const localPlayerId = this.serverState.getLocalPlayerId();
 
     let backingTrack = null;
@@ -513,7 +513,7 @@ export class PerformancePhase extends BasePhase {
    * Handle continue button
    */
   handleContinue() {
-    const currentRound = this.serverState.getCurrentRound();
+    const currentRound = this.localState.getCurrentRound();
 
     // Stop playback
     this.pause();

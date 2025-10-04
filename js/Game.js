@@ -307,7 +307,7 @@ export class Game {
    * Get next phase based on current phase completing
    */
   getNextPhase(currentPhaseName) {
-    const currentRound = this.serverState.getCurrentRound();
+    const currentRound = this.localState.getCurrentRound();
     const maxRounds = this.serverState.getMaxRounds();
 
     switch (currentPhaseName) {
@@ -324,6 +324,8 @@ export class Game {
         if (currentRound >= maxRounds) {
           return PhaseType.SHOWCASE;
         }
+        // Increment round before moving to next round
+        this.localState.incrementRound();
         // Next round starts with preview (for round 2+)
         return PhaseType.PREVIEW;
       case "PreviewPhase":

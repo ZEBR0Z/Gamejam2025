@@ -10,6 +10,7 @@ export class WaitingPhase extends BasePhase {
     super(services);
 
     this.stateUpdateHandler = null;
+    this.unsubscribeStateUpdate = null;
     this.updateInterval = null;
     this.backgroundMusic = null;
   }
@@ -22,7 +23,7 @@ export class WaitingPhase extends BasePhase {
 
     // Listen for server state updates
     this.stateUpdateHandler = () => this.handleStateUpdate();
-    this.serverState.observer.on("stateUpdate", this.stateUpdateHandler);
+    this.unsubscribeStateUpdate = this.serverState.onChange(this.stateUpdateHandler);
 
     // Initial UI update
     this.updateWaitingUI();
@@ -46,8 +47,9 @@ export class WaitingPhase extends BasePhase {
 
   exit() {
     // Clean up event listeners
-    if (this.stateUpdateHandler) {
-      this.serverState.observer.off("stateUpdate", this.stateUpdateHandler);
+    if (this.unsubscribeStateUpdate) {
+      this.unsubscribeStateUpdate();
+      this.unsubscribeStateUpdate = null;
       this.stateUpdateHandler = null;
     }
 
@@ -73,7 +75,7 @@ export class WaitingPhase extends BasePhase {
   handleStateUpdate() {
     this.updateWaitingUI();
 
-    const currentRound = this.serverState.getCurrentRound();
+    const currentRound = this.localState.getCurrentRound();
     const maxRounds = this.serverState.getMaxRounds();
 
     // Check if all players are at or past waiting phase for current round
@@ -98,18 +100,19 @@ export class WaitingPhase extends BasePhase {
    * Update waiting UI (show player progress)
    */
   updateWaitingUI() {
-    const players = this.serverState.getPlayers();
-    const currentRound = this.serverState.getCurrentRound();
+    const currentRound = this.localState.getCurrentRound();
     const maxRounds = this.serverState.getMaxRounds();
 
     // Update round info
-    const roundInfo = document.getElementById("waiting-round-info");
-    if (roundInfo) {
-      roundInfo.textContent = `Round ${currentRound} of ${maxRounds}`;
-    }
+    const currentRoundEl = document.getElementById("current-round");
+    const totalRoundsEl = document.getElementById("total-rounds");
 
-    // Update player list with status
-    this.ui.updateWaitingPlayerList(players, currentRound);
+    if (currentRoundEl) {
+      currentRoundEl.textContent = currentRound;
+    }
+    if (totalRoundsEl) {
+      totalRoundsEl.textContent = maxRounds;
+    }
   }
 
   /**

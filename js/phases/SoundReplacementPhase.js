@@ -186,7 +186,7 @@ export class SoundReplacementPhase extends BasePhase {
     this.localState.setSelectedSounds(currentSounds);
 
     // Update server
-    const currentRound = this.serverState.getCurrentRound();
+    const currentRound = this.localState.getCurrentRound();
     this.network.updatePhase(PhaseType.PERFORMANCE, currentRound);
 
     // Complete phase

@@ -76,7 +76,7 @@ export class PreviewPhase extends BasePhase {
    * Load previous player's work
    */
   async loadPreviousWork() {
-    const currentRound = this.serverState.getCurrentRound();
+    const currentRound = this.localState.getCurrentRound();
     const localPlayerId = this.serverState.getLocalPlayerId();
 
     // Round 1 has no previous work (shouldn't reach here)
@@ -414,7 +414,7 @@ export class PreviewPhase extends BasePhase {
    * Handle continue button
    */
   handleContinue() {
-    const currentRound = this.serverState.getCurrentRound();
+    const currentRound = this.localState.getCurrentRound();
 
     // Stop playback
     this.pause();

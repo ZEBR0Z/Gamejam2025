@@ -531,7 +531,7 @@ export class EditingPhase extends BasePhase {
    * Handle continue button
    */
   handleContinue() {
-    const currentRound = this.serverState.getCurrentRound();
+    const currentRound = this.localState.getCurrentRound();
 
     // Stop playback
     this.pause();

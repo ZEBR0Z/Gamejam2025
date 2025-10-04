@@ -11,6 +11,9 @@ export class LocalGameState {
   constructor() {
     this.observer = new StateObserver();
 
+    // Round tracking
+    this.currentRound = 1;
+
     // Sound management
     this.soundList = []; // All available sounds from audiomap.json
     this.backingTracks = []; // All available backing tracks
@@ -292,6 +295,31 @@ export class LocalGameState {
   }
 
   /**
+   * Get current round
+   * @returns {number}
+   */
+  getCurrentRound() {
+    return this.currentRound;
+  }
+
+  /**
+   * Set current round
+   * @param {number} round
+   */
+  setCurrentRound(round) {
+    this.currentRound = round;
+    this.emit(StateEvent.LOCAL_STATE_CHANGED);
+  }
+
+  /**
+   * Increment to next round
+   */
+  incrementRound() {
+    this.currentRound++;
+    this.emit(StateEvent.LOCAL_STATE_CHANGED);
+  }
+
+  /**
    * Reset for new round (clear events, keep sounds)
    */
   resetForNewRound() {
@@ -303,6 +331,7 @@ export class LocalGameState {
    * Reset everything for new game
    */
   resetForNewGame() {
+    this.currentRound = 1;
     this.clearEvents();
     this.clearSelectedSounds();
     this.availableSounds = [];
