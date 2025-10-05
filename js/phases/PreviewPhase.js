@@ -1,6 +1,5 @@
 import { BasePhase } from "./BasePhase.js";
 import { PhaseType, GameConfig } from "../Constants.js";
-import { SoundEvent } from "../models/SoundEvent.js";
 
 /**
  * PreviewPhase - Preview assigned player's previous work
@@ -13,8 +12,9 @@ export class PreviewPhase extends BasePhase {
     this.previewEvents = [];
     this.scheduleInterval = null;
     this.animationFrameId = null;
-    this.timeRemaining = 20; // 20 seconds preview time
+    this.timeRemaining = 20;
     this.countdownInterval = null;
+    this.segmentLength = GameConfig.DEFAULT_SEGMENT_LENGTH;
   }
 
   async enter(onComplete, onSecondary = null) {
@@ -81,15 +81,12 @@ export class PreviewPhase extends BasePhase {
 
     // Round 1 has no previous work (shouldn't reach here)
     if (currentRound < 2) {
-      console.warn("PreviewPhase called in round 1");
       return;
     }
 
     // Get assignment for current round
     const assignment = this.serverState.getAssignment(localPlayerId, currentRound);
-
     if (!assignment) {
-      console.warn("No assignment found for round", currentRound);
       return;
     }
 
@@ -98,30 +95,30 @@ export class PreviewPhase extends BasePhase {
       assignment,
       currentRound - 1
     );
-
     if (!submission) {
-      console.warn("No submission found for assigned player", assignment);
       return;
     }
 
     // Load backing track
     if (submission.backingTrack) {
       this.localState.setBackingTrack(submission.backingTrack);
-      await this.audio.loadBackingTrack(submission.backingTrack.audio);
+      await this.audio.loadBackingTrack(submission.backingTrack.path);
+      this.segmentLength = submission.backingTrack.duration;
     }
 
-    // Convert submission to events for preview
+    // Convert submission to preview events
     this.previewEvents = [];
-    if (submission.songData) {
-      submission.songData.forEach((eventData) => {
-        this.previewEvents.push(
-          new SoundEvent(
-            null,
-            0, // soundIndex (not relevant for preview)
-            eventData.time,
-            eventData.pitch || 0
-          )
-        );
+    if (submission.events && submission.selectedSounds) {
+      submission.events.forEach((event) => {
+        const sound = submission.selectedSounds[event.soundIndex];
+        this.previewEvents.push({
+          audio: sound.audio,
+          icon: sound.icon,
+          soundIndex: event.soundIndex,
+          startTimeSec: event.startTimeSec,
+          pitchSemitones: event.pitchSemitones,
+          scheduled: false
+        });
       });
     }
 
@@ -131,17 +128,32 @@ export class PreviewPhase extends BasePhase {
       .find((p) => p.id === assignment);
     const playerName = assignedPlayer ? assignedPlayer.name : "Unknown";
 
-    this.ui.updatePreviewInfo(playerName, currentRound);
+    const playerNameEl = document.getElementById("previous-player-name");
+    if (playerNameEl) {
+      playerNameEl.textContent = playerName;
+    }
+
+    const currentRoundEl = document.getElementById("preview-current-round");
+    if (currentRoundEl) {
+      currentRoundEl.textContent = currentRound;
+    }
+
+    const totalRoundsEl = document.getElementById("preview-total-rounds");
+    if (totalRoundsEl) {
+      totalRoundsEl.textContent = this.serverState.getTotalRounds();
+    }
   }
 
   /**
    * Start playback
    */
   startPlayback() {
+    const currentTime = this.audio.getCurrentTime();
+
     this.localState.setPlaybackState(
       true,
       0,
-      this.audio.getCurrentTime()
+      currentTime
     );
 
     this.audio.startBackingTrack();
@@ -149,11 +161,10 @@ export class PreviewPhase extends BasePhase {
     this.startAnimation();
 
     this.ui.updateTransportControls(
-      "preview-play-pause-btn",
-      "preview-progress-bar",
+      "preview",
       true,
       0,
-      GameConfig.DEFAULT_SEGMENT_LENGTH
+      this.segmentLength
     );
   }
 
@@ -184,7 +195,7 @@ export class PreviewPhase extends BasePhase {
     const playbackTime = currentTime - this.localState.getStartTime();
 
     // Loop back if we reached the end
-    if (playbackTime >= GameConfig.DEFAULT_SEGMENT_LENGTH) {
+    if (playbackTime >= this.segmentLength) {
       this.restart();
       return;
     }
@@ -196,11 +207,10 @@ export class PreviewPhase extends BasePhase {
 
         if (
           eventTime >= playbackTime &&
-          eventTime <= playbackTime + 0.1 // 100ms lookahead
+          eventTime <= playbackTime + 0.1
         ) {
           const scheduleTime = currentTime + (eventTime - playbackTime);
-          // Note: In preview, we don't have actual audio URLs for events
-          // This would need to be handled differently in the actual implementation
+          this.audio.playSoundFromUrl(event.audio, event.pitchSemitones, scheduleTime);
           event.scheduled = true;
         }
       }
@@ -230,11 +240,10 @@ export class PreviewPhase extends BasePhase {
     this.localState.setCurrentTime(playbackTime);
 
     this.ui.updateTransportControls(
-      "preview-play-pause-btn",
-      "preview-progress-bar",
+      "preview",
       true,
       playbackTime,
-      GameConfig.DEFAULT_SEGMENT_LENGTH
+      this.segmentLength
     );
 
     // Draw canvas
@@ -244,7 +253,7 @@ export class PreviewPhase extends BasePhase {
         canvas,
         this.previewEvents,
         playbackTime,
-        GameConfig.DEFAULT_SEGMENT_LENGTH
+        this.segmentLength
       );
     }
   }
@@ -280,11 +289,10 @@ export class PreviewPhase extends BasePhase {
     this.startAnimation();
 
     this.ui.updateTransportControls(
-      "preview-play-pause-btn",
-      "preview-progress-bar",
+      "preview",
       true,
       currentTime,
-      GameConfig.DEFAULT_SEGMENT_LENGTH
+      this.segmentLength
     );
   }
 
@@ -302,11 +310,10 @@ export class PreviewPhase extends BasePhase {
     this.audio.pauseBackingTrack();
 
     this.ui.updateTransportControls(
-      "preview-play-pause-btn",
-      "preview-progress-bar",
+      "preview",
       false,
       this.localState.getCurrentTime(),
-      GameConfig.DEFAULT_SEGMENT_LENGTH
+      this.segmentLength
     );
   }
 
@@ -328,11 +335,10 @@ export class PreviewPhase extends BasePhase {
     }
 
     this.ui.updateTransportControls(
-      "preview-play-pause-btn",
-      "preview-progress-bar",
+      "preview",
       this.localState.isPlaying(),
       0,
-      GameConfig.DEFAULT_SEGMENT_LENGTH
+      this.segmentLength
     );
   }
 
@@ -352,11 +358,10 @@ export class PreviewPhase extends BasePhase {
     this.audio.seekBackingTrack(time);
 
     this.ui.updateTransportControls(
-      "preview-play-pause-btn",
-      "preview-progress-bar",
+      "preview",
       this.localState.isPlaying(),
       time,
-      GameConfig.DEFAULT_SEGMENT_LENGTH
+      this.segmentLength
     );
 
     // Update canvas
@@ -366,7 +371,7 @@ export class PreviewPhase extends BasePhase {
         canvas,
         this.previewEvents,
         time,
-        GameConfig.DEFAULT_SEGMENT_LENGTH
+        this.segmentLength
       );
     }
   }
@@ -392,9 +397,9 @@ export class PreviewPhase extends BasePhase {
    * Update countdown display
    */
   updateCountdownDisplay() {
-    const element = document.getElementById("preview-countdown");
+    const element = document.getElementById("preview-phase-timer");
     if (element) {
-      element.textContent = `Time: ${this.timeRemaining}s`;
+      element.textContent = this.timeRemaining;
     }
   }
 

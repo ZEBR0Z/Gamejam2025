@@ -404,8 +404,9 @@ export class CanvasService {
    * @param {Array} events
    * @param {number} currentTime
    * @param {number} totalTime
+   * @param {Array} selectedSounds - Array of {audio, icon}
    */
-  drawFinalView(canvas, events, currentTime, totalTime) {
+  drawFinalView(canvas, events, currentTime, totalTime, selectedSounds = null) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -429,7 +430,7 @@ export class CanvasService {
         const centerY = height / 2;
         const y = centerY - event.pitchSemitones * 5;
 
-        this.drawNoteWithIcon(ctx, x, y, 13, event, null, event.soundIndex + 1);
+        this.drawNoteWithIcon(ctx, x, y, 13, event, selectedSounds, event.soundIndex + 1);
       }
     });
 

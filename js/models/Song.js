@@ -124,17 +124,13 @@ export class Song {
    */
   toSubmission() {
     return {
-      songData: this.events.map((event) => ({
-        audio: this.selectedSounds[event.soundIndex].audio,
-        icon: this.selectedSounds[event.soundIndex].icon,
-        time: event.startTimeSec,
-        pitch: event.pitchSemitones,
+      events: this.events.map((event) => ({
+        soundIndex: event.soundIndex,
+        startTimeSec: event.startTimeSec,
+        pitchSemitones: event.pitchSemitones,
       })),
       backingTrack: this.backingTrack,
-      selectedSounds: this.selectedSounds.map((s) => ({
-        audio: s.audio,
-        icon: s.icon,
-      })),
+      selectedSounds: this.selectedSounds,
     };
   }
 
@@ -146,20 +142,11 @@ export class Song {
   static fromSubmission(submission) {
     const song = new Song();
 
-    // Set backing track
     song.setBackingTrack(submission.backingTrack);
-
-    // Set selected sounds
     song.setSelectedSounds(submission.selectedSounds);
 
-    // Convert songData to events
-    submission.songData.forEach((data) => {
-      const soundIndex = song.selectedSounds.findIndex(
-        (s) => s.audio === data.audio
-      );
-      if (soundIndex !== -1) {
-        song.addEvent(soundIndex, data.time, data.pitch);
-      }
+    submission.events.forEach((event) => {
+      song.addEvent(event.soundIndex, event.startTimeSec, event.pitchSemitones);
     });
 
     return song;

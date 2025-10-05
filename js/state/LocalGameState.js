@@ -6,6 +6,7 @@
 
 import { StateObserver } from "./StateObserver.js";
 import { StateEvent, GameConfig } from "../Constants.js";
+import { Song } from "../models/Song.js";
 
 export class LocalGameState {
   constructor() {
@@ -275,23 +276,17 @@ export class LocalGameState {
   }
 
   /**
-   * Convert current state to server submission format
-   * @returns {Object} {songData, backingTrack, selectedSounds}
+   * Convert to Song object
+   * @returns {Song}
    */
-  toSubmission() {
-    return {
-      songData: this.events.map((event) => ({
-        audio: this.selectedSounds[event.soundIndex].audio,
-        icon: this.selectedSounds[event.soundIndex].icon,
-        time: event.startTimeSec,
-        pitch: event.pitchSemitones,
-      })),
-      backingTrack: this.backingTrack,
-      selectedSounds: this.selectedSounds.map((s) => ({
-        audio: s.audio,
-        icon: s.icon,
-      })),
-    };
+  toSong() {
+    const song = new Song();
+    song.setBackingTrack(this.backingTrack);
+    song.setSelectedSounds(this.selectedSounds);
+    this.events.forEach((event) => {
+      song.addEvent(event.soundIndex, event.startTimeSec, event.pitchSemitones);
+    });
+    return song;
   }
 
   /**

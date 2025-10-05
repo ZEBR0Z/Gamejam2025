@@ -538,8 +538,8 @@ export class EditingPhase extends BasePhase {
     this.audio.stopBackingTrack();
 
     // Submit work to server and move to waiting phase
-    const submission = this.localState.toSubmission();
-    this.network.updatePhase(PhaseType.WAITING, currentRound, submission);
+    const song = this.localState.toSong();
+    this.network.updatePhase(PhaseType.WAITING, currentRound, song.toSubmission());
 
     // Complete phase
     this.complete();
