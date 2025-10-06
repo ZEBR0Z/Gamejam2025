@@ -22,6 +22,9 @@ export class SoundReplacementPhase extends BasePhase {
     // Show replacement screen
     this.ui.showScreen("sound_replacement");
 
+    // Load selected sounds from previous submission
+    this.loadSelectedSounds();
+
     // Pick random sound to replace
     const currentSounds = this.localState.getSelectedSounds();
     this.soundToReplaceIndex = Math.floor(Math.random() * currentSounds.length);
@@ -57,6 +60,32 @@ export class SoundReplacementPhase extends BasePhase {
     this.input.cleanupButtonEvents();
 
     super.exit();
+  }
+
+  /**
+   * Load selected sounds from previous submission
+   */
+  loadSelectedSounds() {
+    const currentRound = this.localState.getCurrentRound();
+    const localPlayerId = this.serverState.getLocalPlayerId();
+
+    // Get assignment for current round
+    const assignment = this.serverState.getAssignment(localPlayerId, currentRound);
+    if (!assignment) {
+      return;
+    }
+
+    // Get that player's previous submission
+    const submission = this.serverState.getSubmission(
+      assignment,
+      currentRound - 1
+    );
+    if (!submission || !submission.selectedSounds) {
+      return;
+    }
+
+    // Set selected sounds in local state
+    this.localState.setSelectedSounds(submission.selectedSounds);
   }
 
   /**
@@ -243,7 +272,7 @@ export class SoundReplacementPhase extends BasePhase {
 
     // Replace the sound in local state
     const newSound = this.replacementOptions[this.selectedIndex];
-    const currentSounds = this.localState.getSelectedSounds();
+    const currentSounds = [...this.localState.getSelectedSounds()];
     currentSounds[this.soundToReplaceIndex] = newSound;
     this.localState.setSelectedSounds(currentSounds);
 

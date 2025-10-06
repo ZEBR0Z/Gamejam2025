@@ -128,7 +128,7 @@ export class PerformancePhase extends BasePhase {
 
     if (backingTrack) {
       this.localState.setBackingTrack(backingTrack);
-      await this.audio.loadBackingTrack(backingTrack.audio);
+      await this.audio.loadBackingTrack(backingTrack.audio || backingTrack.path);
     }
   }
 
