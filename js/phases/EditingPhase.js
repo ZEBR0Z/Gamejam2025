@@ -197,7 +197,7 @@ export class EditingPhase extends BasePhase {
       // Play the note immediately on mousedown
       const selectedSound = this.localState.getSelectedSounds()[clickedEvent.soundIndex];
       if (selectedSound) {
-        this.audio.playPreviewSound(selectedSound.audio, clickedEvent.pitchSemitones);
+        this.audio.playPreviewSound(selectedSound.path, clickedEvent.pitchSemitones);
       }
 
       return {
@@ -225,7 +225,7 @@ export class EditingPhase extends BasePhase {
       // Play preview when pitch changes (responsive feedback)
       const selectedSound = this.localState.getSelectedSounds()[note.soundIndex];
       if (selectedSound) {
-        this.audio.playPreviewSound(selectedSound.audio, newPitch);
+        this.audio.playPreviewSound(selectedSound.path, newPitch);
       }
     }
 
@@ -309,7 +309,7 @@ export class EditingPhase extends BasePhase {
 
           if (sound) {
             this.audio.playSoundFromUrl(
-              sound.audio,
+              sound.path,
               event.pitchSemitones,
               scheduleTime
             );

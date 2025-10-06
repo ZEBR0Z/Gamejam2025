@@ -10,7 +10,7 @@ export class Song {
   constructor() {
     this.events = []; // Array of SoundEvent instances
     this.backingTrack = null; // {path, duration}
-    this.selectedSounds = []; // [{audio, icon}]
+    this.selectedSounds = []; // [{path, icon_path}]
     this.nextEventId = 0;
   }
 
@@ -73,17 +73,10 @@ export class Song {
 
   /**
    * Set backing track
-   * @param {Object} track - {path, duration} or {audio, duration}
+   * @param {Object} track - {path, duration}
    */
   setBackingTrack(track) {
-    if (track) {
-      this.backingTrack = {
-        path: track.audio || track.path,
-        duration: track.duration,
-      };
-    } else {
-      this.backingTrack = null;
-    }
+    this.backingTrack = track;
   }
 
   /**

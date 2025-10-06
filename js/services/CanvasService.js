@@ -85,10 +85,12 @@ export class CanvasService {
    * @returns {string|null}
    */
   getEventIcon(event, selectedSounds = null) {
-    if (event.icon) {
+    if (event.icon_path) {
+      return event.icon_path;
+    } else if (event.icon) {
       return event.icon;
     } else if (selectedSounds && selectedSounds[event.soundIndex]) {
-      return selectedSounds[event.soundIndex].icon;
+      return selectedSounds[event.soundIndex].icon_path;
     }
     return null;
   }

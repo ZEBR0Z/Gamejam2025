@@ -372,7 +372,7 @@ export class UIService {
       soundOption.style.justifyContent = "center";
       soundOption.style.fontSize = "2rem";
     };
-    img.src = soundData.icon;
+    img.src = soundData.icon_path;
     img.alt = `Sound ${index + 1}`;
 
     return soundOption;
@@ -412,7 +412,7 @@ export class UIService {
   updateSoundIcons(selectedSounds) {
     this.elements.soundIcons.forEach((icon, index) => {
       if (icon && selectedSounds[index]) {
-        icon.src = selectedSounds[index].icon;
+        icon.src = selectedSounds[index].icon_path;
       }
     });
   }
@@ -425,7 +425,7 @@ export class UIService {
   updateEditingSoundIcons(selectedSounds, selectedSoundIndex) {
     this.elements.editingSoundIcons.forEach((icon, index) => {
       if (icon && selectedSounds[index]) {
-        icon.src = selectedSounds[index].icon;
+        icon.src = selectedSounds[index].icon_path;
       }
     });
 
@@ -518,7 +518,7 @@ export class UIService {
       soundOption.style.justifyContent = "center";
       soundOption.style.fontSize = "2rem";
     };
-    img.src = soundData.icon;
+    img.src = soundData.icon_path;
     img.alt = `Replacement Option ${index + 1}`;
 
     return soundOption;
@@ -526,7 +526,7 @@ export class UIService {
 
   /**
    * Update replacement info display
-   * @param {Object} soundToReplace - {audio, icon}
+   * @param {Object} soundToReplace - {path, icon_path}
    * @param {number} soundIndex
    */
   updateReplacementInfo(soundToReplace, soundIndex) {
@@ -534,7 +534,7 @@ export class UIService {
     const targetNumber = this.getElement("replacementTargetNumber");
 
     if (targetIcon && soundToReplace) {
-      targetIcon.src = soundToReplace.icon;
+      targetIcon.src = soundToReplace.icon_path;
       targetIcon.alt = `Sound ${soundIndex + 1}`;
     }
 

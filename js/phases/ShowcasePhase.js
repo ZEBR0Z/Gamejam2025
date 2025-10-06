@@ -151,7 +151,7 @@ export class ShowcasePhase extends BasePhase {
 
     // Load backing track
     if (song.backingTrack) {
-      await this.audio.loadBackingTrack(song.backingTrack.audio);
+      await this.audio.loadBackingTrack(song.backingTrack.path);
     }
 
     // Start playback in sequential mode

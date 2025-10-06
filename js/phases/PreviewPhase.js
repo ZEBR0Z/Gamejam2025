@@ -112,8 +112,8 @@ export class PreviewPhase extends BasePhase {
       submission.events.forEach((event) => {
         const sound = submission.selectedSounds[event.soundIndex];
         this.previewEvents.push({
-          audio: sound.audio,
-          icon: sound.icon,
+          path: sound.path,
+          icon_path: sound.icon_path,
           soundIndex: event.soundIndex,
           startTimeSec: event.startTimeSec,
           pitchSemitones: event.pitchSemitones,
@@ -210,7 +210,7 @@ export class PreviewPhase extends BasePhase {
           eventTime <= playbackTime + 0.1
         ) {
           const scheduleTime = currentTime + (eventTime - playbackTime);
-          this.audio.playSoundFromUrl(event.audio, event.pitchSemitones, scheduleTime);
+          this.audio.playSoundFromUrl(event.path, event.pitchSemitones, scheduleTime);
           event.scheduled = true;
         }
       }

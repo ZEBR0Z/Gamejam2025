@@ -32,7 +32,7 @@ export class SoundReplacementPhase extends BasePhase {
     // Generate 3 replacement options (excluding current sounds)
     this.replacementOptions = this.localState.getRandomSounds(
       3,
-      currentSounds.map((s) => s.audio)
+      currentSounds.map((s) => s.path)
     );
 
     // Display replacement UI
@@ -140,9 +140,9 @@ export class SoundReplacementPhase extends BasePhase {
    */
   async handleSoundHover(index) {
     const soundData = this.replacementOptions[index];
-    if (soundData && soundData.audio) {
+    if (soundData && soundData.path) {
       try {
-        await this.audio.playPreviewSound(soundData.audio);
+        await this.audio.playPreviewSound(soundData.path);
       } catch (error) {
         console.error("Failed to preview sound:", error);
       }
@@ -153,9 +153,9 @@ export class SoundReplacementPhase extends BasePhase {
    * Handle target sound hover (preview the sound being replaced)
    */
   async handleTargetSoundHover(soundData) {
-    if (soundData && soundData.audio) {
+    if (soundData && soundData.path) {
       try {
-        await this.audio.playPreviewSound(soundData.audio);
+        await this.audio.playPreviewSound(soundData.path);
       } catch (error) {
         console.error("Failed to preview target sound:", error);
       }

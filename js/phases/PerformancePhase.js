@@ -128,7 +128,7 @@ export class PerformancePhase extends BasePhase {
 
     if (backingTrack) {
       this.localState.setBackingTrack(backingTrack);
-      await this.audio.loadBackingTrack(backingTrack.audio || backingTrack.path);
+      await this.audio.loadBackingTrack(backingTrack.path);
     }
   }
 
@@ -187,7 +187,7 @@ export class PerformancePhase extends BasePhase {
 
     // Play the sound immediately
     const sound = selectedSounds[soundIndex];
-    this.audio.playSoundFromUrl(sound.audio, 0, this.audio.getCurrentTime());
+    this.audio.playSoundFromUrl(sound.path, 0, this.audio.getCurrentTime());
   }
 
   /**
@@ -290,7 +290,7 @@ export class PerformancePhase extends BasePhase {
 
           if (sound) {
             this.audio.playSoundFromUrl(
-              sound.audio,
+              sound.path,
               event.pitchSemitones,
               scheduleTime
             );

@@ -95,9 +95,9 @@ export class SelectionPhase extends BasePhase {
    */
   async handleSoundHover(index) {
     const soundData = this.availableSounds[index];
-    if (soundData && soundData.audio) {
+    if (soundData && soundData.path) {
       try {
-        await this.audio.playPreviewSound(soundData.audio);
+        await this.audio.playPreviewSound(soundData.path);
       } catch (error) {
         console.error("Failed to preview sound:", error);
       }

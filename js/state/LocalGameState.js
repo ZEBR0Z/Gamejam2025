@@ -68,11 +68,11 @@ export class LocalGameState {
   /**
    * Get random sounds (without storing them)
    * @param {number} count - Number of sounds to get
-   * @param {Array} exclude - Audio paths to exclude
+   * @param {Array} exclude - Paths to exclude
    * @returns {Array} Random sounds
    */
   getRandomSounds(count, exclude = []) {
-    const available = this.soundList.filter(s => !exclude.includes(s.audio));
+    const available = this.soundList.filter(s => !exclude.includes(s.path));
     const shuffled = [...available].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, count);
   }
@@ -88,24 +88,22 @@ export class LocalGameState {
 
   /**
    * Add a sound to selected sounds
-   * @param {Object} soundData - {audio, icon}
-   * @param {number} originalIndex - Index in availableSounds
+   * @param {Object} soundData - {path, icon_path}
    * @returns {boolean} Success
    */
-  addSelectedSound(soundData, originalIndex) {
+  addSelectedSound(soundData) {
     if (this.selectedSounds.length >= GameConfig.SOUNDS_TO_SELECT) {
       return false;
     }
 
     this.selectedSounds.push({
-      originalIndex,
-      icon: soundData.icon,
-      audio: soundData.audio,
+      icon_path: soundData.icon_path,
+      path: soundData.path,
     });
 
     // Notify for icon preloading
-    if (this.onIconPreload && soundData.icon) {
-      this.onIconPreload(soundData.icon);
+    if (this.onIconPreload && soundData.icon_path) {
+      this.onIconPreload(soundData.icon_path);
     }
 
     this.emit(StateEvent.LOCAL_STATE_CHANGED);
@@ -114,12 +112,12 @@ export class LocalGameState {
 
   /**
    * Remove a sound from selected sounds
-   * @param {number} originalIndex - Index in availableSounds
+   * @param {Object} soundData - {path, icon_path}
    * @returns {boolean} Success
    */
-  removeSelectedSound(originalIndex) {
+  removeSelectedSound(soundData) {
     const index = this.selectedSounds.findIndex(
-      (sound) => sound.originalIndex === originalIndex
+      (sound) => sound.path === soundData.path
     );
 
     if (index !== -1) {
@@ -203,17 +201,10 @@ export class LocalGameState {
 
   /**
    * Set backing track
-   * @param {Object} track - {path, duration} or {audio, duration}
+   * @param {Object} track - {path, duration}
    */
   setBackingTrack(track) {
-    if (track) {
-      this.backingTrack = {
-        path: track.audio || track.path,
-        duration: track.duration,
-      };
-    } else {
-      this.backingTrack = null;
-    }
+    this.backingTrack = track;
     this.emit(StateEvent.LOCAL_STATE_CHANGED);
   }
 
@@ -267,7 +258,7 @@ export class LocalGameState {
     this.clearEvents();
     submission.songData.forEach((data) => {
       const soundIndex = this.selectedSounds.findIndex(
-        (s) => s.audio === data.audio
+        (s) => s.path === data.path
       );
       if (soundIndex !== -1) {
         this.addEvent(soundIndex, data.time, data.pitch);
