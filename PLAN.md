@@ -116,8 +116,8 @@ js/
 
 ### Phase 6: Integration & Testing
 - [x] Wire everything together
-- [ ] Test lobby creation/joining
-- [ ] Test ready system and game start
+- [x] Test lobby creation/joining
+- [x] Test ready system and game start
 - [ ] Test full round flow (selection → preview → replacement → performance → editing → waiting)
 - [ ] Test round transitions
 - [ ] Test showcase phase

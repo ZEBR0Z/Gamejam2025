@@ -37,7 +37,7 @@ export class SoundReplacementPhase extends BasePhase {
 
     // Set up continue button
     this.input.setupButtonEvents({
-      "confirm-replacement-btn": () => this.handleConfirmReplacement(),
+      "replacement-continue-btn": () => this.handleConfirmReplacement(),
     });
 
     this.updateConfirmButton();
@@ -63,7 +63,7 @@ export class SoundReplacementPhase extends BasePhase {
    * Display replacement options
    */
   displayReplacementOptions() {
-    const container = document.getElementById("replacement-options-container");
+    const container = document.getElementById("replacement-grid");
     if (!container) return;
 
     container.innerHTML = "";
@@ -71,19 +71,33 @@ export class SoundReplacementPhase extends BasePhase {
     // Show which sound is being replaced
     const soundToReplace =
       this.localState.getSelectedSounds()[this.soundToReplaceIndex];
-    const infoElement = document.getElementById("replacement-info");
-    if (infoElement) {
-      infoElement.textContent = `Replacing Sound ${this.soundToReplaceIndex + 1}`;
+    this.ui.updateReplacementInfo(soundToReplace, this.soundToReplaceIndex);
+
+    // Add hover preview to the sound being replaced
+    const targetIcon = document.getElementById("replacement-target-icon");
+    if (targetIcon && soundToReplace) {
+      targetIcon.parentElement.addEventListener("mouseenter", () =>
+        this.handleTargetSoundHover(soundToReplace)
+      );
+      targetIcon.parentElement.addEventListener("mouseleave", () =>
+        this.handleSoundLeave()
+      );
     }
 
     // Show replacement options
     this.replacementOptions.forEach((sound, index) => {
-      const soundOption = this.ui.createSoundOption(
-        sound,
-        index,
-        this.selectedIndex === index
-      );
+      const soundOption = this.ui.createSoundOption(sound, index);
 
+      // Add selected class if this sound is selected
+      if (this.selectedIndex === index) {
+        soundOption.classList.add("selected");
+      }
+
+      // Hover to preview sound
+      soundOption.addEventListener("mouseenter", () => this.handleSoundHover(index));
+      soundOption.addEventListener("mouseleave", () => this.handleSoundLeave());
+
+      // Click to select/deselect
       soundOption.addEventListener("click", () =>
         this.handleReplacementClick(index)
       );
@@ -93,19 +107,65 @@ export class SoundReplacementPhase extends BasePhase {
   }
 
   /**
+   * Handle sound hover (preview)
+   */
+  async handleSoundHover(index) {
+    const soundData = this.replacementOptions[index];
+    if (soundData && soundData.audio) {
+      try {
+        await this.audio.playPreviewSound(soundData.audio);
+      } catch (error) {
+        console.error("Failed to preview sound:", error);
+      }
+    }
+  }
+
+  /**
+   * Handle target sound hover (preview the sound being replaced)
+   */
+  async handleTargetSoundHover(soundData) {
+    if (soundData && soundData.audio) {
+      try {
+        await this.audio.playPreviewSound(soundData.audio);
+      } catch (error) {
+        console.error("Failed to preview target sound:", error);
+      }
+    }
+  }
+
+  /**
+   * Handle sound leave (stop preview)
+   */
+  handleSoundLeave() {
+    this.audio.stopPreview();
+  }
+
+  /**
    * Handle replacement option click
    */
   handleReplacementClick(index) {
+    const container = document.getElementById("replacement-grid");
+    const soundOption = container?.querySelector(`[data-index="${index}"]`);
+    if (!soundOption) return;
+
     if (this.selectedIndex === index) {
       // Deselect
       this.selectedIndex = -1;
+      soundOption.classList.remove("selected");
     } else {
-      // Select
+      // Deselect previous selection
+      if (this.selectedIndex !== -1) {
+        const prevOption = container?.querySelector(`[data-index="${this.selectedIndex}"]`);
+        if (prevOption) {
+          prevOption.classList.remove("selected");
+        }
+      }
+      // Select new
       this.selectedIndex = index;
+      soundOption.classList.add("selected");
     }
 
-    // Update UI
-    this.displayReplacementOptions();
+    // Update button
     this.updateConfirmButton();
   }
 
@@ -113,14 +173,16 @@ export class SoundReplacementPhase extends BasePhase {
    * Update confirm button state
    */
   updateConfirmButton() {
-    const confirmBtn = document.getElementById("confirm-replacement-btn");
+    const confirmBtn = document.getElementById("replacement-continue-btn");
     if (!confirmBtn) return;
 
     if (this.selectedIndex !== -1) {
       confirmBtn.disabled = false;
-      confirmBtn.textContent = "Confirm Replacement";
+      confirmBtn.classList.remove("is-disabled");
+      confirmBtn.textContent = "Continue";
     } else {
       confirmBtn.disabled = true;
+      confirmBtn.classList.add("is-disabled");
       confirmBtn.textContent = "Select a Replacement";
     }
   }
@@ -148,7 +210,7 @@ export class SoundReplacementPhase extends BasePhase {
   updateCountdownDisplay() {
     const element = document.getElementById("replacement-countdown");
     if (element) {
-      element.textContent = `Time: ${this.timeRemaining}s`;
+      element.textContent = this.timeRemaining;
     }
   }
 
