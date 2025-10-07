@@ -459,6 +459,9 @@ export class EditingPhase extends BasePhase {
       0,
       this.localState.getSegmentLength()
     );
+
+    // Update canvas immediately
+    this.drawCanvas();
   }
 
   /**

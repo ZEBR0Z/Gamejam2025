@@ -388,11 +388,17 @@ export class ShowcasePhase extends BasePhase {
     const wasPlaying = this.localState.isPlaying();
     this.pause();
     this.localState.setCurrentTime(0);
+    this.resetScheduledFlags(0);
 
     if (wasPlaying) {
       this.play();
     } else {
       this.ui.updateTransportControls("showcase", false, 0, this.getTotalTime());
+      // Update canvas immediately
+      const canvas = document.getElementById("showcase-canvas");
+      if (canvas) {
+        this.canvas.drawFinalView(canvas, this.currentSongEvents, 0, this.getTotalTime());
+      }
     }
   }
 
@@ -411,6 +417,12 @@ export class ShowcasePhase extends BasePhase {
     this.resetScheduledFlags(time);
     this.audio.seekBackingTrack(time % song.backingTrack.duration);
     this.ui.updateTransportControls("showcase", this.localState.isPlaying(), time, this.getTotalTime());
+
+    // Update canvas immediately
+    const canvas = document.getElementById("showcase-canvas");
+    if (canvas) {
+      this.canvas.drawFinalView(canvas, this.currentSongEvents, time, this.getTotalTime());
+    }
   }
 
   /**

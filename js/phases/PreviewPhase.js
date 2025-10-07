@@ -340,6 +340,17 @@ export class PreviewPhase extends BasePhase {
       0,
       this.segmentLength
     );
+
+    // Update canvas immediately
+    const canvas = document.getElementById("preview-canvas");
+    if (canvas) {
+      this.canvas.drawFinalView(
+        canvas,
+        this.previewEvents,
+        0,
+        this.segmentLength
+      );
+    }
   }
 
   /**
