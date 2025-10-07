@@ -138,8 +138,6 @@ export class AudioService {
     }
   }
 
-  // ===== PREVIEW PLAYBACK =====
-
   /**
    * Play a preview sound (only one at a time, automatically stops previous)
    * @param {string} audioUrl
@@ -194,8 +192,6 @@ export class AudioService {
       this.currentPreview = null;
     }
   }
-
-  // ===== BACKING TRACK (HTML5 Audio) =====
 
   /**
    * Load backing track
@@ -296,8 +292,6 @@ export class AudioService {
     return this.backingTrackAudio && !this.backingTrackAudio.paused;
   }
 
-  // ===== MENU MUSIC (HTML5 Audio) =====
-
   /**
    * Load menu music
    */
@@ -372,6 +366,24 @@ export class AudioService {
    */
   isMenuMusicPlaying() {
     return this.menuMusicAudio && !this.menuMusicAudio.paused;
+  }
+
+  /**
+   * Restart menu music (resume if playing, start from beginning if stopped)
+   */
+  async restartMenuMusic() {
+    // If music is already playing, just keep it playing
+    if (this.isMenuMusicPlaying()) {
+      return Promise.resolve();
+    }
+
+    // If music was stopped (audio element is null), reload and start
+    if (!this.menuMusicAudio) {
+      await this.loadMenuMusic();
+    }
+
+    // Start playing from beginning
+    return this.startMenuMusic();
   }
 
   /**

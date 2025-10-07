@@ -106,6 +106,9 @@ export class LobbyPhase extends BasePhase {
         gameStartingElement.style.display = "block";
       }
 
+      // Stop menu music when countdown starts
+      this.audio.stopMenuMusic();
+
       // Auto-complete after countdown
       setTimeout(() => {
         if (this.isActive) {

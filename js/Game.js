@@ -75,12 +75,20 @@ export class Game {
 
     // Load assets
     await this.localState.loadSoundList();
+    await this.audio.loadMenuMusic();
 
     // Set up main menu buttons
     this.setupMainMenu();
 
     // Show main menu
     this.ui.showScreen("main_menu");
+
+    // Start menu music
+    try {
+      await this.audio.startMenuMusic();
+    } catch (error) {
+      console.warn("Failed to autoplay menu music (user interaction required):", error);
+    }
 
     console.log("Game initialized");
   }
@@ -95,13 +103,23 @@ export class Game {
       "tutorial-btn": () => this.ui.showScreen("tutorial"),
       "create-lobby-confirm-btn": () => this.handleCreateLobby(),
       "join-lobby-confirm-btn": () => this.handleJoinLobby(),
-      "back-to-menu-btn": () => this.ui.showScreen("main_menu"),
-      "back-to-menu-from-join-btn": () => this.ui.showScreen("main_menu"),
-      "skip-tutorial-btn": () => this.ui.showScreen("main_menu"),
+      "back-to-menu-btn": () => this.returnToMainMenu(),
+      "back-to-menu-from-join-btn": () => this.returnToMainMenu(),
+      "skip-tutorial-btn": () => this.returnToMainMenu(),
     });
 
     // Set up input validation for name fields
     this.setupNameInputValidation();
+  }
+
+  /**
+   * Return to main menu and restart menu music
+   */
+  returnToMainMenu() {
+    this.ui.showScreen("main_menu");
+    this.audio.restartMenuMusic().catch((error) => {
+      console.warn("Failed to restart menu music:", error);
+    });
   }
 
   /**
@@ -429,6 +447,11 @@ export class Game {
 
     // Show main menu
     this.ui.showScreen("main_menu");
+
+    // Restart menu music (resume if playing, start if stopped)
+    this.audio.restartMenuMusic().catch((error) => {
+      console.warn("Failed to restart menu music:", error);
+    });
 
     console.log("Returned to main menu");
   }
