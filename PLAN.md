@@ -118,8 +118,8 @@ js/
 - [x] Wire everything together
 - [x] Test lobby creation/joining
 - [x] Test ready system and game start
-- [ ] Test full round flow (selection → preview → replacement → performance → editing → waiting)
-- [ ] Test round transitions
+- [x] Test full round flow (selection → preview → replacement → performance → editing → waiting)
+- [x] Test round transitions
 - [ ] Test showcase phase
 - [ ] Test error handling and edge cases
 

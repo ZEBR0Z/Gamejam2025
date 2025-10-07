@@ -598,8 +598,9 @@ export class UIService {
    * @param {number} currentSongIndex
    * @param {number} totalSongs
    * @param {Array<string>} songCreators - Player names
+   * @param {boolean} isForcedShowcase - Whether controls should be disabled
    */
-  updateShowcaseScreen(currentSongIndex, totalSongs, songCreators) {
+  updateShowcaseScreen(currentSongIndex, totalSongs, songCreators, isForcedShowcase = false) {
     if (this.elements.currentSongNumber) {
       this.elements.currentSongNumber.textContent = currentSongIndex + 1;
     }
@@ -608,6 +609,54 @@ export class UIService {
     }
     if (this.elements.songCreators) {
       this.elements.songCreators.textContent = songCreators.join(", then ");
+    }
+
+    // Disable transport controls in forced showcase mode
+    const playPauseBtn = document.getElementById("showcase-play-pause-btn");
+    const restartBtn = document.getElementById("showcase-restart-btn");
+    const progressBar = document.getElementById("showcase-progress-bar");
+    const prevBtn = document.getElementById("prev-song-btn");
+    const nextBtn = document.getElementById("next-song-btn");
+
+    const buttons = [
+      { element: playPauseBtn, hasNesBtn: false },
+      { element: restartBtn, hasNesBtn: false },
+      { element: progressBar, hasNesBtn: false },
+      { element: prevBtn, hasNesBtn: prevBtn?.classList.contains("nes-btn") },
+      { element: nextBtn, hasNesBtn: nextBtn?.classList.contains("nes-btn") }
+    ];
+
+    buttons.forEach(({ element, hasNesBtn }) => {
+      if (!element) return;
+
+      if (isForcedShowcase) {
+        element.disabled = true;
+        element.classList.add("is-disabled");
+      } else {
+        element.disabled = false;
+        element.classList.remove("is-disabled");
+      }
+    });
+
+    // Disable prev button on first song, next button on last song
+    if (prevBtn) {
+      if (currentSongIndex === 0) {
+        prevBtn.disabled = true;
+        prevBtn.classList.add("is-disabled");
+      } else if (!isForcedShowcase) {
+        prevBtn.disabled = false;
+        prevBtn.classList.remove("is-disabled");
+      }
+    }
+
+    if (nextBtn) {
+      if (currentSongIndex === totalSongs - 1) {
+        nextBtn.disabled = true;
+        nextBtn.classList.add("is-disabled");
+      } else if (!isForcedShowcase) {
+        nextBtn.disabled = false;
+        nextBtn.classList.remove("is-disabled");
+      }
     }
   }
 

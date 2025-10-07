@@ -544,6 +544,18 @@ canvas {
   filter: brightness(80%);
 }
 
+.control-button.is-disabled,
+.control-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(100%);
+}
+
+.control-button.is-disabled:hover,
+.control-button:disabled:hover {
+  filter: grayscale(100%);
+}
+
 .play-pause-btn {
   background-image: url("assets/artwork/play.png");
   background-repeat: no-repeat;
@@ -589,7 +601,7 @@ canvas {
   height: 8px;
   background: rgba(255, 255, 255, 0.3);
   outline: none;
-  cursor: pointer;
+  cursor: url("./assets/artwork/cursor.png"), auto;
 }
 
 #progress-bar::-webkit-slider-thumb,
@@ -601,7 +613,7 @@ canvas {
   width: 20px;
   height: 20px;
   background: #4caf50;
-  cursor: pointer;
+  cursor: url("./assets/artwork/cursor.png"), auto;
 }
 
 #time-display,

@@ -14,7 +14,7 @@ export class ShowcasePhase extends BasePhase {
     this.finalSongs = [];
     this.currentSongIndex = 0;
     this.currentSongEvents = [];
-    this.isSequentialMode = true;
+    this.isForcedShowcase = true;
     this.hasPlayedAllSongs = false;
   }
 
@@ -27,21 +27,20 @@ export class ShowcasePhase extends BasePhase {
     // Load final songs from server state
     this.loadFinalSongs();
 
-    // Set up transport controls (disabled in sequential mode)
+    // Set up transport controls (disabled in forced showcase mode)
     this.input.setupTransportEvents({
       "showcase-play-pause-btn": () =>
-        !this.isSequentialMode && this.togglePlayback(),
-      "showcase-restart-btn": () => !this.isSequentialMode && this.restart(),
+        !this.isForcedShowcase && this.togglePlayback(),
+      "showcase-restart-btn": () => !this.isForcedShowcase && this.restart(),
       "showcase-progress-bar": (value) =>
-        !this.isSequentialMode && this.seekTo(value),
+        !this.isForcedShowcase && this.seekTo(value),
     });
 
     // Set up navigation buttons
     this.input.setupButtonEvents({
-      "prev-song-btn": () => !this.isSequentialMode && this.previousSong(),
-      "next-song-btn": () => !this.isSequentialMode && this.nextSong(),
+      "prev-song-btn": () => !this.isForcedShowcase && this.previousSong(),
+      "next-song-btn": () => !this.isForcedShowcase && this.nextSong(),
       "showcase-exit-btn": () => this.handleExit(),
-      "showcase-restart-btn": () => this.handleRestart(),
     });
 
     // Show first song
@@ -79,53 +78,44 @@ export class ShowcasePhase extends BasePhase {
     const players = this.serverState.getPlayers();
     const maxRounds = this.serverState.getMaxRounds();
 
-    this.finalSongs = players.map((player) => {
-      // Get all submissions for this player
+    this.finalSongs = players.map((originalPlayer) => {
+      // Build the song by following who worked on it each round
       const submissions = [];
-      for (let round = 1; round <= maxRounds; round++) {
-        const submission = this.serverState.getSubmission(player.id, round);
-        if (submission) {
-          submissions.push(submission);
+      const contributors = [originalPlayer.name];
+
+      // Round 1: Original player's submission
+      const round1Submission = this.serverState.getSubmission(originalPlayer.id, 1);
+      if (round1Submission) {
+        submissions.push(round1Submission);
+      }
+
+      // Round 2+: Find who was assigned to work on this song
+      for (let round = 2; round <= maxRounds; round++) {
+        let foundSubmission = false;
+
+        for (const player of players) {
+          const assignment = this.serverState.getAssignment(player.id, round);
+          if (assignment === originalPlayer.id) {
+            const submission = this.serverState.getSubmission(player.id, round);
+            if (submission) {
+              submissions.push(submission);
+              if (!contributors.includes(player.name)) {
+                contributors.push(player.name);
+              }
+              foundSubmission = true;
+              break;
+            }
+          }
         }
       }
 
-      // Get contributors for this song (who worked on it)
-      const contributors = this.getContributors(player.id, maxRounds);
-
       return {
-        id: `song_${player.id}`,
-        originalCreator: player.name,
+        id: `song_${originalPlayer.id}`,
+        originalCreator: originalPlayer.name,
         segments: submissions,
         contributors: contributors,
         backingTrack: submissions[0]?.backingTrack || null,
       };
-    });
-  }
-
-  /**
-   * Get list of contributors for a song
-   */
-  getContributors(originalCreatorId, maxRounds) {
-    const contributors = [originalCreatorId];
-
-    // For each round, find who worked on this song
-    for (let round = 2; round <= maxRounds; round++) {
-      const players = this.serverState.getPlayers();
-
-      for (const player of players) {
-        const assignment = this.serverState.getAssignment(player.id, round);
-
-        // Check if this player was assigned to work on the original creator's song
-        if (assignment === originalCreatorId && !contributors.includes(player.id)) {
-          contributors.push(player.id);
-        }
-      }
-    }
-
-    // Convert IDs to names
-    return contributors.map((id) => {
-      const player = this.serverState.getPlayers().find((p) => p.id === id);
-      return player ? player.name : "Unknown";
     });
   }
 
@@ -146,7 +136,7 @@ export class ShowcasePhase extends BasePhase {
       songIndex,
       this.finalSongs.length,
       song.contributors,
-      this.isSequentialMode
+      this.isForcedShowcase
     );
 
     // Load backing track
@@ -154,8 +144,8 @@ export class ShowcasePhase extends BasePhase {
       await this.audio.loadBackingTrack(song.backingTrack.path);
     }
 
-    // Start playback in sequential mode
-    if (this.isSequentialMode) {
+    // Start playback in forced showcase mode
+    if (this.isForcedShowcase) {
       this.startPlayback();
     }
   }
@@ -168,49 +158,37 @@ export class ShowcasePhase extends BasePhase {
 
     if (!song.segments || song.segments.length === 0) return;
 
-    const segmentLength = GameConfig.DEFAULT_SEGMENT_LENGTH;
+    const segmentLength = song.backingTrack.duration;
 
     song.segments.forEach((submission, segmentIndex) => {
-      if (!submission.songData) return;
+      if (!submission.events) return;
 
-      submission.songData.forEach((eventData) => {
+      submission.events.forEach((eventData) => {
+        // Get sound info from selectedSounds
+        const sound = submission.selectedSounds[eventData.soundIndex];
+
         this.currentSongEvents.push({
-          id: `${segmentIndex}_${eventData.time}`,
-          soundIndex: 0,
-          startTimeSec: segmentIndex * segmentLength + eventData.time,
-          pitchSemitones: eventData.pitch || 0,
+          id: `${segmentIndex}_${eventData.startTimeSec}`,
+          soundIndex: eventData.soundIndex,
+          startTimeSec: segmentIndex * segmentLength + eventData.startTimeSec,
+          pitchSemitones: eventData.pitchSemitones,
           scheduled: false,
-          audio: eventData.audio,
-          icon: eventData.icon,
+          audio: sound.path,
+          icon: sound.icon_path,
         });
       });
     });
   }
 
   /**
-   * Start playback
+   * Start playback from beginning
    */
   startPlayback() {
-    const song = this.finalSongs[this.currentSongIndex];
-    const totalTime = song.segments.length * GameConfig.DEFAULT_SEGMENT_LENGTH;
-
-    this.localState.setPlaybackState(
-      true,
-      0,
-      this.audio.getCurrentTime()
-    );
-
+    this.localState.setPlaybackState(true, 0, this.audio.getCurrentTime());
     this.audio.startBackingTrack();
     this.startScheduling();
     this.startAnimation();
-
-    this.ui.updateTransportControls(
-      "showcase-play-pause-btn",
-      "showcase-progress-bar",
-      true,
-      0,
-      totalTime
-    );
+    this.ui.updateTransportControls("showcase", true, 0, this.getTotalTime());
   }
 
   /**
@@ -236,11 +214,9 @@ export class ShowcasePhase extends BasePhase {
 
     const currentTime = this.audio.getCurrentTime();
     const playbackTime = currentTime - this.localState.getStartTime();
-    const song = this.finalSongs[this.currentSongIndex];
-    const totalTime = song.segments.length * GameConfig.DEFAULT_SEGMENT_LENGTH;
 
     // Check if song finished
-    if (playbackTime >= totalTime) {
+    if (playbackTime >= this.getTotalTime()) {
       this.handleSongFinished();
       return;
     }
@@ -289,52 +265,44 @@ export class ShowcasePhase extends BasePhase {
   updateDisplay() {
     const currentTime = this.audio.getCurrentTime();
     const playbackTime = currentTime - this.localState.getStartTime();
-    const song = this.finalSongs[this.currentSongIndex];
-    const totalTime = song.segments.length * GameConfig.DEFAULT_SEGMENT_LENGTH;
+    const totalTime = this.getTotalTime();
 
     this.localState.setCurrentTime(playbackTime);
+    this.ui.updateTransportControls("showcase", true, playbackTime, totalTime);
 
-    this.ui.updateTransportControls(
-      "showcase-play-pause-btn",
-      "showcase-progress-bar",
-      true,
-      playbackTime,
-      totalTime
-    );
-
-    // Draw canvas
     const canvas = document.getElementById("showcase-canvas");
     if (canvas) {
-      this.canvas.drawFinalView(
-        canvas,
-        this.currentSongEvents,
-        playbackTime,
-        totalTime
-      );
+      this.canvas.drawFinalView(canvas, this.currentSongEvents, playbackTime, totalTime);
     }
   }
 
   /**
    * Handle song finished
    */
-  handleSongFinished() {
+  async handleSongFinished() {
     // Stop playback
     this.pause();
     this.audio.stopBackingTrack();
 
-    if (this.isSequentialMode) {
+    if (this.isForcedShowcase) {
       // Move to next song
       if (this.currentSongIndex < this.finalSongs.length - 1) {
         this.showSong(this.currentSongIndex + 1);
       } else {
         // All songs played
         this.hasPlayedAllSongs = true;
-        this.isSequentialMode = false;
+        this.isForcedShowcase = false;
         this.showSong(0); // Show first song in manual mode
       }
     } else {
-      // In manual mode, just stop
-      this.restart();
+      // In manual mode, stop at end and reset to beginning
+      const song = this.finalSongs[this.currentSongIndex];
+      if (song.backingTrack) {
+        await this.audio.loadBackingTrack(song.backingTrack.path);
+      }
+      this.localState.setPlaybackState(false, 0, 0);
+      this.resetScheduledFlags(0);
+      this.ui.updateTransportControls("showcase", false, 0, this.getTotalTime());
     }
   }
 
@@ -350,12 +318,29 @@ export class ShowcasePhase extends BasePhase {
   }
 
   /**
+   * Get total time for current song
+   */
+  getTotalTime() {
+    const song = this.finalSongs[this.currentSongIndex];
+    return song.segments.length * song.backingTrack.duration;
+  }
+
+  /**
+   * Reset event scheduled flags from a given time onwards
+   */
+  resetScheduledFlags(fromTime = 0) {
+    this.currentSongEvents.forEach((e) => {
+      if (e.startTimeSec >= fromTime) {
+        e.scheduled = false;
+      }
+    });
+  }
+
+  /**
    * Play
    */
   play() {
     const currentTime = this.localState.getCurrentTime();
-    const song = this.finalSongs[this.currentSongIndex];
-    const totalTime = song.segments.length * GameConfig.DEFAULT_SEGMENT_LENGTH;
 
     this.localState.setPlaybackState(
       true,
@@ -363,20 +348,18 @@ export class ShowcasePhase extends BasePhase {
       this.audio.getCurrentTime() - currentTime
     );
 
-    // Reset scheduled flags
-    this.currentSongEvents.forEach((e) => (e.scheduled = false));
+    this.resetScheduledFlags(currentTime);
 
-    this.audio.resumeBackingTrack();
+    if (currentTime === 0) {
+      this.audio.startBackingTrack();
+    } else {
+      this.audio.resumeBackingTrack();
+    }
+
     this.startScheduling();
     this.startAnimation();
 
-    this.ui.updateTransportControls(
-      "showcase-play-pause-btn",
-      "showcase-progress-bar",
-      true,
-      currentTime,
-      totalTime
-    );
+    this.ui.updateTransportControls("showcase", true, currentTime, this.getTotalTime());
   }
 
   /**
@@ -391,46 +374,22 @@ export class ShowcasePhase extends BasePhase {
     }
 
     this.audio.pauseBackingTrack();
-
-    const song = this.finalSongs[this.currentSongIndex];
-    const totalTime = song.segments.length * GameConfig.DEFAULT_SEGMENT_LENGTH;
-
-    this.ui.updateTransportControls(
-      "showcase-play-pause-btn",
-      "showcase-progress-bar",
-      false,
-      this.localState.getCurrentTime(),
-      totalTime
-    );
+    this.ui.updateTransportControls("showcase", false, this.localState.getCurrentTime(), this.getTotalTime());
   }
 
   /**
-   * Restart playback
+   * Restart playback from beginning
    */
   restart() {
-    const song = this.finalSongs[this.currentSongIndex];
-    const totalTime = song.segments.length * GameConfig.DEFAULT_SEGMENT_LENGTH;
+    const wasPlaying = this.localState.isPlaying();
+    this.pause();
+    this.localState.setCurrentTime(0);
 
-    this.localState.setPlaybackState(
-      this.localState.isPlaying(),
-      0,
-      this.audio.getCurrentTime()
-    );
-
-    // Reset scheduled flags
-    this.currentSongEvents.forEach((e) => (e.scheduled = false));
-
-    if (this.localState.isPlaying()) {
-      this.audio.startBackingTrack();
+    if (wasPlaying) {
+      this.play();
+    } else {
+      this.ui.updateTransportControls("showcase", false, 0, this.getTotalTime());
     }
-
-    this.ui.updateTransportControls(
-      "showcase-play-pause-btn",
-      "showcase-progress-bar",
-      this.localState.isPlaying(),
-      0,
-      totalTime
-    );
   }
 
   /**
@@ -438,7 +397,6 @@ export class ShowcasePhase extends BasePhase {
    */
   seekTo(time) {
     const song = this.finalSongs[this.currentSongIndex];
-    const totalTime = song.segments.length * GameConfig.DEFAULT_SEGMENT_LENGTH;
 
     this.localState.setPlaybackState(
       this.localState.isPlaying(),
@@ -446,50 +404,34 @@ export class ShowcasePhase extends BasePhase {
       this.audio.getCurrentTime() - time
     );
 
-    // Reset scheduled flags
-    this.currentSongEvents.forEach((e) => (e.scheduled = false));
-
-    this.audio.seekBackingTrack(time % GameConfig.DEFAULT_SEGMENT_LENGTH);
-
-    this.ui.updateTransportControls(
-      "showcase-play-pause-btn",
-      "showcase-progress-bar",
-      this.localState.isPlaying(),
-      time,
-      totalTime
-    );
-
-    // Update canvas
-    const canvas = document.getElementById("showcase-canvas");
-    if (canvas) {
-      this.canvas.drawFinalView(
-        canvas,
-        this.currentSongEvents,
-        time,
-        totalTime
-      );
-    }
+    this.resetScheduledFlags(time);
+    this.audio.seekBackingTrack(time % song.backingTrack.duration);
+    this.ui.updateTransportControls("showcase", this.localState.isPlaying(), time, this.getTotalTime());
   }
 
   /**
    * Previous song
    */
-  previousSong() {
+  async previousSong() {
     if (this.currentSongIndex > 0) {
       this.pause();
       this.audio.stopBackingTrack();
-      this.showSong(this.currentSongIndex - 1);
+      await this.showSong(this.currentSongIndex - 1);
+      this.localState.setPlaybackState(false, 0, 0);
+      this.startPlayback();
     }
   }
 
   /**
    * Next song
    */
-  nextSong() {
+  async nextSong() {
     if (this.currentSongIndex < this.finalSongs.length - 1) {
       this.pause();
       this.audio.stopBackingTrack();
-      this.showSong(this.currentSongIndex + 1);
+      await this.showSong(this.currentSongIndex + 1);
+      this.localState.setPlaybackState(false, 0, 0);
+      this.startPlayback();
     }
   }
 
