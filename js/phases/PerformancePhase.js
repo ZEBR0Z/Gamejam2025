@@ -59,7 +59,8 @@ export class PerformancePhase extends BasePhase {
     // Start playback loop
     this.startPlayback();
 
-    // Start countdown
+    // Reset and start countdown
+    this.timeRemaining = GameConfig.PERFORMANCE_TIME;
     this.startCountdown();
   }
 
@@ -471,11 +472,10 @@ export class PerformancePhase extends BasePhase {
 
     this.countdownInterval = setInterval(() => {
       this.timeRemaining--;
+      this.updateCountdownDisplay();
 
       if (this.timeRemaining <= 0) {
         this.handleTimeExpired();
-      } else {
-        this.updateCountdownDisplay();
       }
     }, 1000);
   }

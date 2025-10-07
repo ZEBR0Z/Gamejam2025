@@ -159,11 +159,10 @@ export class SelectionPhase extends BasePhase {
    */
   updateCountdown() {
     this.timeRemaining--;
+    this.updateCountdownDisplay();
 
     if (this.timeRemaining <= 0) {
       this.handleTimeExpired();
-    } else {
-      this.updateCountdownDisplay();
     }
   }
 

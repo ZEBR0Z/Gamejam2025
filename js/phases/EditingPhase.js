@@ -65,7 +65,8 @@ export class EditingPhase extends BasePhase {
     // Start playback loop
     this.startPlayback();
 
-    // Start countdown
+    // Reset and start countdown
+    this.timeRemaining = GameConfig.EDITING_TIME;
     this.startCountdown();
   }
 
@@ -502,11 +503,10 @@ export class EditingPhase extends BasePhase {
 
     this.countdownInterval = setInterval(() => {
       this.timeRemaining--;
+      this.updateCountdownDisplay();
 
       if (this.timeRemaining <= 0) {
         this.handleTimeExpired();
-      } else {
-        this.updateCountdownDisplay();
       }
     }, 1000);
   }

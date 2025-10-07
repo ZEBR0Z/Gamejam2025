@@ -12,7 +12,7 @@ export class PreviewPhase extends BasePhase {
     this.previewEvents = [];
     this.scheduleInterval = null;
     this.animationFrameId = null;
-    this.timeRemaining = 20;
+    this.timeRemaining = GameConfig.PREVIEW_TIME;
     this.countdownInterval = null;
     this.segmentLength = GameConfig.DEFAULT_SEGMENT_LENGTH;
   }
@@ -41,7 +41,8 @@ export class PreviewPhase extends BasePhase {
     // Start playback automatically
     this.startPlayback();
 
-    // Start countdown
+    // Reset and start countdown
+    this.timeRemaining = GameConfig.PREVIEW_TIME;
     this.startCountdown();
   }
 
@@ -390,11 +391,10 @@ export class PreviewPhase extends BasePhase {
 
     this.countdownInterval = setInterval(() => {
       this.timeRemaining--;
+      this.updateCountdownDisplay();
 
       if (this.timeRemaining <= 0) {
         this.handleTimeExpired();
-      } else {
-        this.updateCountdownDisplay();
       }
     }, 1000);
   }

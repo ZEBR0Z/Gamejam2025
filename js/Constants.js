@@ -17,6 +17,7 @@ export const GameConfig = {
   SERVER_URL: "https://yothatsheat.ruelalarcon.dev", // Replace this with http://localhost:8000 in testing
   DEFAULT_SEGMENT_LENGTH: 8, // seconds (overridden by backing track)
   SELECTION_TIME: 30, // seconds
+  PREVIEW_TIME: 20, // seconds
   PERFORMANCE_TIME: 90, // seconds
   EDITING_TIME: 60, // seconds
   REPLACEMENT_TIME: 30, // seconds

@@ -45,7 +45,8 @@ export class SoundReplacementPhase extends BasePhase {
 
     this.updateConfirmButton();
 
-    // Start countdown
+    // Reset and start countdown
+    this.timeRemaining = GameConfig.REPLACEMENT_TIME;
     this.startCountdown();
   }
 
@@ -231,11 +232,10 @@ export class SoundReplacementPhase extends BasePhase {
 
     this.countdownInterval = setInterval(() => {
       this.timeRemaining--;
+      this.updateCountdownDisplay();
 
       if (this.timeRemaining <= 0) {
         this.handleTimeExpired();
-      } else {
-        this.updateCountdownDisplay();
       }
     }, 1000);
   }
