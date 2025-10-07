@@ -47,11 +47,20 @@ export class UIService {
    */
   cacheElements() {
     // Countdown elements
-    this.elements.selectionCountdown = document.getElementById("selection-countdown");
-    this.elements.performanceCountdown = document.getElementById("performance-countdown");
-    this.elements.editingCountdown = document.getElementById("editing-countdown");
-    this.elements.replacementCountdown = document.getElementById("replacement-countdown");
-    this.elements.previewPhaseTimer = document.getElementById("preview-phase-timer");
+    this.elements.selectionCountdown = document.getElementById(
+      "selection-countdown",
+    );
+    this.elements.performanceCountdown = document.getElementById(
+      "performance-countdown",
+    );
+    this.elements.editingCountdown =
+      document.getElementById("editing-countdown");
+    this.elements.replacementCountdown = document.getElementById(
+      "replacement-countdown",
+    );
+    this.elements.previewPhaseTimer = document.getElementById(
+      "preview-phase-timer",
+    );
 
     // Selection screen
     this.elements.selectedCount = document.getElementById("selected-count");
@@ -60,44 +69,83 @@ export class UIService {
 
     // Sound replacement screen
     this.elements.replacementGrid = document.getElementById("replacement-grid");
-    this.elements.replacementContinueBtn = document.getElementById("replacement-continue-btn");
-    this.elements.replacementTargetIcon = document.getElementById("replacement-target-icon");
-    this.elements.replacementTargetNumber = document.getElementById("replacement-target-number");
-    this.elements.replacementStatus = document.getElementById("replacement-status");
+    this.elements.replacementContinueBtn = document.getElementById(
+      "replacement-continue-btn",
+    );
+    this.elements.replacementTargetIcon = document.getElementById(
+      "replacement-target-icon",
+    );
+    this.elements.replacementTargetNumber = document.getElementById(
+      "replacement-target-number",
+    );
+    this.elements.replacementStatus =
+      document.getElementById("replacement-status");
 
     // Performance screen
     this.elements.playPauseBtn = document.getElementById("play-pause-btn");
     this.elements.restartBtn = document.getElementById("restart-btn");
     this.elements.progressBar = document.getElementById("progress-bar");
     this.elements.timeDisplay = document.getElementById("time-display");
-    this.elements.performanceContinueBtn = document.getElementById("performance-continue-btn");
+    this.elements.performanceContinueBtn = document.getElementById(
+      "performance-continue-btn",
+    );
 
     // Editing screen
-    this.elements.editPlayPauseBtn = document.getElementById("edit-play-pause-btn");
+    this.elements.editPlayPauseBtn = document.getElementById(
+      "edit-play-pause-btn",
+    );
     this.elements.editRestartBtn = document.getElementById("edit-restart-btn");
-    this.elements.editProgressBar = document.getElementById("edit-progress-bar");
-    this.elements.editTimeDisplay = document.getElementById("edit-time-display");
+    this.elements.editProgressBar =
+      document.getElementById("edit-progress-bar");
+    this.elements.editTimeDisplay =
+      document.getElementById("edit-time-display");
 
     // Preview screen
-    this.elements.previousPlayerName = document.getElementById("previous-player-name");
-    this.elements.previewCurrentRound = document.getElementById("preview-current-round");
-    this.elements.previewTotalRounds = document.getElementById("preview-total-rounds");
+    this.elements.previousPlayerName = document.getElementById(
+      "previous-player-name",
+    );
+    this.elements.previewCurrentRound = document.getElementById(
+      "preview-current-round",
+    );
+    this.elements.previewTotalRounds = document.getElementById(
+      "preview-total-rounds",
+    );
     this.elements.previewCanvas = document.getElementById("preview-canvas");
-    this.elements.previewPlayPauseBtn = document.getElementById("preview-play-pause-btn");
-    this.elements.previewRestartBtn = document.getElementById("preview-restart-btn");
-    this.elements.previewProgressBar = document.getElementById("preview-progress-bar");
-    this.elements.previewTimeDisplay = document.getElementById("preview-time-display");
-    this.elements.continueToPerformanceBtn = document.getElementById("continue-to-performance-btn");
+    this.elements.previewPlayPauseBtn = document.getElementById(
+      "preview-play-pause-btn",
+    );
+    this.elements.previewRestartBtn = document.getElementById(
+      "preview-restart-btn",
+    );
+    this.elements.previewProgressBar = document.getElementById(
+      "preview-progress-bar",
+    );
+    this.elements.previewTimeDisplay = document.getElementById(
+      "preview-time-display",
+    );
+    this.elements.continueToPerformanceBtn = document.getElementById(
+      "continue-to-performance-btn",
+    );
 
     // Showcase screen
-    this.elements.currentSongNumber = document.getElementById("current-song-number");
+    this.elements.currentSongNumber = document.getElementById(
+      "current-song-number",
+    );
     this.elements.totalSongs = document.getElementById("total-songs");
     this.elements.songCreators = document.getElementById("song-creators");
     this.elements.showcaseCanvas = document.getElementById("showcase-canvas");
-    this.elements.showcasePlayPauseBtn = document.getElementById("showcase-play-pause-btn");
-    this.elements.showcaseRestartBtn = document.getElementById("showcase-restart-btn");
-    this.elements.showcaseProgressBar = document.getElementById("showcase-progress-bar");
-    this.elements.showcaseTimeDisplay = document.getElementById("showcase-time-display");
+    this.elements.showcasePlayPauseBtn = document.getElementById(
+      "showcase-play-pause-btn",
+    );
+    this.elements.showcaseRestartBtn = document.getElementById(
+      "showcase-restart-btn",
+    );
+    this.elements.showcaseProgressBar = document.getElementById(
+      "showcase-progress-bar",
+    );
+    this.elements.showcaseTimeDisplay = document.getElementById(
+      "showcase-time-display",
+    );
     this.elements.prevSongBtn = document.getElementById("prev-song-btn");
     this.elements.nextSongBtn = document.getElementById("next-song-btn");
 
@@ -121,7 +169,9 @@ export class UIService {
 
     // Canvases
     this.elements.timelineCanvas = document.getElementById("timeline-canvas");
-    this.elements.editingTimelineCanvas = document.getElementById("editing-timeline-canvas");
+    this.elements.editingTimelineCanvas = document.getElementById(
+      "editing-timeline-canvas",
+    );
     this.elements.editingCanvases = [
       document.getElementById("editing-canvas-1"),
       document.getElementById("editing-canvas-2"),
@@ -133,11 +183,15 @@ export class UIService {
     this.elements.playerName = document.getElementById("player-name");
     this.elements.joinPlayerName = document.getElementById("join-player-name");
     this.elements.lobbyCodeInput = document.getElementById("lobby-code");
-    this.elements.lobbyCodeDisplay = document.getElementById("lobby-code-display");
+    this.elements.lobbyCodeDisplay =
+      document.getElementById("lobby-code-display");
     this.elements.shareableCode = document.getElementById("shareable-code");
     this.elements.playerCount = document.getElementById("player-count");
-    this.elements.playersContainer = document.getElementById("players-container");
-    this.elements.connectionIndicator = document.getElementById("connection-indicator");
+    this.elements.playersContainer =
+      document.getElementById("players-container");
+    this.elements.connectionIndicator = document.getElementById(
+      "connection-indicator",
+    );
     this.elements.gameStarting = document.getElementById("game-starting");
     this.elements.startCountdown = document.getElementById("start-countdown");
   }
@@ -445,7 +499,9 @@ export class UIService {
    * @param {number} keyIndex - Index of the key (0-2)
    */
   showKeyPress(keyIndex) {
-    const keyEl = document.querySelector(`.sound-key:nth-child(${keyIndex + 1}) .key`);
+    const keyEl = document.querySelector(
+      `.sound-key:nth-child(${keyIndex + 1}) .key`,
+    );
     if (keyEl) {
       keyEl.classList.add("pressed");
     }
@@ -456,7 +512,9 @@ export class UIService {
    * @param {number} keyIndex - Index of the key (0-2)
    */
   hideKeyPress(keyIndex) {
-    const keyEl = document.querySelector(`.sound-key:nth-child(${keyIndex + 1}) .key`);
+    const keyEl = document.querySelector(
+      `.sound-key:nth-child(${keyIndex + 1}) .key`,
+    );
     if (keyEl) {
       keyEl.classList.remove("pressed");
     }
@@ -600,7 +658,12 @@ export class UIService {
    * @param {Array<string>} songCreators - Player names
    * @param {boolean} isForcedShowcase - Whether controls should be disabled
    */
-  updateShowcaseScreen(currentSongIndex, totalSongs, songCreators, isForcedShowcase = false) {
+  updateShowcaseScreen(
+    currentSongIndex,
+    totalSongs,
+    songCreators,
+    isForcedShowcase = false,
+  ) {
     if (this.elements.currentSongNumber) {
       this.elements.currentSongNumber.textContent = currentSongIndex + 1;
     }
@@ -623,7 +686,7 @@ export class UIService {
       { element: restartBtn, hasNesBtn: false },
       { element: progressBar, hasNesBtn: false },
       { element: prevBtn, hasNesBtn: prevBtn?.classList.contains("nes-btn") },
-      { element: nextBtn, hasNesBtn: nextBtn?.classList.contains("nes-btn") }
+      { element: nextBtn, hasNesBtn: nextBtn?.classList.contains("nes-btn") },
     ];
 
     buttons.forEach(({ element, hasNesBtn }) => {

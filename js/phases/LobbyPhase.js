@@ -22,7 +22,8 @@ export class LobbyPhase extends BasePhase {
     this.ui.showScreen("lobby_waiting");
 
     // Display lobby code (get from network service since server state may not be populated yet)
-    const lobbyCode = this.network.getLobbyCode() || this.serverState.getLobbyCode();
+    const lobbyCode =
+      this.network.getLobbyCode() || this.serverState.getLobbyCode();
     if (lobbyCode) {
       this.ui.updateLobbyCode(lobbyCode);
     }
@@ -35,7 +36,10 @@ export class LobbyPhase extends BasePhase {
 
     // Listen for server state updates
     this.stateUpdateHandler = () => this.handleStateUpdate();
-    this.serverState.observer.on(StateEvent.SERVER_STATE_CHANGED, this.stateUpdateHandler);
+    this.serverState.observer.on(
+      StateEvent.SERVER_STATE_CHANGED,
+      this.stateUpdateHandler,
+    );
 
     // Initial UI update
     this.updateLobbyUI();
@@ -50,7 +54,10 @@ export class LobbyPhase extends BasePhase {
     // Update countdown if counting down
     if (this.countdownStartTime !== null) {
       const elapsed = (Date.now() - this.countdownStartTime) / 1000;
-      const remaining = Math.max(0, Math.ceil(GameConfig.LOBBY_START_COUNTDOWN - elapsed));
+      const remaining = Math.max(
+        0,
+        Math.ceil(GameConfig.LOBBY_START_COUNTDOWN - elapsed),
+      );
 
       const countdownElement = document.getElementById("start-countdown");
       if (countdownElement) {
@@ -62,7 +69,10 @@ export class LobbyPhase extends BasePhase {
   exit() {
     // Clean up event listeners
     if (this.stateUpdateHandler) {
-      this.serverState.observer.off(StateEvent.SERVER_STATE_CHANGED, this.stateUpdateHandler);
+      this.serverState.observer.off(
+        StateEvent.SERVER_STATE_CHANGED,
+        this.stateUpdateHandler,
+      );
       this.stateUpdateHandler = null;
     }
 
@@ -158,7 +168,6 @@ export class LobbyPhase extends BasePhase {
         }
       }
     }
-
   }
 
   /**

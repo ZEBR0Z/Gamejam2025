@@ -51,7 +51,7 @@ export class SoundEvent {
       this.id,
       this.soundIndex,
       this.startTimeSec,
-      this.pitchSemitones
+      this.pitchSemitones,
     );
   }
 
@@ -78,7 +78,7 @@ export class SoundEvent {
       data.id,
       data.soundIndex,
       data.startTimeSec,
-      data.pitchSemitones
+      data.pitchSemitones,
     );
   }
 }

@@ -32,7 +32,7 @@ export class SoundReplacementPhase extends BasePhase {
     // Generate 3 replacement options (excluding current sounds)
     this.replacementOptions = this.localState.getRandomSounds(
       3,
-      currentSounds.map((s) => s.path)
+      currentSounds.map((s) => s.path),
     );
 
     // Display replacement UI
@@ -70,7 +70,10 @@ export class SoundReplacementPhase extends BasePhase {
     const localPlayerId = this.serverState.getLocalPlayerId();
 
     // Get assignment for current round
-    const assignment = this.serverState.getAssignment(localPlayerId, currentRound);
+    const assignment = this.serverState.getAssignment(
+      localPlayerId,
+      currentRound,
+    );
     if (!assignment) {
       return;
     }
@@ -78,7 +81,7 @@ export class SoundReplacementPhase extends BasePhase {
     // Get that player's previous submission
     const submission = this.serverState.getSubmission(
       assignment,
-      currentRound - 1
+      currentRound - 1,
     );
     if (!submission || !submission.selectedSounds) {
       return;
@@ -106,10 +109,10 @@ export class SoundReplacementPhase extends BasePhase {
     const targetIcon = document.getElementById("replacement-target-icon");
     if (targetIcon && soundToReplace) {
       targetIcon.parentElement.addEventListener("mouseenter", () =>
-        this.handleTargetSoundHover(soundToReplace)
+        this.handleTargetSoundHover(soundToReplace),
       );
       targetIcon.parentElement.addEventListener("mouseleave", () =>
-        this.handleSoundLeave()
+        this.handleSoundLeave(),
       );
     }
 
@@ -123,12 +126,14 @@ export class SoundReplacementPhase extends BasePhase {
       }
 
       // Hover to preview sound
-      soundOption.addEventListener("mouseenter", () => this.handleSoundHover(index));
+      soundOption.addEventListener("mouseenter", () =>
+        this.handleSoundHover(index),
+      );
       soundOption.addEventListener("mouseleave", () => this.handleSoundLeave());
 
       // Click to select/deselect
       soundOption.addEventListener("click", () =>
-        this.handleReplacementClick(index)
+        this.handleReplacementClick(index),
       );
 
       container.appendChild(soundOption);
@@ -184,7 +189,9 @@ export class SoundReplacementPhase extends BasePhase {
     } else {
       // Deselect previous selection
       if (this.selectedIndex !== -1) {
-        const prevOption = container?.querySelector(`[data-index="${this.selectedIndex}"]`);
+        const prevOption = container?.querySelector(
+          `[data-index="${this.selectedIndex}"]`,
+        );
         if (prevOption) {
           prevOption.classList.remove("selected");
         }
@@ -255,7 +262,7 @@ export class SoundReplacementPhase extends BasePhase {
     // Auto-select if not selected
     if (this.selectedIndex === -1 && this.replacementOptions.length > 0) {
       this.selectedIndex = Math.floor(
-        Math.random() * this.replacementOptions.length
+        Math.random() * this.replacementOptions.length,
       );
     }
 

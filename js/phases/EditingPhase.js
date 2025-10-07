@@ -98,7 +98,7 @@ export class EditingPhase extends BasePhase {
     this.input.cleanupTransportEvents();
     this.input.cleanupButtonEvents();
     this.input.cleanupCanvasEvents(
-      document.getElementById("editing-timeline-canvas")
+      document.getElementById("editing-timeline-canvas"),
     );
 
     // Stop audio
@@ -190,14 +190,18 @@ export class EditingPhase extends BasePhase {
       canvas,
       this.localState.getSegmentLength(),
       this.selectedSoundIndex, // Only allow selecting events from the selected sound
-      currentTime
+      currentTime,
     );
 
     if (clickedEvent) {
       // Play the note immediately on mousedown
-      const selectedSound = this.localState.getSelectedSounds()[clickedEvent.soundIndex];
+      const selectedSound =
+        this.localState.getSelectedSounds()[clickedEvent.soundIndex];
       if (selectedSound) {
-        this.audio.playPreviewSound(selectedSound.path, clickedEvent.pitchSemitones);
+        this.audio.playPreviewSound(
+          selectedSound.path,
+          clickedEvent.pitchSemitones,
+        );
       }
 
       return {
@@ -217,13 +221,18 @@ export class EditingPhase extends BasePhase {
     // Calculate pitch change using canvas renderer
     const deltaY = startY - mouseY;
     const pitchChange = this.canvas.calculatePitchChange(deltaY);
-    const newPitch = this.canvas.constrainPitch(startPitch + pitchChange, -12, 12);
+    const newPitch = this.canvas.constrainPitch(
+      startPitch + pitchChange,
+      -12,
+      12,
+    );
 
     if (newPitch !== note.pitchSemitones) {
       note.pitchSemitones = newPitch;
 
       // Play preview when pitch changes (responsive feedback)
-      const selectedSound = this.localState.getSelectedSounds()[note.soundIndex];
+      const selectedSound =
+        this.localState.getSelectedSounds()[note.soundIndex];
       if (selectedSound) {
         this.audio.playPreviewSound(selectedSound.path, newPitch);
       }
@@ -245,11 +254,7 @@ export class EditingPhase extends BasePhase {
    * Start playback loop
    */
   startPlayback() {
-    this.localState.setPlaybackState(
-      true,
-      0,
-      this.audio.getCurrentTime()
-    );
+    this.localState.setPlaybackState(true, 0, this.audio.getCurrentTime());
 
     this.audio.startBackingTrack();
     this.startScheduling();
@@ -259,7 +264,7 @@ export class EditingPhase extends BasePhase {
       "editing",
       true,
       0,
-      this.localState.getSegmentLength()
+      this.localState.getSegmentLength(),
     );
   }
 
@@ -311,7 +316,7 @@ export class EditingPhase extends BasePhase {
             this.audio.playSoundFromUrl(
               sound.path,
               event.pitchSemitones,
-              scheduleTime
+              scheduleTime,
             );
           }
 
@@ -347,7 +352,7 @@ export class EditingPhase extends BasePhase {
       "editing",
       this.localState.isPlaying(),
       playbackTime,
-      this.localState.getSegmentLength()
+      this.localState.getSegmentLength(),
     );
 
     this.drawCanvas();
@@ -373,7 +378,7 @@ export class EditingPhase extends BasePhase {
       this.localState.getSegmentLength(),
       this.selectedSoundIndex,
       isPlaying,
-      selectedSounds
+      selectedSounds,
     );
   }
 
@@ -397,7 +402,7 @@ export class EditingPhase extends BasePhase {
     this.localState.setPlaybackState(
       true,
       currentTime,
-      this.audio.getCurrentTime() - currentTime
+      this.audio.getCurrentTime() - currentTime,
     );
 
     // Reset scheduled flags
@@ -411,7 +416,7 @@ export class EditingPhase extends BasePhase {
       "editing",
       true,
       currentTime,
-      this.localState.getSegmentLength()
+      this.localState.getSegmentLength(),
     );
   }
 
@@ -432,7 +437,7 @@ export class EditingPhase extends BasePhase {
       "editing",
       false,
       this.localState.getCurrentTime(),
-      this.localState.getSegmentLength()
+      this.localState.getSegmentLength(),
     );
   }
 
@@ -443,7 +448,7 @@ export class EditingPhase extends BasePhase {
     this.localState.setPlaybackState(
       this.localState.isPlaying(),
       0,
-      this.audio.getCurrentTime()
+      this.audio.getCurrentTime(),
     );
 
     // Reset scheduled flags
@@ -457,7 +462,7 @@ export class EditingPhase extends BasePhase {
       "editing",
       this.localState.isPlaying(),
       0,
-      this.localState.getSegmentLength()
+      this.localState.getSegmentLength(),
     );
 
     // Update canvas immediately
@@ -471,7 +476,7 @@ export class EditingPhase extends BasePhase {
     this.localState.setPlaybackState(
       this.localState.isPlaying(),
       time,
-      this.audio.getCurrentTime() - time
+      this.audio.getCurrentTime() - time,
     );
 
     // Reset scheduled flags
@@ -483,7 +488,7 @@ export class EditingPhase extends BasePhase {
       "editing",
       this.localState.isPlaying(),
       time,
-      this.localState.getSegmentLength()
+      this.localState.getSegmentLength(),
     );
 
     this.drawCanvas();
@@ -542,7 +547,11 @@ export class EditingPhase extends BasePhase {
 
     // Submit work to server and move to waiting phase
     const song = this.localState.toSong();
-    this.network.updatePhase(PhaseType.WAITING, currentRound, song.toSubmission());
+    this.network.updatePhase(
+      PhaseType.WAITING,
+      currentRound,
+      song.toSubmission(),
+    );
 
     // Complete phase
     this.complete();

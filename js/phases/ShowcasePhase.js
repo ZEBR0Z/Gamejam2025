@@ -84,7 +84,10 @@ export class ShowcasePhase extends BasePhase {
       const contributors = [originalPlayer.name];
 
       // Round 1: Original player's submission
-      const round1Submission = this.serverState.getSubmission(originalPlayer.id, 1);
+      const round1Submission = this.serverState.getSubmission(
+        originalPlayer.id,
+        1,
+      );
       if (round1Submission) {
         submissions.push(round1Submission);
       }
@@ -136,7 +139,7 @@ export class ShowcasePhase extends BasePhase {
       songIndex,
       this.finalSongs.length,
       song.contributors,
-      this.isForcedShowcase
+      this.isForcedShowcase,
     );
 
     // Load backing track
@@ -150,7 +153,12 @@ export class ShowcasePhase extends BasePhase {
     } else {
       this.localState.setPlaybackState(false, 0, 0);
       this.resetScheduledFlags(0);
-      this.ui.updateTransportControls("showcase", false, 0, this.getTotalTime());
+      this.ui.updateTransportControls(
+        "showcase",
+        false,
+        0,
+        this.getTotalTime(),
+      );
     }
   }
 
@@ -240,7 +248,7 @@ export class ShowcasePhase extends BasePhase {
             this.audio.playSoundFromUrl(
               event.audio,
               event.pitchSemitones,
-              scheduleTime
+              scheduleTime,
             );
           }
 
@@ -276,7 +284,12 @@ export class ShowcasePhase extends BasePhase {
 
     const canvas = document.getElementById("showcase-canvas");
     if (canvas) {
-      this.canvas.drawFinalView(canvas, this.currentSongEvents, playbackTime, totalTime);
+      this.canvas.drawFinalView(
+        canvas,
+        this.currentSongEvents,
+        playbackTime,
+        totalTime,
+      );
     }
   }
 
@@ -306,7 +319,12 @@ export class ShowcasePhase extends BasePhase {
       }
       this.localState.setPlaybackState(false, 0, 0);
       this.resetScheduledFlags(0);
-      this.ui.updateTransportControls("showcase", false, 0, this.getTotalTime());
+      this.ui.updateTransportControls(
+        "showcase",
+        false,
+        0,
+        this.getTotalTime(),
+      );
     }
   }
 
@@ -349,7 +367,7 @@ export class ShowcasePhase extends BasePhase {
     this.localState.setPlaybackState(
       true,
       currentTime,
-      this.audio.getCurrentTime() - currentTime
+      this.audio.getCurrentTime() - currentTime,
     );
 
     this.resetScheduledFlags(currentTime);
@@ -363,7 +381,12 @@ export class ShowcasePhase extends BasePhase {
     this.startScheduling();
     this.startAnimation();
 
-    this.ui.updateTransportControls("showcase", true, currentTime, this.getTotalTime());
+    this.ui.updateTransportControls(
+      "showcase",
+      true,
+      currentTime,
+      this.getTotalTime(),
+    );
   }
 
   /**
@@ -378,7 +401,12 @@ export class ShowcasePhase extends BasePhase {
     }
 
     this.audio.pauseBackingTrack();
-    this.ui.updateTransportControls("showcase", false, this.localState.getCurrentTime(), this.getTotalTime());
+    this.ui.updateTransportControls(
+      "showcase",
+      false,
+      this.localState.getCurrentTime(),
+      this.getTotalTime(),
+    );
   }
 
   /**
@@ -393,11 +421,21 @@ export class ShowcasePhase extends BasePhase {
     if (wasPlaying) {
       this.play();
     } else {
-      this.ui.updateTransportControls("showcase", false, 0, this.getTotalTime());
+      this.ui.updateTransportControls(
+        "showcase",
+        false,
+        0,
+        this.getTotalTime(),
+      );
       // Update canvas immediately
       const canvas = document.getElementById("showcase-canvas");
       if (canvas) {
-        this.canvas.drawFinalView(canvas, this.currentSongEvents, 0, this.getTotalTime());
+        this.canvas.drawFinalView(
+          canvas,
+          this.currentSongEvents,
+          0,
+          this.getTotalTime(),
+        );
       }
     }
   }
@@ -411,17 +449,27 @@ export class ShowcasePhase extends BasePhase {
     this.localState.setPlaybackState(
       this.localState.isPlaying(),
       time,
-      this.audio.getCurrentTime() - time
+      this.audio.getCurrentTime() - time,
     );
 
     this.resetScheduledFlags(time);
     this.audio.seekBackingTrack(time % song.backingTrack.duration);
-    this.ui.updateTransportControls("showcase", this.localState.isPlaying(), time, this.getTotalTime());
+    this.ui.updateTransportControls(
+      "showcase",
+      this.localState.isPlaying(),
+      time,
+      this.getTotalTime(),
+    );
 
     // Update canvas immediately
     const canvas = document.getElementById("showcase-canvas");
     if (canvas) {
-      this.canvas.drawFinalView(canvas, this.currentSongEvents, time, this.getTotalTime());
+      this.canvas.drawFinalView(
+        canvas,
+        this.currentSongEvents,
+        time,
+        this.getTotalTime(),
+      );
     }
   }
 

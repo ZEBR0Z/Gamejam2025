@@ -10,7 +10,9 @@
 export class BasePhase {
   constructor(services) {
     if (new.target === BasePhase) {
-      throw new Error("BasePhase is abstract and cannot be instantiated directly");
+      throw new Error(
+        "BasePhase is abstract and cannot be instantiated directly",
+      );
     }
 
     // Services injected by Game controller

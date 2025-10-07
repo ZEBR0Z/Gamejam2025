@@ -115,7 +115,7 @@ export class CanvasService {
     event,
     selectedSounds = null,
     fallbackNumber = null,
-    opacity = 1.0
+    opacity = 1.0,
   ) {
     const iconUrl = this.getEventIcon(event, selectedSounds);
     const backgroundColor = iconUrl
@@ -145,7 +145,13 @@ export class CanvasService {
         ctx.beginPath();
         ctx.arc(x, y, radius - 2, 0, Math.PI * 2);
         ctx.clip();
-        ctx.drawImage(icon, x - iconSize / 2, y - iconSize / 2, iconSize, iconSize);
+        ctx.drawImage(
+          icon,
+          x - iconSize / 2,
+          y - iconSize / 2,
+          iconSize,
+          iconSize,
+        );
         ctx.restore();
         ctx.restore();
         return true;
@@ -227,7 +233,13 @@ export class CanvasService {
    * @param {number} segmentLength
    * @param {Array} selectedSounds
    */
-  drawTimeline(canvas, events, currentTime, segmentLength, selectedSounds = null) {
+  drawTimeline(
+    canvas,
+    events,
+    currentTime,
+    segmentLength,
+    selectedSounds = null,
+  ) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -263,11 +275,22 @@ export class CanvasService {
 
     // Draw events
     events.forEach((event) => {
-      if (event.startTimeSec >= viewport.startTime && event.startTimeSec <= viewport.endTime) {
+      if (
+        event.startTimeSec >= viewport.startTime &&
+        event.startTimeSec <= viewport.endTime
+      ) {
         const x = this.timeToX(event.startTimeSec, viewport);
         const trackY = event.soundIndex * trackHeight + trackHeight / 2;
 
-        this.drawNoteWithIcon(ctx, x, trackY, 13, event, selectedSounds, event.soundIndex + 1);
+        this.drawNoteWithIcon(
+          ctx,
+          x,
+          trackY,
+          13,
+          event,
+          selectedSounds,
+          event.soundIndex + 1,
+        );
 
         event.displayX = x;
         event.displayY = trackY;
@@ -295,7 +318,7 @@ export class CanvasService {
     segmentLength,
     soundIndex,
     isPlaying,
-    selectedSounds = null
+    selectedSounds = null,
   ) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -319,7 +342,7 @@ export class CanvasService {
       (event) =>
         event.soundIndex === soundIndex &&
         event.startTimeSec >= viewport.startTime &&
-        event.startTimeSec <= viewport.endTime
+        event.startTimeSec <= viewport.endTime,
     );
 
     soundEvents.forEach((event) => {
@@ -327,7 +350,15 @@ export class CanvasService {
       const centerY = height / 2;
       const y = centerY - event.pitchSemitones * this.semitoneHeight;
 
-      this.drawNoteWithIcon(ctx, x, y, 13, event, selectedSounds, event.soundIndex + 1);
+      this.drawNoteWithIcon(
+        ctx,
+        x,
+        y,
+        13,
+        event,
+        selectedSounds,
+        event.soundIndex + 1,
+      );
 
       event.displayX = x;
       event.displayY = y;
@@ -357,7 +388,7 @@ export class CanvasService {
     segmentLength,
     selectedSoundIndex,
     isPlaying,
-    selectedSounds = null
+    selectedSounds = null,
   ) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -379,7 +410,8 @@ export class CanvasService {
     // Draw all events with transparency
     const visibleEvents = events.filter(
       (event) =>
-        event.startTimeSec >= viewport.startTime && event.startTimeSec <= viewport.endTime
+        event.startTimeSec >= viewport.startTime &&
+        event.startTimeSec <= viewport.endTime,
     );
 
     visibleEvents.forEach((event) => {
@@ -390,7 +422,16 @@ export class CanvasService {
       const isSelected = event.soundIndex === selectedSoundIndex;
       const opacity = isSelected ? 1.0 : 0.2;
 
-      this.drawNoteWithIcon(ctx, x, y, 13, event, selectedSounds, event.soundIndex + 1, opacity);
+      this.drawNoteWithIcon(
+        ctx,
+        x,
+        y,
+        13,
+        event,
+        selectedSounds,
+        event.soundIndex + 1,
+        opacity,
+      );
 
       event.displayX = x;
       event.displayY = y;
@@ -427,12 +468,23 @@ export class CanvasService {
 
     // Draw events
     events.forEach((event) => {
-      if (event.startTimeSec >= viewport.startTime && event.startTimeSec <= viewport.endTime) {
+      if (
+        event.startTimeSec >= viewport.startTime &&
+        event.startTimeSec <= viewport.endTime
+      ) {
         const x = this.timeToX(event.startTimeSec, viewport);
         const centerY = height / 2;
         const y = centerY - event.pitchSemitones * 5;
 
-        this.drawNoteWithIcon(ctx, x, y, 13, event, selectedSounds, event.soundIndex + 1);
+        this.drawNoteWithIcon(
+          ctx,
+          x,
+          y,
+          13,
+          event,
+          selectedSounds,
+          event.soundIndex + 1,
+        );
       }
     });
 
@@ -559,7 +611,15 @@ export class CanvasService {
    * @param {number} currentTime
    * @returns {Object|null}
    */
-  getEventAtPosition(events, mouseX, mouseY, canvas, segmentLength, soundIndex = null, currentTime = 0) {
+  getEventAtPosition(
+    events,
+    mouseX,
+    mouseY,
+    canvas,
+    segmentLength,
+    soundIndex = null,
+    currentTime = 0,
+  ) {
     if (!canvas) return null;
 
     const width = canvas.width;
@@ -568,7 +628,11 @@ export class CanvasService {
 
     const candidateEvents = events.filter((event) => {
       if (soundIndex !== null && event.soundIndex !== soundIndex) return false;
-      if (event.startTimeSec < viewport.startTime || event.startTimeSec > viewport.endTime) return false;
+      if (
+        event.startTimeSec < viewport.startTime ||
+        event.startTimeSec > viewport.endTime
+      )
+        return false;
 
       // Calculate coordinates if not set
       if (!event.displayX || !event.displayY) {
@@ -588,7 +652,8 @@ export class CanvasService {
       }
 
       const distance = Math.sqrt(
-        Math.pow(mouseX - event.displayX, 2) + Math.pow(mouseY - event.displayY, 2)
+        Math.pow(mouseX - event.displayX, 2) +
+          Math.pow(mouseY - event.displayY, 2),
       );
 
       return distance <= 15;
@@ -599,10 +664,12 @@ export class CanvasService {
     // Return closest
     return candidateEvents.reduce((prev, curr) => {
       const prevDistance = Math.sqrt(
-        Math.pow(mouseX - prev.displayX, 2) + Math.pow(mouseY - prev.displayY, 2)
+        Math.pow(mouseX - prev.displayX, 2) +
+          Math.pow(mouseY - prev.displayY, 2),
       );
       const currDistance = Math.sqrt(
-        Math.pow(mouseX - curr.displayX, 2) + Math.pow(mouseY - curr.displayY, 2)
+        Math.pow(mouseX - curr.displayX, 2) +
+          Math.pow(mouseY - curr.displayY, 2),
       );
       return currDistance < prevDistance ? curr : prev;
     });
@@ -618,7 +685,11 @@ export class CanvasService {
    */
   getTimeAtPosition(mouseX, canvas, segmentLength, currentTime = 0) {
     if (!canvas) return 0;
-    const viewport = this.calculateViewport(currentTime, segmentLength, canvas.width);
+    const viewport = this.calculateViewport(
+      currentTime,
+      segmentLength,
+      canvas.width,
+    );
     return this.xToTime(mouseX, viewport);
   }
 

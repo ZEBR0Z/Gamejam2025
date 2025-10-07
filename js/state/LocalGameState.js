@@ -47,7 +47,7 @@ export class LocalGameState {
       this.soundList = audioMap.sounds;
       this.backingTracks = audioMap.backing_tracks;
       console.log(
-        `Loaded ${this.soundList.length} sounds and ${this.backingTracks.length} backing tracks`
+        `Loaded ${this.soundList.length} sounds and ${this.backingTracks.length} backing tracks`,
       );
     } catch (error) {
       console.error("Failed to load audio map:", error);
@@ -72,7 +72,7 @@ export class LocalGameState {
    * @returns {Array} Random sounds
    */
   getRandomSounds(count, exclude = []) {
-    const available = this.soundList.filter(s => !exclude.includes(s.path));
+    const available = this.soundList.filter((s) => !exclude.includes(s.path));
     const shuffled = [...available].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, count);
   }
@@ -117,7 +117,7 @@ export class LocalGameState {
    */
   removeSelectedSound(soundData) {
     const index = this.selectedSounds.findIndex(
-      (sound) => sound.path === soundData.path
+      (sound) => sound.path === soundData.path,
     );
 
     if (index !== -1) {
@@ -258,7 +258,7 @@ export class LocalGameState {
     this.clearEvents();
     submission.songData.forEach((data) => {
       const soundIndex = this.selectedSounds.findIndex(
-        (s) => s.path === data.path
+        (s) => s.path === data.path,
       );
       if (soundIndex !== -1) {
         this.addEvent(soundIndex, data.time, data.pitch);

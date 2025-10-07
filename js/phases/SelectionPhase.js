@@ -23,7 +23,7 @@ export class SelectionPhase extends BasePhase {
 
     // Generate 5 random sounds
     this.availableSounds = this.localState.getRandomSounds(
-      GameConfig.SOUNDS_TO_CHOOSE_FROM
+      GameConfig.SOUNDS_TO_CHOOSE_FROM,
     );
     this.selectedSounds = [];
 
@@ -77,7 +77,9 @@ export class SelectionPhase extends BasePhase {
       }
 
       // Hover to preview sound
-      soundOption.addEventListener("mouseenter", () => this.handleSoundHover(index));
+      soundOption.addEventListener("mouseenter", () =>
+        this.handleSoundHover(index),
+      );
       soundOption.addEventListener("mouseleave", () => this.handleSoundLeave());
 
       // Click to select/deselect
@@ -210,7 +212,7 @@ export class SelectionPhase extends BasePhase {
 
     // Store selected sounds in local state
     const selectedSoundData = this.selectedSounds.map(
-      (index) => this.availableSounds[index]
+      (index) => this.availableSounds[index],
     );
     this.localState.setSelectedSounds(selectedSoundData);
 

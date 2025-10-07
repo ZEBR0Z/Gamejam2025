@@ -178,7 +178,7 @@ export class InputService {
           this.dragState.draggedNote,
           this.dragState.dragStartY,
           this.dragState.dragStartPitch,
-          mouseY
+          mouseY,
         );
         break;
       }
@@ -306,9 +306,11 @@ export class InputService {
    */
   cleanupTransportEvents() {
     if (this.currentTransportHandlers) {
-      this.currentTransportHandlers.forEach(({ element, eventType, handler }) => {
-        element.removeEventListener(eventType, handler);
-      });
+      this.currentTransportHandlers.forEach(
+        ({ element, eventType, handler }) => {
+          element.removeEventListener(eventType, handler);
+        },
+      );
       this.currentTransportHandlers.clear();
     }
   }

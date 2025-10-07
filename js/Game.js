@@ -148,15 +148,21 @@ export class Game {
 
     // Set up event listeners for create lobby
     if (playerNameInput) {
-      playerNameInput.addEventListener("input", () => this.validateCreateLobbyInputs());
+      playerNameInput.addEventListener("input", () =>
+        this.validateCreateLobbyInputs(),
+      );
     }
 
     // Set up event listeners for join lobby
     if (joinPlayerNameInput) {
-      joinPlayerNameInput.addEventListener("input", () => this.validateJoinLobbyInputs());
+      joinPlayerNameInput.addEventListener("input", () =>
+        this.validateJoinLobbyInputs(),
+      );
     }
     if (lobbyCodeInput) {
-      lobbyCodeInput.addEventListener("input", () => this.validateJoinLobbyInputs());
+      lobbyCodeInput.addEventListener("input", () =>
+        this.validateJoinLobbyInputs(),
+      );
     }
   }
 
@@ -286,7 +292,9 @@ export class Game {
       this.startPhase(PhaseType.LOBBY);
     } catch (error) {
       console.error("Failed to join lobby:", error);
-      this.ui.showError("Failed to join lobby. Please check the code and try again.");
+      this.ui.showError(
+        "Failed to join lobby. Please check the code and try again.",
+      );
     }
   }
 
@@ -404,7 +412,7 @@ export class Game {
     // Enter phase with callbacks
     await phase.enter(
       () => this.handlePhaseComplete(),
-      () => this.handlePhaseSecondary()
+      () => this.handlePhaseSecondary(),
     );
   }
 

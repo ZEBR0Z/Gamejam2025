@@ -85,7 +85,10 @@ export class PreviewPhase extends BasePhase {
     }
 
     // Get assignment for current round
-    const assignment = this.serverState.getAssignment(localPlayerId, currentRound);
+    const assignment = this.serverState.getAssignment(
+      localPlayerId,
+      currentRound,
+    );
     if (!assignment) {
       return;
     }
@@ -93,7 +96,7 @@ export class PreviewPhase extends BasePhase {
     // Get that player's previous submission
     const submission = this.serverState.getSubmission(
       assignment,
-      currentRound - 1
+      currentRound - 1,
     );
     if (!submission) {
       return;
@@ -117,7 +120,7 @@ export class PreviewPhase extends BasePhase {
           soundIndex: event.soundIndex,
           startTimeSec: event.startTimeSec,
           pitchSemitones: event.pitchSemitones,
-          scheduled: false
+          scheduled: false,
         });
       });
     }
@@ -150,22 +153,13 @@ export class PreviewPhase extends BasePhase {
   startPlayback() {
     const currentTime = this.audio.getCurrentTime();
 
-    this.localState.setPlaybackState(
-      true,
-      0,
-      currentTime
-    );
+    this.localState.setPlaybackState(true, 0, currentTime);
 
     this.audio.startBackingTrack();
     this.startScheduling();
     this.startAnimation();
 
-    this.ui.updateTransportControls(
-      "preview",
-      true,
-      0,
-      this.segmentLength
-    );
+    this.ui.updateTransportControls("preview", true, 0, this.segmentLength);
   }
 
   /**
@@ -205,12 +199,13 @@ export class PreviewPhase extends BasePhase {
       if (!event.scheduled) {
         const eventTime = event.startTimeSec;
 
-        if (
-          eventTime >= playbackTime &&
-          eventTime <= playbackTime + 0.1
-        ) {
+        if (eventTime >= playbackTime && eventTime <= playbackTime + 0.1) {
           const scheduleTime = currentTime + (eventTime - playbackTime);
-          this.audio.playSoundFromUrl(event.path, event.pitchSemitones, scheduleTime);
+          this.audio.playSoundFromUrl(
+            event.path,
+            event.pitchSemitones,
+            scheduleTime,
+          );
           event.scheduled = true;
         }
       }
@@ -243,7 +238,7 @@ export class PreviewPhase extends BasePhase {
       "preview",
       true,
       playbackTime,
-      this.segmentLength
+      this.segmentLength,
     );
 
     // Draw canvas
@@ -253,7 +248,7 @@ export class PreviewPhase extends BasePhase {
         canvas,
         this.previewEvents,
         playbackTime,
-        this.segmentLength
+        this.segmentLength,
       );
     }
   }
@@ -278,7 +273,7 @@ export class PreviewPhase extends BasePhase {
     this.localState.setPlaybackState(
       true,
       currentTime,
-      this.audio.getCurrentTime() - currentTime
+      this.audio.getCurrentTime() - currentTime,
     );
 
     // Reset scheduled flags
@@ -292,7 +287,7 @@ export class PreviewPhase extends BasePhase {
       "preview",
       true,
       currentTime,
-      this.segmentLength
+      this.segmentLength,
     );
   }
 
@@ -313,7 +308,7 @@ export class PreviewPhase extends BasePhase {
       "preview",
       false,
       this.localState.getCurrentTime(),
-      this.segmentLength
+      this.segmentLength,
     );
   }
 
@@ -324,7 +319,7 @@ export class PreviewPhase extends BasePhase {
     this.localState.setPlaybackState(
       this.localState.isPlaying(),
       0,
-      this.audio.getCurrentTime()
+      this.audio.getCurrentTime(),
     );
 
     // Reset scheduled flags
@@ -338,7 +333,7 @@ export class PreviewPhase extends BasePhase {
       "preview",
       this.localState.isPlaying(),
       0,
-      this.segmentLength
+      this.segmentLength,
     );
 
     // Update canvas immediately
@@ -348,7 +343,7 @@ export class PreviewPhase extends BasePhase {
         canvas,
         this.previewEvents,
         0,
-        this.segmentLength
+        this.segmentLength,
       );
     }
   }
@@ -360,7 +355,7 @@ export class PreviewPhase extends BasePhase {
     this.localState.setPlaybackState(
       this.localState.isPlaying(),
       time,
-      this.audio.getCurrentTime() - time
+      this.audio.getCurrentTime() - time,
     );
 
     // Reset scheduled flags
@@ -372,7 +367,7 @@ export class PreviewPhase extends BasePhase {
       "preview",
       this.localState.isPlaying(),
       time,
-      this.segmentLength
+      this.segmentLength,
     );
 
     // Update canvas
@@ -382,7 +377,7 @@ export class PreviewPhase extends BasePhase {
         canvas,
         this.previewEvents,
         time,
-        this.segmentLength
+        this.segmentLength,
       );
     }
   }

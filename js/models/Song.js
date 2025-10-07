@@ -26,7 +26,7 @@ export class Song {
       this.nextEventId++,
       soundIndex,
       startTimeSec,
-      pitchSemitones
+      pitchSemitones,
     );
     this.events.push(event);
     return event;
@@ -151,9 +151,7 @@ export class Song {
    */
   clone() {
     const song = new Song();
-    song.backingTrack = this.backingTrack
-      ? { ...this.backingTrack }
-      : null;
+    song.backingTrack = this.backingTrack ? { ...this.backingTrack } : null;
     song.selectedSounds = this.selectedSounds.map((s) => ({ ...s }));
     song.events = this.events.map((e) => e.clone());
     song.nextEventId = this.nextEventId;

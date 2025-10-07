@@ -4,7 +4,6 @@
  * Emits events when server state updates are received
  */
 
-import { transports } from "engine.io-client";
 import { NetworkEvent } from "../Constants.js";
 import { StateObserver } from "../state/StateObserver.js";
 
@@ -33,7 +32,7 @@ export class NetworkService {
 
       // Create socket connection
       this.socket = window.io(serverUrl, {
-        transports: ["websocket"]
+        transports: ["websocket"],
       });
       console.log("Socket.IO connection created");
 
@@ -126,7 +125,9 @@ export class NetworkService {
             this.serverState.update(response.state);
           }
 
-          console.log(`Lobby created: ${this.lobbyCode}, Player ID: ${this.playerId}`);
+          console.log(
+            `Lobby created: ${this.lobbyCode}, Player ID: ${this.playerId}`,
+          );
         }
         resolve(response);
       });
@@ -159,10 +160,12 @@ export class NetworkService {
               this.serverState.update(response.state);
             }
 
-            console.log(`Joined lobby: ${this.lobbyCode}, Player ID: ${this.playerId}`);
+            console.log(
+              `Joined lobby: ${this.lobbyCode}, Player ID: ${this.playerId}`,
+            );
           }
           resolve(response);
-        }
+        },
       );
     });
   }

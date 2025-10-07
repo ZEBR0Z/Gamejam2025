@@ -23,7 +23,9 @@ export class WaitingPhase extends BasePhase {
 
     // Listen for server state updates
     this.stateUpdateHandler = () => this.handleStateUpdate();
-    this.unsubscribeStateUpdate = this.serverState.onChange(this.stateUpdateHandler);
+    this.unsubscribeStateUpdate = this.serverState.onChange(
+      this.stateUpdateHandler,
+    );
 
     // Initial UI update
     this.updateWaitingUI();
@@ -81,7 +83,7 @@ export class WaitingPhase extends BasePhase {
     // Check if all players are at or past waiting phase for current round
     const allPlayersWaiting = this.serverState.areAllPlayersAtPhase(
       currentRound,
-      PhaseType.WAITING
+      PhaseType.WAITING,
     );
 
     if (allPlayersWaiting) {
@@ -147,7 +149,7 @@ export class WaitingPhase extends BasePhase {
   async fetchRandomFact() {
     try {
       const response = await fetch(
-        "https://uselessfacts.jsph.pl/api/v2/facts/random"
+        "https://uselessfacts.jsph.pl/api/v2/facts/random",
       );
 
       if (!this.isActive) return;
@@ -166,7 +168,7 @@ export class WaitingPhase extends BasePhase {
       if (waitingMessage) {
         await this.typeText(
           waitingMessage,
-          "Sometimes either the internet, API, or JavaScript, just want to... not work!"
+          "Sometimes either the internet, API, or JavaScript, just want to... not work!",
         );
       }
     }

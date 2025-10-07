@@ -23,7 +23,11 @@ export class ServerState {
     this.previousState = this.state;
     this.state = newState;
 
-    this.observer.emit(StateEvent.SERVER_STATE_CHANGED, this.previousState, this.state);
+    this.observer.emit(
+      StateEvent.SERVER_STATE_CHANGED,
+      this.previousState,
+      this.state,
+    );
   }
 
   /**

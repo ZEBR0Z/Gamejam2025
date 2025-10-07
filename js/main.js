@@ -28,7 +28,8 @@ async function init() {
     const errorDialog = document.getElementById("error-dialog");
     const errorMessage = document.getElementById("error-message");
     if (errorDialog && errorMessage) {
-      errorMessage.textContent = "Failed to start game. Please refresh the page.";
+      errorMessage.textContent =
+        "Failed to start game. Please refresh the page.";
       errorDialog.showModal();
     } else {
       alert("Failed to start game. Please refresh the page.");

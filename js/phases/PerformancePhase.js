@@ -46,7 +46,8 @@ export class PerformancePhase extends BasePhase {
     const canvas = document.getElementById("timeline-canvas");
     if (canvas) {
       this.input.setupCanvasEvents(canvas, "timeline", null, {
-        onRightClick: (mouseX, mouseY) => this.handleTimelineRightClick(mouseX, mouseY),
+        onRightClick: (mouseX, mouseY) =>
+          this.handleTimelineRightClick(mouseX, mouseY),
       });
     }
 
@@ -85,9 +86,7 @@ export class PerformancePhase extends BasePhase {
     // Clean up input handlers
     this.input.cleanupTransportEvents();
     this.input.cleanupButtonEvents();
-    this.input.cleanupCanvasEvents(
-      document.getElementById("timeline-canvas")
-    );
+    this.input.cleanupCanvasEvents(document.getElementById("timeline-canvas"));
 
     // Stop audio
     this.audio.stopBackingTrack();
@@ -115,7 +114,7 @@ export class PerformancePhase extends BasePhase {
       // Round 2+: Use backing track from assigned player's round 1
       const assignment = this.serverState.getAssignment(
         localPlayerId,
-        currentRound
+        currentRound,
       );
 
       if (assignment) {
@@ -206,7 +205,7 @@ export class PerformancePhase extends BasePhase {
       canvas,
       this.localState.getSegmentLength(),
       null,
-      currentTime
+      currentTime,
     );
 
     if (clickedEvent) {
@@ -217,7 +216,7 @@ export class PerformancePhase extends BasePhase {
         this.localState.getEvents(),
         currentTime,
         this.localState.getSegmentLength(),
-        this.localState.getSelectedSounds()
+        this.localState.getSelectedSounds(),
       );
     }
   }
@@ -226,11 +225,7 @@ export class PerformancePhase extends BasePhase {
    * Start playback loop
    */
   startPlayback() {
-    this.localState.setPlaybackState(
-      true,
-      0,
-      this.audio.getCurrentTime()
-    );
+    this.localState.setPlaybackState(true, 0, this.audio.getCurrentTime());
 
     this.audio.startBackingTrack();
     this.startScheduling();
@@ -240,7 +235,7 @@ export class PerformancePhase extends BasePhase {
       "performance",
       true,
       0,
-      this.localState.getSegmentLength()
+      this.localState.getSegmentLength(),
     );
   }
 
@@ -292,7 +287,7 @@ export class PerformancePhase extends BasePhase {
             this.audio.playSoundFromUrl(
               sound.path,
               event.pitchSemitones,
-              scheduleTime
+              scheduleTime,
             );
           }
 
@@ -333,7 +328,7 @@ export class PerformancePhase extends BasePhase {
       "performance",
       this.localState.isPlaying(),
       playbackTime,
-      this.localState.getSegmentLength()
+      this.localState.getSegmentLength(),
     );
 
     // Draw canvas
@@ -344,7 +339,7 @@ export class PerformancePhase extends BasePhase {
         this.localState.getEvents(),
         playbackTime,
         this.localState.getSegmentLength(),
-        this.localState.getSelectedSounds()
+        this.localState.getSelectedSounds(),
       );
     }
   }
@@ -369,7 +364,7 @@ export class PerformancePhase extends BasePhase {
     this.localState.setPlaybackState(
       true,
       currentTime,
-      this.audio.getCurrentTime() - currentTime
+      this.audio.getCurrentTime() - currentTime,
     );
 
     // Reset scheduled flags
@@ -383,7 +378,7 @@ export class PerformancePhase extends BasePhase {
       "performance",
       true,
       currentTime,
-      this.localState.getSegmentLength()
+      this.localState.getSegmentLength(),
     );
   }
 
@@ -404,7 +399,7 @@ export class PerformancePhase extends BasePhase {
       "performance",
       false,
       this.localState.getCurrentTime(),
-      this.localState.getSegmentLength()
+      this.localState.getSegmentLength(),
     );
   }
 
@@ -415,7 +410,7 @@ export class PerformancePhase extends BasePhase {
     this.localState.setPlaybackState(
       this.localState.isPlaying(),
       0,
-      this.audio.getCurrentTime()
+      this.audio.getCurrentTime(),
     );
 
     // Reset scheduled flags
@@ -429,7 +424,7 @@ export class PerformancePhase extends BasePhase {
       "performance",
       this.localState.isPlaying(),
       0,
-      this.localState.getSegmentLength()
+      this.localState.getSegmentLength(),
     );
   }
 
@@ -440,7 +435,7 @@ export class PerformancePhase extends BasePhase {
     this.localState.setPlaybackState(
       this.localState.isPlaying(),
       time,
-      this.audio.getCurrentTime() - time
+      this.audio.getCurrentTime() - time,
     );
 
     // Reset scheduled flags
@@ -452,7 +447,7 @@ export class PerformancePhase extends BasePhase {
       "performance",
       this.localState.isPlaying(),
       time,
-      this.localState.getSegmentLength()
+      this.localState.getSegmentLength(),
     );
 
     // Update canvas
@@ -463,7 +458,7 @@ export class PerformancePhase extends BasePhase {
         this.localState.getEvents(),
         time,
         this.localState.getSegmentLength(),
-        this.localState.getSelectedSounds()
+        this.localState.getSelectedSounds(),
       );
     }
   }
