@@ -83,14 +83,30 @@ export class Game {
     // Show main menu
     this.ui.showScreen("main_menu");
 
-    // Start menu music
-    try {
-      await this.audio.startMenuMusic();
-    } catch (error) {
-      console.warn("Failed to autoplay menu music (user interaction required):", error);
-    }
+    // Set up menu music to play on first user interaction
+    this.setupMenuMusicRetry();
 
     console.log("Game initialized");
+  }
+
+  /**
+   * Set up one-time listener to start menu music on first user interaction
+   */
+  setupMenuMusicRetry() {
+    const startPlayback = async () => {
+      if (!this.audio.isMenuMusicPlaying()) {
+        try {
+          await this.audio.startMenuMusic();
+          console.log("Menu music started after user interaction");
+        } catch (error) {
+          console.warn("Failed to play menu music:", error);
+        }
+      }
+    };
+
+    // Listen for any click or keypress (once: true automatically removes listeners)
+    document.addEventListener("click", startPlayback, { once: true });
+    document.addEventListener("keydown", startPlayback, { once: true });
   }
 
   /**
