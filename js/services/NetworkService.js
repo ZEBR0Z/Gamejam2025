@@ -4,6 +4,7 @@
  * Emits events when server state updates are received
  */
 
+import { transports } from "engine.io-client";
 import { NetworkEvent } from "../Constants.js";
 import { StateObserver } from "../state/StateObserver.js";
 
@@ -31,7 +32,9 @@ export class NetworkService {
       }
 
       // Create socket connection
-      this.socket = window.io(serverUrl);
+      this.socket = window.io(serverUrl, {
+        transports: ["websocket"]
+      });
       console.log("Socket.IO connection created");
 
       // Set up event handlers
