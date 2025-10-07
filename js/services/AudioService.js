@@ -1,39 +1,64 @@
 /**
- * AudioEngine - Manages Web Audio API operations
+ * AudioService - Manages Web Audio API operations
  * Handles audio loading, playback, and pitch manipulation with lazy loading
+ * Stateless service that operates on data passed to it
  */
-export class AudioEngine {
+export class AudioService {
   constructor() {
     this.context = null;
-    this.currentPreview = null;
-    this.currentEditPreview = null;
-    this.lookaheadTime = 0.2;
     this.audioBufferCache = new Map();
     this.loadingPromises = new Map();
 
+    // Preview playback tracking (unified - only one preview at a time)
+    this.currentPreview = null;
+
+    // Backing track (HTML5 Audio for looping)
     this.backingTrackAudio = null;
     this.backingTrackStartTime = 0;
     this.isBackingTrackLoaded = false;
 
+    // Menu music (HTML5 Audio for looping)
     this.menuMusicAudio = null;
     this.isMenuMusicLoaded = false;
+
+    this.lookaheadTime = 0.2;
   }
 
+  /**
+   * Initialize Web Audio API context
+   */
   async initialize() {
     try {
       this.context = new (window.AudioContext || window.webkitAudioContext)();
+      console.log("AudioService initialized");
     } catch (error) {
-      console.error("Failed to initialize AudioEngine:", error);
+      console.error("Failed to initialize AudioService:", error);
       throw error;
     }
   }
 
+  /**
+   * Resume audio context (required after user interaction)
+   */
   async resume() {
     if (this.context && this.context.state === "suspended") {
       await this.context.resume();
     }
   }
 
+  /**
+   * Get current Web Audio API time
+   * @returns {number}
+   */
+  getCurrentTime() {
+    return this.context ? this.context.currentTime : 0;
+  }
+
+  /**
+   * Load an audio buffer from URL
+   * @param {string} url - Audio file URL
+   * @returns {Promise<AudioBuffer>}
+   */
   async loadAudioBuffer(url) {
     try {
       const response = await fetch(url);
@@ -48,19 +73,21 @@ export class AudioEngine {
   /**
    * Get an audio buffer for the given URL, loading it if necessary
    * Uses caching to avoid loading the same file multiple times
-   *
    * @param {string} url - Audio file URL
-   * @returns {Promise<AudioBuffer>} The decoded audio buffer
+   * @returns {Promise<AudioBuffer>}
    */
   async getAudioBuffer(url) {
+    // Return cached buffer if available
     if (this.audioBufferCache.has(url)) {
       return this.audioBufferCache.get(url);
     }
 
+    // Return ongoing load promise if already loading
     if (this.loadingPromises.has(url)) {
       return await this.loadingPromises.get(url);
     }
 
+    // Start new load
     const loadPromise = this.loadAudioBuffer(url);
     this.loadingPromises.set(url, loadPromise);
 
@@ -76,10 +103,11 @@ export class AudioEngine {
   }
 
   /**
+   * Play an audio buffer
    * @param {AudioBuffer} audioBuffer - Buffer to play
    * @param {number} pitchSemitones - Pitch adjustment in semitones
    * @param {number} scheduleTime - Web Audio API time to schedule playback
-   * @returns {AudioBufferSourceNode|null} The audio source node
+   * @returns {AudioBufferSourceNode|null}
    */
   playSound(audioBuffer, pitchSemitones = 0, scheduleTime = null) {
     if (!audioBuffer || !this.context) return null;
@@ -95,11 +123,10 @@ export class AudioEngine {
 
   /**
    * Play a sound from a URL, loading it if necessary
-   *
    * @param {string} audioUrl - Audio file URL
    * @param {number} pitchSemitones - Pitch adjustment in semitones
    * @param {number} scheduleTime - Web Audio API time to schedule playback
-   * @returns {Promise<AudioBufferSourceNode|null>} The audio source node
+   * @returns {Promise<AudioBufferSourceNode|null>}
    */
   async playSoundFromUrl(audioUrl, pitchSemitones = 0, scheduleTime = null) {
     try {
@@ -111,70 +138,65 @@ export class AudioEngine {
     }
   }
 
-  startPreview(audioBuffer) {
-    this.stopPreview();
-    this.currentPreview = this.playSound(audioBuffer);
-  }
-
-  async startPreviewFromUrl(audioUrl) {
-    this.stopPreview();
+  /**
+   * Play a preview sound (only one at a time, automatically stops previous)
+   * @param {string} audioUrl
+   * @param {number} pitchSemitones
+   */
+  async playPreviewSound(audioUrl, pitchSemitones = 0) {
     try {
+      // Stop any currently playing preview
+      if (this.currentPreview) {
+        try {
+          this.currentPreview.stop(0);
+          this.currentPreview.disconnect();
+        } catch (e) {
+          // Already stopped
+        }
+        this.currentPreview = null;
+      }
+
+      // Load and play new preview
       const audioBuffer = await this.getAudioBuffer(audioUrl);
-      this.currentPreview = this.playSound(audioBuffer);
+
+      const source = this.context.createBufferSource();
+      source.buffer = audioBuffer;
+      source.detune.value = pitchSemitones * 100;
+      source.connect(this.context.destination);
+      source.start(0);
+
+      this.currentPreview = source;
+
+      // Auto-cleanup when finished
+      source.onended = () => {
+        if (this.currentPreview === source) {
+          this.currentPreview = null;
+        }
+      };
     } catch (error) {
-      console.error("Failed to start preview from URL:", audioUrl, error);
+      console.error("Failed to play preview sound:", audioUrl, error);
     }
   }
 
+  /**
+   * Stop preview playback
+   */
   stopPreview() {
     if (this.currentPreview) {
       try {
-        this.currentPreview.stop();
-      } catch (e) {}
+        this.currentPreview.stop(0);
+        this.currentPreview.disconnect();
+      } catch (e) {
+        // Ignore errors (already stopped)
+      }
       this.currentPreview = null;
     }
   }
 
-  startEditPreview(audioBuffer, pitchSemitones = 0) {
-    this.stopEditPreview();
-    this.currentEditPreview = this.playSound(audioBuffer, pitchSemitones);
-
-    if (this.currentEditPreview) {
-      this.currentEditPreview.onended = () => {
-        this.currentEditPreview = null;
-      };
-    }
-  }
-
-  async startEditPreviewFromUrl(audioUrl, pitchSemitones = 0) {
-    this.stopEditPreview();
-    try {
-      const audioBuffer = await this.getAudioBuffer(audioUrl);
-      this.currentEditPreview = this.playSound(audioBuffer, pitchSemitones);
-
-      if (this.currentEditPreview) {
-        this.currentEditPreview.onended = () => {
-          this.currentEditPreview = null;
-        };
-      }
-    } catch (error) {
-      console.error("Failed to start edit preview from URL:", audioUrl, error);
-    }
-  }
-
-  stopEditPreview() {
-    if (this.currentEditPreview) {
-      try {
-        this.currentEditPreview.stop();
-      } catch (e) {}
-      this.currentEditPreview = null;
-    }
-  }
-
-  getCurrentTime() {
-    return this.context ? this.context.currentTime : 0;
-  }
-
+  /**
+   * Load backing track
+   * @param {string} trackPath
+   */
   async loadBackingTrack(trackPath) {
     try {
       this.stopBackingTrack();
@@ -197,10 +219,14 @@ export class AudioEngine {
     } catch (error) {
       console.error("Failed to load backing track:", error);
       this.isBackingTrackLoaded = false;
+      throw error;
     }
   }
 
-  startBackingTrack() {
+  /**
+   * Start backing track playback
+   */
+  async startBackingTrack() {
     if (this.backingTrackAudio && this.isBackingTrackLoaded) {
       this.backingTrackAudio.currentTime = 0;
       this.backingTrackStartTime = this.getCurrentTime();
@@ -209,19 +235,28 @@ export class AudioEngine {
     return Promise.resolve();
   }
 
+  /**
+   * Pause backing track
+   */
   pauseBackingTrack() {
     if (this.backingTrackAudio) {
       this.backingTrackAudio.pause();
     }
   }
 
-  resumeBackingTrack() {
+  /**
+   * Resume backing track
+   */
+  async resumeBackingTrack() {
     if (this.backingTrackAudio && this.isBackingTrackLoaded) {
       return this.backingTrackAudio.play();
     }
     return Promise.resolve();
   }
 
+  /**
+   * Stop backing track
+   */
   stopBackingTrack() {
     if (this.backingTrackAudio) {
       this.backingTrackAudio.pause();
@@ -231,20 +266,35 @@ export class AudioEngine {
     this.isBackingTrackLoaded = false;
   }
 
+  /**
+   * Seek backing track to specific time
+   * @param {number} time - Time in seconds
+   */
   seekBackingTrack(time) {
     if (this.backingTrackAudio) {
       this.backingTrackAudio.currentTime = time;
     }
   }
 
+  /**
+   * Get backing track current time
+   * @returns {number}
+   */
   getBackingTrackCurrentTime() {
     return this.backingTrackAudio ? this.backingTrackAudio.currentTime : 0;
   }
 
+  /**
+   * Check if backing track is playing
+   * @returns {boolean}
+   */
   isBackingTrackPlaying() {
     return this.backingTrackAudio && !this.backingTrackAudio.paused;
   }
 
+  /**
+   * Load menu music
+   */
   async loadMenuMusic() {
     try {
       this.stopMenuMusic();
@@ -268,7 +318,10 @@ export class AudioEngine {
     }
   }
 
-  startMenuMusic() {
+  /**
+   * Start menu music
+   */
+  async startMenuMusic() {
     if (this.menuMusicAudio && this.isMenuMusicLoaded) {
       this.menuMusicAudio.currentTime = 0;
       return this.menuMusicAudio.play();
@@ -276,19 +329,28 @@ export class AudioEngine {
     return Promise.resolve();
   }
 
+  /**
+   * Pause menu music
+   */
   pauseMenuMusic() {
     if (this.menuMusicAudio) {
       this.menuMusicAudio.pause();
     }
   }
 
-  resumeMenuMusic() {
+  /**
+   * Resume menu music
+   */
+  async resumeMenuMusic() {
     if (this.menuMusicAudio && this.isMenuMusicLoaded) {
       return this.menuMusicAudio.play();
     }
     return Promise.resolve();
   }
 
+  /**
+   * Stop menu music
+   */
   stopMenuMusic() {
     if (this.menuMusicAudio) {
       this.menuMusicAudio.pause();
@@ -298,7 +360,41 @@ export class AudioEngine {
     this.isMenuMusicLoaded = false;
   }
 
+  /**
+   * Check if menu music is playing
+   * @returns {boolean}
+   */
   isMenuMusicPlaying() {
     return this.menuMusicAudio && !this.menuMusicAudio.paused;
+  }
+
+  /**
+   * Restart menu music (resume if playing, start from beginning if stopped)
+   */
+  async restartMenuMusic() {
+    // If music is already playing, just keep it playing
+    if (this.isMenuMusicPlaying()) {
+      return Promise.resolve();
+    }
+
+    // If music was stopped (audio element is null), reload and start
+    if (!this.menuMusicAudio) {
+      await this.loadMenuMusic();
+    }
+
+    // Start playing from beginning
+    return this.startMenuMusic();
+  }
+
+  /**
+   * Cleanup all audio resources
+   */
+  cleanup() {
+    this.stopPreview();
+    this.stopEditPreview();
+    this.stopBackingTrack();
+    this.stopMenuMusic();
+    this.audioBufferCache.clear();
+    this.loadingPromises.clear();
   }
 }

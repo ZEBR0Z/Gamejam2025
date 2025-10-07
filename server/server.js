@@ -200,6 +200,16 @@ io.on("connection", (socket) => {
 
   socket.on("createLobby", (data, callback) => {
     const { playerName } = data;
+
+    // Validate player name
+    if (!playerName || playerName.trim().length === 0) {
+      callback({
+        success: false,
+        error: "Player name is required.",
+      });
+      return;
+    }
+
     const code = generateLobbyCode();
     const lobby = new Lobby(code);
 
@@ -225,6 +235,16 @@ io.on("connection", (socket) => {
 
   socket.on("joinLobby", (data, callback) => {
     const { lobbyCode, playerName } = data;
+
+    // Validate player name
+    if (!playerName || playerName.trim().length === 0) {
+      callback({
+        success: false,
+        error: "Player name is required.",
+      });
+      return;
+    }
+
     const lobby = lobbies.get(lobbyCode.toUpperCase());
 
     if (!lobby) {
