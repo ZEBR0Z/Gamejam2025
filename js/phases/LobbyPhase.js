@@ -72,6 +72,16 @@ export class LobbyPhase extends BasePhase {
       this.updateInterval = null;
     }
 
+    // Hide countdown overlay
+    const gameStartingElement = document.getElementById("game-starting");
+    if (gameStartingElement) {
+      gameStartingElement.style.display = "none";
+    }
+
+    // Reset countdown state
+    this.countdownStartTime = null;
+    this.countdownValue = null;
+
     // Clean up input handlers
     this.input.cleanupButtonEvents();
 
