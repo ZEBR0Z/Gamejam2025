@@ -14,7 +14,7 @@ export const PhaseType = {
 };
 
 export const GameConfig = {
-  SERVER_URL: "http://localhost:8000",
+  SERVER_URL: "https://yothatsheat.ruelalarcon.dev", // Replace this with http://localhost:8000 in testing
   DEFAULT_SEGMENT_LENGTH: 8, // seconds (overridden by backing track)
   SELECTION_TIME: 30, // seconds
   PERFORMANCE_TIME: 90, // seconds
