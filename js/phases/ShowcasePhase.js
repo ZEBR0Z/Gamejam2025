@@ -144,9 +144,13 @@ export class ShowcasePhase extends BasePhase {
       await this.audio.loadBackingTrack(song.backingTrack.path);
     }
 
-    // Start playback in forced showcase mode
+    // Start playback in forced showcase mode, or reset to beginning in manual mode
     if (this.isForcedShowcase) {
       this.startPlayback();
+    } else {
+      this.localState.setPlaybackState(false, 0, 0);
+      this.resetScheduledFlags(0);
+      this.ui.updateTransportControls("showcase", false, 0, this.getTotalTime());
     }
   }
 
